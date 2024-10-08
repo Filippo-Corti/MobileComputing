@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column {
                         Greeting(
-                            name = "Android",
+                            name = "Filippo",
                             modifier = Modifier.padding(innerPadding)
                         )
                         Token(token = token)
