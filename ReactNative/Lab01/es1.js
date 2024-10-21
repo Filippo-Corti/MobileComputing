@@ -34,8 +34,6 @@ async function simulateHTTPGetUser(id) {
     return new User("Sergio", "Mascetti")
 }
 
-
-
 async function getUtente(id) {
     let foundUser = await getUserFromLocalDB(id)
     if (!foundUser) {
