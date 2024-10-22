@@ -22,9 +22,9 @@ async function getUserFromLocalDB(id) {
 }
 
 async function storeUserInLocalDB(user) {
+    await sleep(2000)
     for (let i = 0; i < 10000000000; i++) {}
     console.log("Storing user in local DB")
-    await sleep(2000)
     return
 }
 
