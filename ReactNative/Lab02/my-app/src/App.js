@@ -4,6 +4,7 @@ export default class App extends React.Component {
 
   state = {
     screen: "list",
+    detailId: 0,
     pietanze:
       [
         {
@@ -37,15 +38,28 @@ export default class App extends React.Component {
       case "list":
         return this.listaPietanze()
       case "detail":
-        return this.dettaglioPietenza(0)
+        return this.dettaglioPietenza(this.state.detailId)
       default:
         return <div>Schermata non riconosciuta</div>
     }
   }
 
+  handleShowDetails(id) {
+    this.setState({
+      screen: "detail",
+      detailId: id,
+    });
+  }
+
+  handleBackToList() {
+    this.setState({
+      screen: "list",
+    })
+  }
+
   listaPietanze() {
     return <ul>
-      {this.state.pietanze.map(this.itemPietanza)}
+      {this.state.pietanze.map((p) => this.itemPietanza(p))}
     </ul>
   }
 
@@ -53,6 +67,7 @@ export default class App extends React.Component {
     return <li key={pietanza.id}>
       <h3>{pietanza.nome}</h3>
       <p>{pietanza.descrizioneBreve}</p>
+      <button onClick={() => this.handleShowDetails(pietanza.id)}>Details</button>
     </li>
   }
 
@@ -63,7 +78,9 @@ export default class App extends React.Component {
       <h2>{pietanza.nome}</h2>
       <p>{pietanza.descrizioneBreve}</p>
       <p>{pietanza.descrizioneLunga}</p>
+      <button onClick={() => this.handleBackToList()}>Back</button>
     </div>
   }
+
 
 }
