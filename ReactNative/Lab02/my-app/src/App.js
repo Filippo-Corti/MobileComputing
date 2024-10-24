@@ -50,7 +50,7 @@ export default class App extends React.Component {
   }
 
   itemPietanza(pietanza) {
-    return <li>
+    return <li key={pietanza.id}>
       <h3>{pietanza.nome}</h3>
       <p>{pietanza.descrizioneBreve}</p>
     </li>
