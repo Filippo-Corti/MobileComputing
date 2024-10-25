@@ -1,6 +1,8 @@
 import React from 'react';
 import './css/index.css'
 import Dish from './models/Dish';
+import MealsListItem from './components/MealsListItem';
+import MealDetails from './components/MealDetails';
 
 class App extends React.Component {
 
@@ -29,7 +31,11 @@ class App extends React.Component {
         return (
           <section>
             <h1>View: Detail</h1>
-            {this.renderDetail()}
+            <MealDetails 
+              meal={this.state.meals.find(m => m.id === this.state.selectedMealId )} 
+              onGoBack={() => this.handleBackToList()} 
+              onDelete={(id) => this.handleDeleteById(id)}  
+            />
           </section>
         )
       default:
@@ -44,20 +50,13 @@ class App extends React.Component {
   renderList() {
     return (
       <ul>
-        {this.state.meals.map((meal) => this.renderListItem(meal))}
+        {this.state.meals.map(meal => (
+          <MealsListItem key={meal.id} data={meal} onDetail={(id) => this.handleViewDetails(id)} />
+        ))}
       </ul>
     )
   }
 
-  renderListItem(meal) {
-    return (
-      <li key={meal.id}>
-        <h3>{meal.name}</h3>
-        <p>{meal.shortDescription}</p>
-        <button onClick={() => this.handleViewDetails(meal.id)}>Details</button>
-      </li>
-    ) 
-  }
 
   handleViewDetails(id) {
     this.setState({
@@ -66,24 +65,19 @@ class App extends React.Component {
     })
   }
 
-  renderDetail() {
-    console.log(this.state)
-    const selectedMeal = this.state.meals.find((m) => m.id === this.state.selectedMealId)
-
-    return (
-      <div>
-        <p>{selectedMeal.id}</p>
-        <h2>{selectedMeal.name}</h2>
-        <p>{selectedMeal.shortDescription}</p>
-        <p>{selectedMeal.longDescription}</p>
-        <button onClick={() => this.handleBackToList()}>Go Back</button>
-      </div>
-    )
-  }
-
   handleBackToList() {
     this.setState({
       page: 'list'
+    })
+  }
+
+  handleDeleteById(id) {
+    const newMeals = this.state.meals.filter((m) => m.id !== id)
+
+    this.setState({
+      meals: newMeals,
+      selectedMealId: newMeals[0].id,
+      page: 'list',
     })
   }
 
