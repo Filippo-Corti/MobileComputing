@@ -1,8 +1,8 @@
 import React from 'react';
-import './css/index.css'
 import Dish from './models/Dish';
 import MealsListItem from './components/MealsListItem';
 import MealDetails from './components/MealDetails';
+import './css/index.css'
 
 class App extends React.Component {
 
@@ -15,8 +15,6 @@ class App extends React.Component {
       selectedMealId: sampleDishes[0].id
     }
   }
-
-  state = {}
 
   render() {
     switch (this.state.page) {
