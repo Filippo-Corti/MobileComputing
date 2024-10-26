@@ -1,84 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Dish from './models/Dish';
-import MealsListItem from './components/MealsListItem';
-import MealDetails from './components/MealDetails';
+import DishDetails from './components/DishDetails';
 import './css/index.css'
+import DishList from './components/DishList';
 
-class App extends React.Component {
+function App() {
 
-  constructor(props) {
-    super(props)
-    const sampleDishes = Dish.getSampleDishes()
-    this.state = {
-      page: "list", // List or Detail
-      meals: sampleDishes,
-      selectedMealId: sampleDishes[0].id
-    }
+  const sampleDishes = Dish.getSampleDishes()
+  const [page, setPage] = useState("list")
+  const [dishes, setDishes] = useState(sampleDishes)
+  const [selectedMealId, setSelectedMealId] = useState(sampleDishes[0].id)
+
+  const handleBackToList = () => {
+    setPage("list")
   }
 
-  render() {
-    switch (this.state.page) {
-      case "list":
-        return (
-          <section>
-            <h1>View: List</h1>
-            {this.renderList()}
-          </section>
-        )
-      case "detail":
-        return (
-          <section>
-            <h1>View: Detail</h1>
-            <MealDetails 
-              meal={this.state.meals.find(m => m.id === this.state.selectedMealId )} 
-              onGoBack={() => this.handleBackToList()} 
-              onDelete={(id) => this.handleDeleteById(id)}  
-            />
-          </section>
-        )
-      default:
-        return (
-          <section>
-            <h1>Error - Page Not Found</h1>
-          </section>
-        )
-    }
+  const handleDeleteById = (id) => {
+    const newDishes = dishes.filter((m) => m.id !== id)
+    setDishes(newDishes)
+    setPage("list")
   }
 
-  renderList() {
-    return (
-      <ul>
-        {this.state.meals.map(meal => (
-          <MealsListItem key={meal.id} data={meal} onDetail={(id) => this.handleViewDetails(id)} />
-        ))}
-      </ul>
-    )
+  const handleShowDetails = (id) => {
+    setPage("detail")
+    setSelectedMealId(id)
   }
 
-
-  handleViewDetails(id) {
-    this.setState({
-      page: "detail",
-      selectedMealId: id,
-    })
+  switch (page) {
+    case "list":
+      return (
+        <DishList
+          dishes={dishes}
+          handleShowDetails={handleShowDetails}
+        />
+      )
+    case "detail":
+      return (
+        <DishDetails
+          dish={dishes.find(m => m.id === selectedMealId)}
+          handleGoBack={handleBackToList}
+          handleDelete={handleDeleteById}
+        />
+      )
+    default:
+      return (
+        <section>
+          <h1>Error - Page Not Found</h1>
+        </section>
+      )
   }
-
-  handleBackToList() {
-    this.setState({
-      page: 'list'
-    })
-  }
-
-  handleDeleteById(id) {
-    const newMeals = this.state.meals.filter((m) => m.id !== id)
-
-    this.setState({
-      meals: newMeals,
-      selectedMealId: newMeals[0].id,
-      page: 'list',
-    })
-  }
-
 }
 
 export default App;
