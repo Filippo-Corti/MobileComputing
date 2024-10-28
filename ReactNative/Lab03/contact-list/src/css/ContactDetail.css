@@ -1,0 +1,60 @@
+.Contact_page {
+    color: white;
+    position: relative;
+    height: 100vh;
+
+    & h3 {
+        font-weight: 400;
+        padding: 0.5rem 0 0.2rem;
+        margin: 0;
+    }
+}
+
+.Cellphone_container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.Cellphone_tag {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.Cellphone_data {
+    font-size: 14px;
+}
+
+.Contact_detail {
+    max-width: 75%;
+    margin: 2rem auto;
+    margin-top: 10rem;
+    background-color: #111212;
+    padding: 0.5rem 1.5rem 3rem;
+    padding-top: 70px;
+    border-radius: 2rem;
+    position: relative;
+    text-align: center;
+}
+
+.Contact_logo {
+    position: absolute;
+    top: 0;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+}
+
+.Back_button {
+    padding: 0.8rem 0.5rem;
+}
+
+.Bottom_menu {
+    position: absolute;
+    bottom: 3%;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}

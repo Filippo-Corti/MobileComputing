@@ -28,10 +28,10 @@ export default function ContactList({ contacts, handleContactDetails }) {
                 />
             </div>
             <div className="Contacts_list">
-                <ul style={{"list-style": 'none'}}>
-                    {contacts.map((contact) =>
+                <ul style={{"listStyle": 'none', 'padding': '0', 'margin': '0'}}>
+                    {contacts.map((contact) => 
                         <ContactListElement
-                            key={contact.name}
+                            key={contact.id}
                             contact={contact}
                             handleContactDetails={handleContactDetails}
                         />)}

@@ -1,11 +1,25 @@
 .Contact_container {
-    
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
 }
 
-.Contact_icon {
 
+.Contact_icon {
+    width: 15%;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: white;
 }
 
 .Contact_details {
     color: white;
+    width: 85%;
+    padding: 1rem 0;
+    border-bottom: 1px solid #323234;
+}
+
+.Contact_container:last-of-type .Contact_details {
+    border-bottom: none;
 }

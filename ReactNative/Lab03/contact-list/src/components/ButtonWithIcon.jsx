@@ -1,13 +1,19 @@
 import React from "react";
 
-export default function ButtonWithIcon({ Icon, size, color, handleClick }) {
+export default function ButtonWithIcon({ Icon, size, color, handleClick, text }) {
 
     if (!handleClick) 
         handleClick = () => {}
 
+
     const buttonStyle = {
-        "background-color": "transparent",
+        "backgroundColor": "transparent",
         "border": "none",
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "0.2rem",
+        "color": color,
+        "alignItems": "center",
     }
 
     return (
@@ -16,6 +22,7 @@ export default function ButtonWithIcon({ Icon, size, color, handleClick }) {
                 size={size}
                 color={color}
             />
+            <p style={{"padding": "0", "margin": "0"}}>{text}</p>
         </button>
     )
 

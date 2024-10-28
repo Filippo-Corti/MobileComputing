@@ -2,7 +2,9 @@ import {
     Add01Icon,
     Search01Icon,
     Delete02Icon,
-    Menu01Icon
+    Menu01Icon,
+    ArrowLeft01Icon,
+    PencilEdit01Icon
 } from 'hugeicons-react';
 
 export const PlusIcon = ({ size, color }) => {
@@ -37,12 +39,30 @@ export const SearchIcon = ({ size, color }) => {
 
 export const MenuIcon = ({ size, color }) => {
     return (
-      <Menu01Icon 
-        size={size} 
-        color={color}
-        variant={"stroke"}
-      />
+        <Menu01Icon
+            size={size}
+            color={color}
+            variant={"stroke"}
+        />
     )
-  }
+}
 
+export const BackArrowIcon = ({ size, color }) => {
+    return (
+        <ArrowLeft01Icon
+            size={size}
+            color={color}
+            variant={"stroke"}
+        />
+    )
+}
 
+export const EditIcon = ({ size, color }) => {
+    return (
+        <PencilEdit01Icon
+            size={size}
+            color={color}
+            variant={"stroke"}
+        />
+    )
+}

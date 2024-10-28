@@ -9,14 +9,14 @@
 .Action_icons {
     display: flex;
     justify-content: end;
-    margin: 0 1rem;
-    gap: 0.25rem;
+    margin: 0 1.5rem;
+    gap: 0.45rem;
 }
 
 .Contacts_list {
     max-width: 75%;
     margin: 2rem auto;
     background-color: #111212;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 1.5rem;
     border-radius: 2rem;
 }
