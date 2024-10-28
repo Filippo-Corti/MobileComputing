@@ -2,7 +2,7 @@ import './css/App.css';
 import ContactList from './models/ContactList';
 import React, { useState } from 'react';
 import Contact from './models/Contact';
-import ContactListElement from './components/ContactListElement';
+import ContactListComponent from './components/ContactList';
 
 function App() {
 
@@ -23,8 +23,8 @@ function App() {
   switch (page) {
     case "list":
       return (
-        <ContactListElement
-          contacts={contactList}
+        <ContactListComponent
+          contacts={contactList.contacts}
           handleContactDetails={handleContactDetails}
         />
       )
