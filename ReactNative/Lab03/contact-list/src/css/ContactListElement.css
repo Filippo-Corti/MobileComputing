@@ -1,0 +1,14 @@
+.Title {
+    padding: 3rem 0;
+    color: #45A9BB;
+    text-align: center;
+    font-weight: 400;
+    font-size: 2rem;
+}
+
+.Action_icons {
+    display: flex;
+    justify-content: end;
+    margin: 0 1rem;
+    gap: 0.25rem;
+}
