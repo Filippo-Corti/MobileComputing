@@ -1,0 +1,16 @@
+<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    width="29.054px" height="29.055px" viewBox="0 0 29.054 29.055" style="enable-background:new 0 0 29.054 29.055;"
+    xml:space="preserve">
+    <defs>
+        <linearGradient id="grad1" x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="30%" stop-color="#7d2aca" stop-opacity="1" />
+            <stop offset="100%" stop-color="#ad50cd" stop-opacity="1" />
+        </linearGradient>
+    </defs>
+    <g>
+        <path d="M26.536,0.501v4.094c0,0.147-0.063,0.287-0.178,0.383l-8.722,7.354v16.223c0,0.197-0.116,0.377-0.299,0.457
+            c-0.063,0.029-0.134,0.043-0.201,0.043c-0.123,0-0.243-0.045-0.338-0.133l-5.217-4.785c-0.104-0.094-0.162-0.229-0.162-0.367
+            V12.331L2.698,4.977C2.586,4.881,2.519,4.743,2.519,4.594V0.5c0-0.275,0.225-0.5,0.5-0.5h23.015
+            C26.311,0.001,26.536,0.224,26.536,0.501z" fill="url(#grad1)" />
+    </g>
+</svg>
