@@ -8,13 +8,13 @@ export default function App() {
   const [order, setOrder] = useState({
     title: "Loading Data..."
   });
-  const ORDER_ID = 1;
+  const ORDER_ID = 2;
 
   const fetchData = async () => {
     try {
-      console.log("Fetching Data...");
+      //console.log("Fetching Data...");
       const orderData = await ViewModel.loadOrderData(ORDER_ID);
-      console.log("Fetched Data", orderData);
+      //console.log("Fetched Data", orderData);
       setOrder(orderData);
     } catch (err) {
       console.log("Error...", err);
