@@ -9,6 +9,9 @@ import EditProfile from './view/EditProfile';
 import {getNavHeaderOptions} from './view/NavHeader';
 import { navigationRef } from './view/RootNavigation';
 
+
+const USER_ID = 4; //Mine is 4
+
 const Stack = createNativeStackNavigator();
 
 const RootStack = ({ loggedUser }) => {
@@ -16,6 +19,11 @@ const RootStack = ({ loggedUser }) => {
   const handleEditProfile = () => {
     navigationRef.navigate("EditProfile");
   }
+
+  const handleUpdateProfileData = async (newUserData) => {
+    return await ViewModel.updateUserData(USER_ID, newUserData);
+  }
+
 
   const profileOptions = getNavHeaderOptions(false, "Welcome Back", {title: "Edit Profile", cb: handleEditProfile});
   const editOptions = getNavHeaderOptions(true, "Edit Profile", {title: "Save"});
@@ -40,15 +48,13 @@ const RootStack = ({ loggedUser }) => {
           animationDuration: 500,
         }}
       >
-        {() => <EditProfile loggedUser={loggedUser} />}
+        {() => <EditProfile loggedUser={loggedUser} handleSave={(v) => handleUpdateProfileData(v)}/>}
       </Stack.Screen>
     </Stack.Navigator>
   );
 };
 
 export default function App() {
-
-  const USER_ID = 3; //Mine is 28
 
   const [loggedUser, setLoggedUser] = useState(null);
 

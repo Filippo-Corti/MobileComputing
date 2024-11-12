@@ -1,22 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
-import { Image, View, Text, Button, StyleSheet } from "react-native";
+import React, {useEffect} from "react";
+import { Image, View, Text, Button, StyleSheet, Keyboard, TouchableWithoutFeedback} from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FormField from "./FormField.jsx";
+import { useForm } from "react-hook-form";
+import MyButton from "./MyButton"
 
-const EditProfileElement = ({ label, text }) => {
-    return (
-        <View style={[styles.fieldWithLabel]}>
-            <Text style={[styles.text, styles.fieldLabel]}>
-                {label}:
-            </Text>
-            <Text style={[styles.text, styles.fieldText]}>
-                {text}
-            </Text>
-        </View>
-    )
-}
-
-export default function EditProfile({ loggedUser }) {
+export default function EditProfile({ loggedUser, handleSave }) {
 
     if (!loggedUser) {
         return (
@@ -26,13 +16,56 @@ export default function EditProfile({ loggedUser }) {
         );
     }
 
+    const navigation = useNavigation();
+
+    const {control, handleSubmit, formState: { errors },} = useForm({
+        defaultValues: {
+            fName: loggedUser.fName,
+            lName: loggedUser.lName,
+      }
+    });
+
+    const handleSaveData = async (data) => {
+        try {
+            await handleSave(data);
+            navigation.goBack();
+            console.log("Successfully updated the profile data");
+        } catch (err) {
+            console.log("There was an error in the process of saving the new data", err);
+        }
+
+    }
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <MyButton
+                    onPress={handleSubmit(handleSaveData)}
+                    title="Save"
+                />
+            )
+        })
+    }, [navigation]);
+
     return (
-        <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
-            <View style={styles.body}>
-                <EditProfileElement label={"First Name"} text={loggedUser.fName} />
-                <EditProfileElement label={"Last Name"} text={loggedUser.lName} />
-            </View>
-        </SafeAreaView>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+                <View style={styles.body}>
+                    <FormField 
+                        name="fName"
+                        label="First Name" 
+                        control={control}
+                        error={errors.fName}
+                    />
+                    <FormField 
+                        name="lName"
+                        label="Last Name"
+                        control={control}
+                        error={errors.lName}
+                    />
+                </View>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -62,18 +95,5 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
         fontSize: 18,
     },
-
-    fieldWithLabel: {
-        paddingVertical: 8,
-    },
-
-    fieldLabel: {
-        color: '#c3c0c7',
-        fontSize: 14,
-    },
-
-    fieldText: {
-
-    }
 
 });

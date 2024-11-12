@@ -1,10 +1,10 @@
 
 export default class CommunicationController {
 
-    static BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425/"
-    static SID = "afM833kms0ri8TzaGItdoOjhb9ss8uJ6gujDy1wELhVglRqeRUh2LaKRP7AyyVS8"
+    static BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425/";
+    static SID = "afM833kms0ri8TzaGItdoOjhb9ss8uJ6gujDy1wELhVglRqeRUh2LaKRP7AyyVS8";
 
-    static async genericRequest(endpoint, verb, queryParams, bodyParams) {
+    static async genericRequest(endpoint, verb, bodyParams = {}, queryParams = {}) {
         const queryParamsFormatted = new URLSearchParams(queryParams).toString();
         const url = this.BASE_URL + endpoint + "?" + queryParamsFormatted;
 
@@ -13,54 +13,37 @@ export default class CommunicationController {
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
-            }
-        }
+            },
+        };
 
         if (verb !== 'GET') {
-            fetchData.body = JSON.stringify(bodyParams)
+            fetchData.body = JSON.stringify(bodyParams);
         }
 
-        const httpResponse = await fetch(url, fetchData)
+        const httpResponse = await fetch(url, fetchData);
 
-        if (httpResponse.status == 200) {
-            return await httpResponse.json();
+        if (httpResponse.ok) {
+            return (await httpResponse.json()) || {};
         } else {
             const errorMessage = await httpResponse.text();
-            throw new Error("Error message from the server. HTTP status: " + httpResponse.status + " " + errorMessage)
+            throw new Error(`Error message from the server. HTTP status: ${httpResponse.status} ${errorMessage}`);
         }
-
     }
 
-    static async genericRequestWithSID(endpoint, verb, queryParams, bodyParams) {
-        queryParams = {
-            ...queryParams,
-            sid: this.SID,
-        }
-        return await this.genericRequest(endpoint, verb, queryParams, bodyParams)
-    }
-
-    static async genericGETRequest(endpoint, queryParams) {
-        return await this.genericRequest(endpoint, "GET", queryParams)
-    }
-
-    static async genericGETRequestWithSID(endpoint, queryParams) { 
-        return await this.genericRequestWithSID(endpoint, "GET", queryParams)
-    }
-
-    static async genericPOSTRequest(endpoint, bodyParams) {
-        return await this.genericRequest(endpoint, "POST", {}, bodyParams)
-    }
-
-    static async genericPOSTRequestWithSID(endpoint, bodyParams) {
-        return await this.genericRequestWithSID(endpoint, "POST", {}, bodyParams)
+    static async genericGETRequest(endpoint, queryParams = {}) {
+        return await this.genericRequest(endpoint, "GET", {}, queryParams);
     }
 
     static async getUserDetailsById(id) {
-        return await this.genericGETRequestWithSID("user/" + id)
+        const queryParams = { sid: this.SID };
+        return await this.genericGETRequest("user/" + id, queryParams);
     }
 
-    static async registerNewUser(userData) {
-        return await this.genericPOSTRequestWithSID("user", userData)
+    static async updateUserDetails(id, newUserDetails) {
+        const bodyParams = {
+            ...newUserDetails,
+            sid: this.SID,
+        }   
+        return await this.genericRequest("user/" + id, "PUT", bodyParams);
     }
-
 }

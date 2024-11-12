@@ -16,7 +16,7 @@ export function getNavHeaderOptions(goBack, title, actionData) {
         headerTintColor: '#FFFFFF', // Set back button color
         headerRight: () => (
             <MyButton
-                onPress={() => actionData.cb()}
+                onPress={actionData.cb}
                 title={actionData.title}
             />
         ),
