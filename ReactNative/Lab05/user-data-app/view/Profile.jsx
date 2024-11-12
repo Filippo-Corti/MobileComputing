@@ -4,6 +4,7 @@ import { Image, View, Text, Button, StyleSheet } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Profile({ loggedUser }) {
+    
     if (!loggedUser) {
         return (
             <SafeAreaView style={styles.container}>
@@ -13,7 +14,7 @@ export default function Profile({ loggedUser }) {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
             <View style={styles.body}>
                 <Image
                     style={styles.profileImage}
@@ -34,18 +35,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#000000',
         color: '#FFFFFF',
-        alignItems: 'flex-start',
-        justifyContent: 'flex-start',
         paddingHorizontal: 20,
-        paddingVertical: 10,
-    },
-
-    header: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 14,
+        paddingVertical: 12,
     },
 
     body: {
@@ -53,12 +44,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         alignItems: 'center',
         paddingHorizontal: 8,
-        marginTop: 20,
-    },
-
-    headerText: {
-        fontSize: 24,
-        fontWeight: '700',
+        paddingVertical: 14,
     },
 
     text: {
@@ -70,11 +56,6 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         fontSize: 24,
         fontWeight: '600',
-    },
-
-    textWithLabel: {
-        flexDirection: 'column',
-        marginBottom: 8,
     },
 
     profileImage: {

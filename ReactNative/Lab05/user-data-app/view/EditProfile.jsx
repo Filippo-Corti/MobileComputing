@@ -3,18 +3,18 @@ import React from "react";
 import { Image, View, Text, Button, StyleSheet } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// const UserProfileTextElement = ({ label, text }) => {
-//     return (
-//         <View style={[styles.textWithLabel]}>
-//             <Text style={[styles.text, styles.label]}>
-//                 {label}:
-//             </Text>
-//             <Text style={styles.text}>
-//                 {text}
-//             </Text>
-//         </View>
-//     )
-// }
+const EditProfileElement = ({ label, text }) => {
+    return (
+        <View style={[styles.fieldWithLabel]}>
+            <Text style={[styles.text, styles.fieldLabel]}>
+                {label}:
+            </Text>
+            <Text style={[styles.text, styles.fieldText]}>
+                {text}
+            </Text>
+        </View>
+    )
+}
 
 export default function EditProfile({ loggedUser }) {
 
@@ -27,9 +27,10 @@ export default function EditProfile({ loggedUser }) {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
             <View style={styles.body}>
-                <Text style={[styles.text]}> Something here ...</Text>
+                <EditProfileElement label={"First Name"} text={loggedUser.fName} />
+                <EditProfileElement label={"Last Name"} text={loggedUser.lName} />
             </View>
         </SafeAreaView>
     )
@@ -48,30 +49,31 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
 
-    header: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingBottom: 14,
-    },
-
     body: {
         width: '100%',
         flexDirection: 'column',
-        alignItems: 'center',
-        paddingHorizontal: 8,
-        marginTop: 20,
-    },
-
-    headerText: {
-        fontSize: 24,
-        fontWeight: '700',
+        alignItems: 'flex-start',
+        paddingHorizontal: 16,
+        marginTop: 10,
     },
 
     text: {
         color: '#FFFFFF',
         paddingVertical: 2,
+        fontSize: 18,
     },
+
+    fieldWithLabel: {
+        paddingVertical: 8,
+    },
+
+    fieldLabel: {
+        color: '#c3c0c7',
+        fontSize: 14,
+    },
+
+    fieldText: {
+
+    }
 
 });

@@ -1,4 +1,4 @@
-import {Button} from 'react-native'
+import MyButton from "./MyButton"
 
 export function getNavHeaderOptions(goBack, title, actionData) {
     return {
@@ -15,7 +15,7 @@ export function getNavHeaderOptions(goBack, title, actionData) {
         headerBackVisible: goBack,
         headerTintColor: '#FFFFFF', // Set back button color
         headerRight: () => (
-            <Button
+            <MyButton
                 onPress={() => actionData.cb()}
                 title={actionData.title}
             />
