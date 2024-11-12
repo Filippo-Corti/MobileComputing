@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useState, useEffect } from 'react';
 import ViewModel from './viewmodel/ViewModel';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import EditProfile from './view/EditProfile';
 import {getNavHeaderOptions} from './view/NavHeader';
@@ -14,13 +14,14 @@ const USER_ID = 4; //Mine is 4
 
 const Stack = createNativeStackNavigator();
 
-const RootStack = ({ loggedUser }) => {
+const RootStack = ({ loggedUser, setReloadRequired }) => {
 
   const handleEditProfile = () => {
     navigationRef.navigate("EditProfile");
   }
 
   const handleUpdateProfileData = async (newUserData) => {
+    setReloadRequired(true);
     return await ViewModel.updateUserData(USER_ID, newUserData);
   }
 
@@ -57,6 +58,7 @@ const RootStack = ({ loggedUser }) => {
 export default function App() {
 
   const [loggedUser, setLoggedUser] = useState(null);
+  const [reloadRequired, setReloadRequired] = useState(true);
 
   const loadUserData = () => {
     console.log("Loading data...");
@@ -69,16 +71,22 @@ export default function App() {
         console.error(err);
       });
   }
-  useEffect(() => {
-    loadUserData()
-  }, []);
 
+  useEffect(() => {
+    if (reloadRequired) {
+      loadUserData(); 
+      setReloadRequired(false);
+    }
+  }, [reloadRequired]);
 
 
   return (
     <SafeAreaProvider>
       <NavigationContainer ref={navigationRef}>
-        <RootStack loggedUser={loggedUser}/>
+        <RootStack 
+        loggedUser={loggedUser}
+        setReloadRequired={setReloadRequired}
+        />
       </NavigationContainer>
     </SafeAreaProvider>
   );

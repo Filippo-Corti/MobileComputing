@@ -28,7 +28,7 @@ export default function EditProfile({ loggedUser, handleSave }) {
     const handleSaveData = async (data) => {
         try {
             await handleSave(data);
-            navigation.goBack();
+            navigation.navigate("Profile", {reloadRequired: true});
             console.log("Successfully updated the profile data");
         } catch (err) {
             console.log("There was an error in the process of saving the new data", err);

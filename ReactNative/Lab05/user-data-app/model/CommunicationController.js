@@ -23,7 +23,10 @@ export default class CommunicationController {
         const httpResponse = await fetch(url, fetchData);
 
         if (httpResponse.ok) {
-            return (await httpResponse.json()) || {};
+            if (httpResponse.status === 200)
+                return await httpResponse.json()
+            else 
+                return {};
         } else {
             const errorMessage = await httpResponse.text();
             throw new Error(`Error message from the server. HTTP status: ${httpResponse.status} ${errorMessage}`);
