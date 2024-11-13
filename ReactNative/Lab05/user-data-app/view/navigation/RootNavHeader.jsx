@@ -1,6 +1,6 @@
-import MyButton from "./MyButton"
+import MyButton from "../components/MyButton"
 
-export function getNavHeaderOptions(goBack, title, actionData) {
+export const getNavHeaderOptions = (goBack, title, actionData) => {
     return {
         headerTitle: title,
         headerStyle: {

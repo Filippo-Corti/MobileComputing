@@ -1,34 +1,34 @@
-import {useState} from 'react';
 import {
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  TextInputProps,
+    View,
+    TextInput,
+    Text,
+    StyleSheet,
 } from 'react-native'
-import { Controller, FieldError } from 'react-hook-form'
+import { Controller } from 'react-hook-form'
+import PropTypes from 'prop-types';
 
-interface FormFieldProps extends TextInputProps {
-    name: string;
-    label?: string;
-    error?: FieldError | undefined;
-    control: Object;
-}
 
-export default function FormField(props : FormFieldProps) {
+const propTypes = {
+    name: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    error: PropTypes.shape({
+        message: PropTypes.string,
+    }),
+    control: PropTypes.object.isRequired,
+    inputProps: PropTypes.object,
+};
 
-    const { name, label, error, control, ...inputProps } = props;
+
+export default FormField = ({ name, label, error, control, ...inputProps }) => {
 
     return (
         <View style={styles.container}>
             {label && <Text style={[styles.label]}>{label}</Text>}
-            
+
             <Controller
                 control={control}
                 name={name}
-                render={({field: {onChange, onBlur, value}}) => (
+                render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
                         autoCapitalize="none"
                         style={[styles.inputContainer, { borderColor: error ? '#fc6d47' : '#c3c0c7' }]}
@@ -37,13 +37,14 @@ export default function FormField(props : FormFieldProps) {
                         value={value}
                         {...inputProps}
                     />
-            )}
-        />
-        {error && <Text style={styles.textError}>{error.message}</Text>}
-      </View>
+                )}
+            />
+            {error && <Text style={styles.textError}>{error.message}</Text>}
+        </View>
     )
 }
 
+FormField.propTypes = propTypes;
 
 const styles = StyleSheet.create({
     container: {
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
         color: '#c3c0c7',
         fontSize: 14,
     },
-    
+
     text: {
         color: '#FFFFFF',
         paddingVertical: 2,
@@ -75,4 +76,4 @@ const styles = StyleSheet.create({
         color: '#fc6d47',
         marginTop: 8,
     },
-  });
+});

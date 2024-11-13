@@ -1,14 +1,26 @@
-import { useNavigation } from "@react-navigation/native";
-import React, {useEffect} from "react";
-import { Image, View, Text, Button, StyleSheet, Keyboard, TouchableWithoutFeedback} from "react-native";
+import { 
+    View, 
+    Text, 
+    StyleSheet, 
+    Keyboard, 
+    TouchableWithoutFeedback 
+} from "react-native";
+import MyButton from "../components/MyButton.jsx"
+import FormField from "../components/FormField.jsx";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FormField from "./FormField.jsx";
 import { useForm } from "react-hook-form";
-import MyButton from "./MyButton"
+import { useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
+import PropTypes from "prop-types";
 
-export default function EditProfile({ loggedUser, handleSave }) {
+const propTypes = {
+    user: PropTypes.string.isRequired,
+    handleSave: ProPtypes.func.isRequired,
+}
 
-    if (!loggedUser) {
+export default function EditProfile({ user, handleSave }) {
+
+    if (!user) {
         return (
             <SafeAreaView style={styles.container}>
                 <Text>Loading...</Text>
@@ -18,17 +30,17 @@ export default function EditProfile({ loggedUser, handleSave }) {
 
     const navigation = useNavigation();
 
-    const {control, handleSubmit, formState: { errors },} = useForm({
+    const { control, handleSubmit, formState: { errors }, } = useForm({
         defaultValues: {
-            fName: loggedUser.fName,
-            lName: loggedUser.lName,
-      }
+            fName: user.fName,
+            lName: user.lName,
+        }
     });
 
     const handleSaveData = async (data) => {
         try {
             await handleSave(data);
-            navigation.navigate("Profile", {reloadRequired: true});
+            navigation.navigate("Profile", { reloadRequired: true });
             console.log("Successfully updated the profile data");
         } catch (err) {
             console.log("There was an error in the process of saving the new data", err);
@@ -51,13 +63,13 @@ export default function EditProfile({ loggedUser, handleSave }) {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
                 <View style={styles.body}>
-                    <FormField 
+                    <FormField
                         name="fName"
-                        label="First Name" 
+                        label="First Name"
                         control={control}
                         error={errors.fName}
                     />
-                    <FormField 
+                    <FormField
                         name="lName"
                         label="Last Name"
                         control={control}
@@ -68,6 +80,8 @@ export default function EditProfile({ loggedUser, handleSave }) {
         </TouchableWithoutFeedback>
     )
 }
+
+EditProfile.propTypes = propTypes;
 
 
 const styles = StyleSheet.create({

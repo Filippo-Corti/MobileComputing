@@ -1,11 +1,19 @@
-import { useNavigation } from "@react-navigation/native";
-import React from "react";
-import { Image, View, Text, Button, StyleSheet } from "react-native";
+import { 
+    Image, 
+    View, 
+    Text, 
+    StyleSheet 
+} from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PropTypes from "prop-types";
 
-export default function Profile({ loggedUser }) {
+const propTypes = {
+    user: PropTypes.string.isRequired,
+}
+
+export default Profile = ({ user }) => {
     
-    if (!loggedUser) {
+    if (!user) {
         return (
             <SafeAreaView style={styles.container}>
                 <Text>Loading...</Text>
@@ -21,12 +29,14 @@ export default function Profile({ loggedUser }) {
                     source={require('../assets/default-avatar.jpg')}
                 />
                 <Text style={[styles.text, styles.profileName]}>
-                    {loggedUser.fName} {loggedUser.lName}
+                    {user.fName} {user.lName}
                 </Text>
             </View>
         </SafeAreaView>
     )
 }
+
+Profile.propTypes = propTypes;
 
 
 const styles = StyleSheet.create({
