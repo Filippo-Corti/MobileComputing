@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import PropTypes from "prop-types";
 
 const propTypes = {
-    user: PropTypes.string.isRequired,
+    user: PropTypes.object,
 }
 
 export default Profile = ({ user }) => {
@@ -26,7 +26,7 @@ export default Profile = ({ user }) => {
             <View style={styles.body}>
                 <Image
                     style={styles.profileImage}
-                    source={require('../assets/default-avatar.jpg')}
+                    source={require('../../assets/default-avatar.jpg')}
                 />
                 <Text style={[styles.text, styles.profileName]}>
                     {user.fName} {user.lName}

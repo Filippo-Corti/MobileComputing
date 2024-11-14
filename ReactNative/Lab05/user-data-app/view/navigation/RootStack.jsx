@@ -1,12 +1,13 @@
-import Profile from './view/Profile';
-import EditProfile from './view/EditProfile';
+import Profile from '../screens/Profile';
+import EditProfile from '../screens/EditProfile';
+import ViewModel from '../../viewmodel/ViewModel';
 import {getNavHeaderOptions} from './RootNavHeader';
 import { navigationRef } from './RootNavigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import PropTypes from 'prop-types';
 
 const propTypes = {
-    user: PropTypes.string.isRequired,
+    user: PropTypes.object,
     setReloadRequired: PropTypes.func.isRequired,
 }
 
@@ -21,7 +22,7 @@ export default RootStack = ({ user, setReloadRequired }) => {
 
   const handleUpdateProfileData = async (newUserData) => {
     setReloadRequired(true);
-    return await ViewModel.updateUserData(USER_ID, newUserData);
+    return await ViewModel.updateUserData(user.id, newUserData);
   }
 
   const profileOptions = getNavHeaderOptions(false, "Welcome Back", {title: "Edit Profile", cb: handleEditProfile});

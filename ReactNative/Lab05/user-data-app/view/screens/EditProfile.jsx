@@ -14,8 +14,8 @@ import { useNavigation } from "@react-navigation/native";
 import PropTypes from "prop-types";
 
 const propTypes = {
-    user: PropTypes.string.isRequired,
-    handleSave: ProPtypes.func.isRequired,
+    user: PropTypes.object,
+    handleSave: PropTypes.func.isRequired,
 }
 
 export default function EditProfile({ user, handleSave }) {
