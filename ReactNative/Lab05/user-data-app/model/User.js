@@ -11,8 +11,6 @@ export default class User {
             this.creditCard = new CreditCard(ccInfo.ccFullName, ccInfo.ccNumber, ccInfo.ccExpMonth, ccInfo.ccExpYear, ccInfo.ccCVC);
     }
 
-    // Non ho ancora deciso cosa farci con queste validate...
-
     static validateId(id) {
         if (id < 0) {
             return false;

@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import PropTypes from "prop-types";
+import User from "../../model/User.js";
 
 const propTypes = {
     user: PropTypes.object,
@@ -68,12 +69,14 @@ export default function EditProfile({ user, handleSave }) {
                         label="First Name"
                         control={control}
                         error={errors.fName}
+                        validate={(fName) => User.validateFirstName(fName) || "First Name must be less than 15 characters long"}
                     />
                     <FormField
                         name="lName"
                         label="Last Name"
                         control={control}
                         error={errors.lName}
+                        validate={(lName) => User.validateLastName(lName) || "Last Name must be less than 15 characters long"}
                     />
                 </View>
             </SafeAreaView>

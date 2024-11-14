@@ -15,11 +15,14 @@ const propTypes = {
         message: PropTypes.string,
     }),
     control: PropTypes.object.isRequired,
+    validate: PropTypes.func,
     inputProps: PropTypes.object,
 };
 
 
-export default FormField = ({ name, label, error, control, ...inputProps }) => {
+export default FormField = ({ name, label, error, control, validate, ...inputProps }) => {
+
+    validate = validate || ((v) => true); 
 
     return (
         <View style={styles.container}>
@@ -28,6 +31,9 @@ export default FormField = ({ name, label, error, control, ...inputProps }) => {
             <Controller
                 control={control}
                 name={name}
+                rules={{
+                    validate: {validate},
+                }}
                 render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
                         autoCapitalize="none"
