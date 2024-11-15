@@ -41,10 +41,23 @@ export default class ViewModel {
             console.log("Menu Image is: ", menuImage);
             if (menuImage) {
                 console.log("Found in storage!");
+                return {
+                    imageURL: menuImage.Image,
+                    imageFetchText: "Fetched from DB Storage!",
+                }
             } else {
                 console.log("Not found in storage, need to ask to API");
-                const newMenuImage = await CommunicationController.getMenuImageById(menuId);
-                console.log("Here's your image", newMenuImage.base64.substring(0, 100));
+                let newMenuImage = (await CommunicationController.getMenuImageById(menuId)).base64;
+                if (!newMenuImage.startsWith("data:image/jpeg;base64,")) {
+                    newMenuImage = "data:image/jpeg;base64," + newMenuImage;
+                }
+                console.log("Here's your image", newMenuImage.substring(0, 100));
+                console.log("Now I'll save it to the storage");
+                await this.dbController.insertMenuImage(menuId, newMenuImage, menuDetails.imageVersion);
+                return {
+                    imageURL: newMenuImage,
+                    imageFetchText: "Fetched from API, now saved in storage",
+                }
             }
         } catch (err) {
             console.log("Errore nel fetch del menu", err);

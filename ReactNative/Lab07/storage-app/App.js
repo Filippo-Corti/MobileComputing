@@ -1,29 +1,28 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
-import CommunicationController from './model/CommunicationController';
-import DBController from './model/DBController';
-import AsyncStorageManager from './model/AsyncStorageManager';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StyleSheet, Text, View, Image } from 'react-native';
 import ViewModel from './viewmodel/ViewModel';
 
 export default function App() {
 
+  console.log("--------------------------");
   const viewModel = new ViewModel();
 
   const defaultAppState = {
     firstLaunch: false,
     sid: null,
     uid: null,
+    imageURL: null,
+    imageFetchText: null,
   }
 
   const [appState, setAppState] = useState(defaultAppState);
 
   const updateAppState = (newState) => {
-    setAppState({
-      ...appState,
+    setAppState((prevState) => ({
+      ...prevState,
       ...newState
-    })
+    }));
   } 
 
  
@@ -31,7 +30,8 @@ export default function App() {
   const startApp = async () => {
     const appStateData = await viewModel.fetchAppStateData();
     updateAppState(appStateData);
-    await viewModel.fetchTestMenu(12);
+    const imageURL = await viewModel.fetchTestMenu(1);
+    updateAppState(imageURL);
     console.log("Menu Fetch ENDED");
   }
 
@@ -54,6 +54,8 @@ export default function App() {
         <Text>Secondo avvio.</Text>
         <Text>SID: {appState.sid?.substring(0, 10)}...</Text>
         <Text>UID: {appState.uid}</Text>
+        <Image source={{uri: appState.imageURL}} style={styles.image}></Image>
+        <Text>{appState.imageFetchText}</Text>
         <StatusBar style="auto" />
       </View>
     );
@@ -68,4 +70,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  
+  image: {
+    width: 154,
+    height: 154,
+  },
+
 });
