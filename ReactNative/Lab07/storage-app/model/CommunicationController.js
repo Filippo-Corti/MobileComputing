@@ -59,4 +59,13 @@ export default class CommunicationController {
         }   
         return await this.genericRequest("user/" + id, "PUT", bodyParams);
     }
+    
+    static async getMenuDetailsById(id) {
+        const queryParams = { 
+            lat: 45.4642,
+            lng: 9.19,
+            sid: this.SID, 
+        };
+        return await this.genericGETRequest("menu/" + id, queryParams);
+    }
 }
