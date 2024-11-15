@@ -61,11 +61,24 @@ export default class CommunicationController {
     }
     
     static async getMenuDetailsById(id) {
+        if (!this.SID) 
+            throw new Error("Endpoint requires SID but not SID is memorized");
+        
         const queryParams = { 
             lat: 45.4642,
             lng: 9.19,
             sid: this.SID, 
         };
         return await this.genericGETRequest("menu/" + id, queryParams);
+    }
+
+    static async getMenuImageById(id) {
+        if (!this.SID) 
+            throw new Error("Endpoint requires SID but not SID is memorized");
+        
+        const queryParams = { 
+            sid: this.SID, 
+        };
+        return await this.genericGETRequest("menu/" + id + "/image", queryParams);
     }
 }

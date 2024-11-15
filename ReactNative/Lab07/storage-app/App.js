@@ -9,8 +9,8 @@ import ViewModel from './viewmodel/ViewModel';
 
 export default function App() {
 
-  let dbController = null;
-  
+  const viewModel = new ViewModel();
+
   const defaultAppState = {
     firstLaunch: false,
     sid: null,
@@ -28,17 +28,16 @@ export default function App() {
 
  
   //AsyncStorage.clear();
+  const startApp = async () => {
+    const appStateData = await viewModel.fetchAppStateData();
+    updateAppState(appStateData);
+    await viewModel.fetchTestMenu(12);
+    console.log("Menu Fetch ENDED");
+  }
 
   useEffect(() => {
-    ViewModel.fetchAppStateData().then((data) => {
-      updateAppState(data)
-    });
-    ViewModel.fetchTestMenu(12).then((data) => {
-      updateAppState(data)
-    });
+    startApp();
   }, []);
-
-  console.log(appState);
 
   if (appState.firstLaunch) {
     return (
