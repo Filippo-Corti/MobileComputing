@@ -1,8 +1,7 @@
 
-export default class CommunicationController {
+export default class APIController {
 
     static BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425/";
-    static SID = null;
 
     static async genericRequest(endpoint, verb, bodyParams = {}, queryParams = {}) {
         const queryParamsFormatted = new URLSearchParams(queryParams).toString();
@@ -29,6 +28,7 @@ export default class CommunicationController {
                 return {};
         } else {
             const errorMessage = await httpResponse.text();
+            console.log("API Fetch Error:", errorMessage);
             throw new Error(`Error message from the server. HTTP status: ${httpResponse.status} ${errorMessage}`);
         }
     }
@@ -37,48 +37,36 @@ export default class CommunicationController {
         return await this.genericRequest(endpoint, "GET", {}, queryParams);
     }
 
-    static async getNewSID() {
+    static async createNewUserSession() {
         return await this.genericRequest("user", "POST");
     }
 
-    static async getUserDetailsById(id) {
-        if (!this.SID) 
-            throw new Error("Endpoint requires SID but not SID is memorized");
-        
-        const queryParams = { sid: this.SID };
-        return await this.genericGETRequest("user/" + id, queryParams);
+    static async getUserDetailsById(sId, userId) {
+        const queryParams = { sid: sId};
+        return await this.genericGETRequest("user/" + userId, queryParams);
     }
 
-    static async updateUserDetails(id, newUserDetails) {
-        if (!this.SID) 
-            throw new Error("Endpoint requires SID but not SID is memorized");
-
+    static async updateUserDetails(sId, userId, newUserDetails) {
         const bodyParams = {
             ...newUserDetails,
-            sid: this.SID,
+            sid: sId,
         }   
-        return await this.genericRequest("user/" + id, "PUT", bodyParams);
+        return await this.genericRequest("user/" + userId, "PUT", bodyParams);
     }
     
-    static async getMenuDetailsById(id) {
-        if (!this.SID) 
-            throw new Error("Endpoint requires SID but not SID is memorized");
-        
+    static async getMenuDetailsById(sId, menuId, latitude=45.4642, longitude=9.19) {
         const queryParams = { 
-            lat: 45.4642,
-            lng: 9.19,
-            sid: this.SID, 
+            lat: latitude,
+            lng: longitude,
+            sid: sId, 
         };
-        return await this.genericGETRequest("menu/" + id, queryParams);
+        return await this.genericGETRequest("menu/" + menuId, queryParams);
     }
 
-    static async getMenuImageById(id) {
-        if (!this.SID) 
-            throw new Error("Endpoint requires SID but not SID is memorized");
-        
+    static async getMenuImageById(sId, menuId) {
         const queryParams = { 
-            sid: this.SID, 
+            sid: sId, 
         };
-        return await this.genericGETRequest("menu/" + id + "/image", queryParams);
+        return (await this.genericGETRequest("menu/" + menuId + "/image", queryParams)).base64;
     }
 }
