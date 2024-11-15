@@ -39,28 +39,28 @@ export default class ViewModel {
                 sid: sid,
             };
         } catch (err) {
-            console.err(err);
+            console.error(err);
             throw new Error("An Unexpected Error occurred starting the Application");
         }
     }
 
     async getUserDetails() {
         if (!this.sessionData.sid || !this.sessionData.uid) {
-            console.err("Session Data is required but it's null");
+            console.error("Session Data is required but it's null");
             throw new Error("An Unexpected Internal Error occurred")
         }
 
         try {
             return await APIController.getUserDetailsById(this.sessionData.sid, this.sessionData.uid);
         } catch (err) {
-            console.err(err);
+            console.error(err);
             throw new Error("An Unexpected Error occurred contacting the App Server");
         }
     }
 
     async updateUserDetails(userFormData) {
         if (!this.sessionData.sid || !this.sessionData.uid) {
-            console.err("Session Data is required but it's null");
+            console.error("Session Data is required but it's null");
             throw new Error("An Unexpected Internal Error occurred")
         }
 
@@ -82,7 +82,7 @@ export default class ViewModel {
         try {
             return await APIController.updateUserDetails(this.sessionData.sid, this.sessionData.uid, userDetails);
         } catch (err) {
-            console.err(err);
+            console.error(err);
             throw new Error("An Unexpected Error occurred contacting the App Server");
         }
     }
@@ -90,7 +90,7 @@ export default class ViewModel {
     // Retrieves Menu Details + Image, either from Local Storage or from the App Server
     async getMenuFullDetailsById(menuId) {
         if (!this.sessionData.sid) {
-            console.err("Session Data is required but it's null");
+            console.error("Session Data is required but it's null");
             throw new Error("An Unexpected Internal Error occurred")
         }
 
@@ -128,7 +128,7 @@ export default class ViewModel {
 
             }
         } catch (err) {
-            console.err(err);
+            console.error(err);
             throw new Error("An Unexpected Error occurred retrieving Data for the Application");
         }
     }

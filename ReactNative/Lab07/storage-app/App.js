@@ -14,7 +14,7 @@ export default function App() {
       await newViewModel.init();
       setViewModel(newViewModel);
     } catch (err) {
-      console.err("Error loading the View Model:", err);
+      console.error("Error loading the View Model:", err);
     }
   }
 
@@ -23,7 +23,7 @@ export default function App() {
       const menuDetails = await viewModel.getMenuFullDetailsById(12);
       setMenuData(menuDetails)
     } catch (err) {
-      console.err("Error loading the Menu Data:", err);
+      console.error("Error loading the Menu Data:", err);
     }
   }
 
