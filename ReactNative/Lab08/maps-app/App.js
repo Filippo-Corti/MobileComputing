@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import ViewModel from './viewmodel/ViewModel';
@@ -21,6 +21,7 @@ export default function App() {
 
   const [viewModel, setViewModel] = useState(null);
   const [menuData, setMenuData] = useState(null);
+  const mapRef = useRef();
 
   const initViewModel = async () => {
     try {
@@ -47,11 +48,10 @@ export default function App() {
         await initViewModel();
       }
       if (viewModel) {
-        await fetchMenuData();
+        //await fetchMenuData();
         const allowedToLocation = await ViewModelPosition.askForLocationPermission();
         if (allowedToLocation) {
-          const location = await ViewModelPosition.getPosition();
-          console.log(location);
+          console.log("We have position");
         }
         console.log("Done", allowedToLocation);
       }
@@ -83,6 +83,23 @@ export default function App() {
               latitudeDelta: 0.001,
               longitudeDelta: 0.001,
             }}
+            showsUserLocation={true}
+            followsUserLocation={true}
+            onUserLocationChange={(event) => {
+              const { coordinate } = event.nativeEvent;
+              console.log("User's new location:", coordinate);
+              const latitudeDelta = Math.abs(LOCATIONS.ingressoCeloria.latitude - coordinate.latitude) * 2 + 0.002;
+              const longitudeDelta = Math.abs(LOCATIONS.ingressoCeloria.longitude - coordinate.longitude) * 2 + 0.002;
+              console.log("Latitude Delta", latitudeDelta, longitudeDelta);
+              // Optionally, animate the map to center on the new location
+              mapRef.current?.animateToRegion({
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+                latitudeDelta: Math.max(0.001, latitudeDelta),
+                longitudeDelta: Math.max(0.001, longitudeDelta),
+              }, 1000);
+            }}
+            ref={mapRef}
           >
             <Marker
               coordinate={LOCATIONS.ingressoCeloria}
