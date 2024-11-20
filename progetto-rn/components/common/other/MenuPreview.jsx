@@ -1,14 +1,17 @@
 import {View, Text, Image, StyleSheet} from 'react-native';
 import {globalStyles} from '../../../styles/global';
+import MyIcon, {IconNames} from '../icons/MyIcon';
 
 export default MenuPreview = ({menuInformation, onPress}) => {
 
     let image = menuInformation.image;
-    if (!image.startsWith("data:image/jpeg;base64,")) {
-        image = "data:image/jpeg;base64," + image;
+    if (image) {
+        if (!image.startsWith("data:image/jpeg;base64,")) {
+            image = "data:image/jpeg;base64," + image;
+        }
+        console.log(image.substring(0, 100))
     }
 
-    console.log(image.substring(0, 100))
 
     let price = menuInformation.price.toFixed(2);
 
@@ -21,7 +24,8 @@ export default MenuPreview = ({menuInformation, onPress}) => {
                 <Text style={styles.otherInfo}>{menuInformation.deliveryTime}min • {menuInformation.distanceFromYou}km from you</Text>
             </View>
             <View style={styles.imageContainer}>
-                <Image source={{ uri: image }} style={styles.image}></Image>
+                {image && <Image source={{ uri: image }} style={styles.image} /> }
+                {!image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray}/> }
             </View>
         </View>
     );
