@@ -2,6 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView} from 'react-native';
 import {useFonts} from 'expo-font';
 import {fonts, globalStyles} from './styles/global';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import HomeScreen from './components/screens/HomeScreen';
+import LastOrderScreen from './components/screens/LastOrderScreen';
+import AccountScreen from './components/screens/AccountScreen';
+import MyTabBar from './components/navigation/MyTabBar';
 
 export default function App() {
 
@@ -12,21 +18,21 @@ export default function App() {
     [fonts.logo]: require('./assets/fonts/Geologica-Medium.ttf'),
   });
 
-  return (
-    <ScrollView 
-      style={globalStyles.container}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <Text>Hello</Text>
+  const Tab = createBottomTabNavigator();
 
-      <StatusBar style="auto" />
-    </ScrollView>
+  return (
+    <NavigationContainer>
+      <Tab.Navigator 
+      screenOptions={{
+        headerShown: false
+      }}
+      tabBar={(props) => <MyTabBar {...props} />}
+      >
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="LastOrder" component={LastOrderScreen} />
+        <Tab.Screen name="Account" component={AccountScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContent: {
-    flexDirection: 'column',
-    gap: 20,
-  }
-})
