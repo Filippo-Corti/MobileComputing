@@ -19,7 +19,9 @@ export const IconNames = {
     ARROW_RIGHT             : 'arrow_right',
     PRICE_TAG               : 'price_tag',
     MARKER                  : 'marker',
-    NAVIGATOR               : 'navigator'
+    NAVIGATOR               : 'navigator',
+    CC_CHIP                 : 'cc_chip',
+    VISA                    : 'visa',
 }
 
 export default MyIcon = ({name, size, color}) => {
@@ -49,5 +51,9 @@ export default MyIcon = ({name, size, color}) => {
             return (<FontAwesome5 name="map-marker-alt" size={size} color={color} />)
         case IconNames.NAVIGATOR:
             return (<Fontisto name="navigate" size={size} color={color} />)
+        case IconNames.CC_CHIP: 
+            return (<MaterialCommunityIcons name="integrated-circuit-chip" size={size} color={color} />);
+        case IconNames.VISA:
+            return (<FontAwesome name="cc-visa" size={size} color={color} />)
     }
 }
