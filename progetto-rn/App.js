@@ -6,6 +6,7 @@ import MyIcon, {IconNames} from './components/common/icons/MyIcon';
 import MyLogo from './components/common/icons/MyLogo';
 import MinimalistButton from './components/common/buttons/MinimalistButton';
 import ButtonWithArrow from './components/common/buttons/ButtonWithArrow';
+import LargeButton from './components/common/buttons/LargeButton';
 
 export default function App() {
 
@@ -23,6 +24,9 @@ export default function App() {
       <MyLogo />
       <MinimalistButton text="NEW ACCOUNT" onPress={() => console.log("Pressed")}/>
       <ButtonWithArrow text="Order Again" onPress={() => console.log("Pressed")}/>
+      <LargeButton text="I'll do it" onPress={() => console.log("Pressed")}/>
+      <LargeButton text="Not now" gray={true} onPress={() => console.log("Pressed")}/>
+      <LargeButton text="Order • €15.00" disabled={true} onPress={() => console.log("Pressed")}/>
       <StatusBar style="auto" />
     </View>
   );
