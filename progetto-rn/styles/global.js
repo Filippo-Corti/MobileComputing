@@ -50,9 +50,8 @@ export const globalStyles = StyleSheet.create({
   ...typographyStyles(),
 
   container: {
-    flex: 1,
     backgroundColor: colors.white,
-    paddingTop: 42,
+    marginVertical: 42, //TODO: substitute with safe area?
     paddingHorizontal: 12,
   },
 

@@ -9,7 +9,7 @@ export default LargeButton = ({text, gray=false, disabled=false, onPress}) => {
     const textColor = (disabled) ? globalStyles.textDarkGray : (gray) ? globalStyles.textBlack : globalStyles.textWhite;
 
     return (
-        <TouchableOpacity style={[styles.button, bgColor, borderColor]} onPress={() => onPress()}>
+        <TouchableOpacity style={[styles.button, bgColor, borderColor]} onPress={() => onPress()} disabled={disabled}>
             <Text style={[styles.buttonText, textColor]}>{text}</Text>
         </TouchableOpacity>
     )

@@ -18,10 +18,14 @@ export default BottomModal = ({onConfirm, title, text, confirmText, rejectText, 
           style={styles.bottomModal}
         >
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{title}</Text>
-            <Text style={styles.modalText}>{text}</Text>
-            <LargeButton text={confirmText} onPress={onConfirm}/>
-            <LargeButton text={rejectText} gray={true} onPress={toggleModal}/>
+            <View style={styles.texts}>
+                <Text style={styles.modalTitle}>{title}</Text>
+                <Text style={styles.modalText}>{text}</Text>
+            </View>
+            <View style={styles.buttons}>
+                <LargeButton text={confirmText} onPress={() => {toggleModal(); onConfirm()}}/>
+                <LargeButton text={rejectText} gray={true} onPress={toggleModal}/>
+            </View>
           </View>
         </Modal>
       </View>
@@ -43,16 +47,36 @@ const styles = StyleSheet.create({
 
     modalContent: {
       backgroundColor: colors.white,
-      height: '40%',
-      padding: 20,
+      height: '35%',
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
     },
 
-    modalTitle: {
+    texts: {
+      flexGrow: 1,
+    },
 
+    modalTitle: {
+        textAlign: 'center',
+        marginVertical: 20,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.gray,
+        ...globalStyles.textBlack,
+        ...globalStyles.textSubtitleBold,
     },
 
     modalText: {
+        paddingBottom: 25,
+        paddingHorizontal: 30,
+        ...globalStyles.textBlack,
+        ...globalStyles.textNormalRegular,
     },
+
+    buttons: {
+        paddingHorizontal: 20,
+        gap: 10,
+        marginBottom: 10,
+    },
+
   });
