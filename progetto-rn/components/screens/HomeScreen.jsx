@@ -1,26 +1,31 @@
-import {View, Text, Button, StyleSheet} from 'react-native';
+import { ScrollView, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {globalStyles} from '../../styles/global';
+import { globalStyles } from '../../styles/global';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-export default HomeScreen = ({}) => {
+export default HomeScreen = ({ }) => {
 
     const navigation = useNavigation();
 
     return (
-        <View style={styles.container}>
-            <Text>
-                THIS IS THE HOME PAGE
-            </Text>
-            <Button title="Details" onPress={() => navigation.navigate("MenuDetails")}/>
-        </View>
+        <SafeAreaProvider>
+            <SafeAreaView style={globalStyles.container}>
+                <ScrollView>
+                    {/* Page Content starts here */}
+                    <Text>
+                        THIS IS THE HOME PAGE    
+                    </Text>
+                    <Button title="Details" onPress={() => navigation.navigate("MenuDetails")} />
+                    
+                    <StatusBar style="auto" />
+                    </ScrollView>
+            </SafeAreaView>
+        </SafeAreaProvider>
     );
 }
 
 const styles = StyleSheet.create({
 
-    container: {
-        ...globalStyles.container,
-        backgroundColor: 'pink'
-    },
 
 });

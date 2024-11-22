@@ -10,9 +10,8 @@ export default HomeStack = ({}) => {
     return (
         <Stack.Navigator
             screenOptions={{
-            headerShown: false
-          }}
-        >
+            headerShown: false,
+          }}        >
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="MenuDetails" component={MenuDetailsScreen} />
           <Stack.Screen name="ConfirmOrder" component={ConfirmOrderScreen} />

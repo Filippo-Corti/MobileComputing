@@ -51,9 +51,9 @@ export const globalStyles = StyleSheet.create({
 
   container: {
     backgroundColor: colors.white,
-    marginVertical: 42, //TODO: substitute with safe area?
-    paddingHorizontal: 12,
+    paddingTop: 18,
+    paddingBottom: 5,
+    flex: 1,
   },
-
 
 });

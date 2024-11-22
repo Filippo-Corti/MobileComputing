@@ -1,11 +1,14 @@
-import {useFonts} from 'expo-font';
-import {fonts} from './styles/global';
+import { View, ActivityIndicator } from 'react-native';
+import { useFonts } from 'expo-font';
+import { fonts } from './styles/global';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import HomeStack from './components/navigation/HomeStack';
 import LastOrderScreen from './components/screens/LastOrderScreen';
 import AccountStack from './components/navigation/AccountStack';
 import MyTabBar from './components/navigation/MyTabBar';
+import MyLogo from './components/common/icons/MyLogo';
+import colors from './styles/colors';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,9 +22,18 @@ export default function App() {
   });
 
 
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <MyLogo />
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Tab.Navigator 
+      <Tab.Navigator
         screenOptions={{
           headerShown: false
         }}
