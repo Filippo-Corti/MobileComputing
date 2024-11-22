@@ -9,7 +9,6 @@ export default MenuPreview = ({menuInformation, onPress}) => {
         if (!image.startsWith("data:image/jpeg;base64,")) {
             image = "data:image/jpeg;base64," + image;
         }
-        console.log(image.substring(0, 100))
     }
 
 
@@ -35,9 +34,11 @@ const styles = StyleSheet.create({
 
     container: {
         flexDirection: 'row',
-        paddingHorizontal: 20,
+        paddingHorizontal: 8,
         paddingVertical: 15,
         gap: 15,
+        borderTopWidth: 1,
+        borderTopColor: colors.lightGray,
     },
 
     textContainer: {

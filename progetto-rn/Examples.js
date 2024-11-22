@@ -102,6 +102,16 @@ export default function App() {
 
       <MenuPreview menuInformation={menuInformation} onPress={() => console.log("Ciao")}/>
 
+      <View style={styles.container}>
+            <Text>
+                THIS IS THE MENU DETAILS PAGE
+            </Text>
+            <Button title="Checkout" onPress={() => navigation.navigate("ConfirmOrder")}/>
+            <Button title="Go to Edit Account" onPress={() => navigation.navigate("AccountStack", { screen: "EditAccount" })} />
+            <Button title="Go Back" onPress={() => navigation.goBack()} />
+        </View>
+
+        
       <StatusBar style="auto" />
     </ScrollView>
   );

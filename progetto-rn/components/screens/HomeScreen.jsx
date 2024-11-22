@@ -1,9 +1,11 @@
 import { View, ScrollView, Text, Button, StyleSheet, Dimensions } from 'react-native';
 import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles } from '../../styles/global';
+import { globalStyles, imageBase64 } from '../../styles/global';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import MyLogo from '../common/icons/MyLogo';
+import MenuPreview from '../common/other/MenuPreview';
 
 const { height } = Dimensions.get('window');
 
@@ -15,13 +17,19 @@ export default HomeScreen = ({ }) => {
         <SafeAreaProvider>
             <SafeAreaView style={globalStyles.container}>
                 <ScrollView>
-                    {/* Page Content starts here */}
 
-                    <View style={globalStyles.insetContainer}>
-                        <Text>
-                            THIS IS THE HOME PAGE    
-                        </Text>
-                        <Button title="Details" onPress={() => navigation.navigate("MenuDetails")} />
+                    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
+                        <View>
+                            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                                Welcome Back, John
+                            </Text>
+                            <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
+                                What are you craving?
+                            </Text>
+                        </View>
+                        <View>
+                            <MyLogo />
+                        </View>
                     </View>
                     <MapView
                         style={styles.map}
@@ -33,14 +41,49 @@ export default HomeScreen = ({ }) => {
                         }}
                     />
                     <View style={[globalStyles.insetContainer, styles.afterMap]}>
-                        <Text>
-                            THIS IS THE HOME PAGE    
-                        </Text>
-                        <Button title="Details" onPress={() => navigation.navigate("MenuDetails")} />
+                        <View style={[globalStyles.flexCenter, { marginVertical: 20 }]}>
+                            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleBold]}>
+                                Menus Around You
+                            </Text>
+                        </View>
+                        <View style={[globalStyles.flexCenter, { flexDirection: 'column', marginHorizontal: 8 }]}>
+                            <MenuPreview menuInformation={{
+                                title: 'McMushroom Pizza',
+                                price: 21,
+                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
+                                deliveryTime: 30,
+                                distanceFromYou: 0.2,
+                                image: imageBase64,
+                            }} />
+                            <MenuPreview menuInformation={{
+                                title: 'McMushroom Pizza2',
+                                price: 17,
+                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
+                                deliveryTime: 30,
+                                distanceFromYou: 0.2,
+                                image: imageBase64,
+                            }} />
+                            <MenuPreview menuInformation={{
+                                title: 'McMushroom Pizza',
+                                price: 21,
+                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
+                                deliveryTime: 30,
+                                distanceFromYou: 0.2,
+                                image: imageBase64,
+                            }} />
+                            <MenuPreview menuInformation={{
+                                title: 'McMushroom Pizza2',
+                                price: 17,
+                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
+                                deliveryTime: 30,
+                                distanceFromYou: 0.2,
+                            }} />
+
+                        </View>
                     </View>
 
                     <StatusBar style="auto" />
-                    </ScrollView>
+                </ScrollView>
             </SafeAreaView>
         </SafeAreaProvider>
     );
@@ -48,15 +91,15 @@ export default HomeScreen = ({ }) => {
 
 const styles = StyleSheet.create({
 
-  map: {
-    width: '100%',
-    height: height * 0.30,
-  },
+    map: {
+        width: '100%',
+        height: height * 0.30,
+    },
 
-  afterMap: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    transform: [{translateY: -30}]
-  }
+    afterMap: {
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        transform: [{ translateY: -30 }]
+    }
 
 });

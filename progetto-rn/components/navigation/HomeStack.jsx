@@ -11,9 +11,10 @@ export default HomeStack = ({}) => {
         <Stack.Navigator
             screenOptions={{
             headerShown: false,
-          }}        >
-          <Stack.Screen name="Home" component={HomeScreen} />
+          }}        
+        >
           <Stack.Screen name="MenuDetails" component={MenuDetailsScreen} />
+          <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="ConfirmOrder" component={ConfirmOrderScreen} />
         </Stack.Navigator>
       );
