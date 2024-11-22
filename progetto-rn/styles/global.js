@@ -44,16 +44,20 @@ function typographyStyles() {
   }
   return styles
 }
-  
+
 export const globalStyles = StyleSheet.create({
   ...colorStyles(),
   ...typographyStyles(),
 
   container: {
     backgroundColor: colors.white,
-    paddingTop: 18,
-    paddingBottom: 5,
+    paddingVertical: 8,
     flex: 1,
+  },
+
+  insetContainer: {
+    backgroundColor: colors.white,
+    paddingHorizontal: 15,
   },
 
 });
