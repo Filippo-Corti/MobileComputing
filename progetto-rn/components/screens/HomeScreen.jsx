@@ -54,7 +54,9 @@ export default HomeScreen = ({ }) => {
                                 deliveryTime: 30,
                                 distanceFromYou: 0.2,
                                 image: imageBase64,
-                            }} />
+                            }} 
+                                onPress={() => navigation.navigate("MenuDetails")}
+                            />
                             <MenuPreview menuInformation={{
                                 title: 'McMushroom Pizza2',
                                 price: 17,
@@ -62,7 +64,9 @@ export default HomeScreen = ({ }) => {
                                 deliveryTime: 30,
                                 distanceFromYou: 0.2,
                                 image: imageBase64,
-                            }} />
+                            }} 
+                                onPress={() => navigation.navigate("MenuDetails")}
+                            />
                             <MenuPreview menuInformation={{
                                 title: 'McMushroom Pizza',
                                 price: 21,
@@ -70,14 +74,18 @@ export default HomeScreen = ({ }) => {
                                 deliveryTime: 30,
                                 distanceFromYou: 0.2,
                                 image: imageBase64,
-                            }} />
+                            }} 
+                                onPress={() => navigation.navigate("MenuDetails")}
+                            />
                             <MenuPreview menuInformation={{
                                 title: 'McMushroom Pizza2',
                                 price: 17,
                                 description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
                                 deliveryTime: 30,
                                 distanceFromYou: 0.2,
-                            }} />
+                            }} 
+                                onPress={() => navigation.navigate("MenuDetails")}
+                            />
 
                         </View>
                     </View>

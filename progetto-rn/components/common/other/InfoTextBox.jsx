@@ -21,8 +21,8 @@ export default InfoTextBox = ({text, label, iconName}) => {
 const styles = StyleSheet.create({
 
     container: {
-        marginVertical: 10,
-        marginHorizontal: 15,
+        marginVertical: 20,
+        marginHorizontal: 30,
         flexDirection: 'row',
         gap: 20,
         alignItems: 'center'

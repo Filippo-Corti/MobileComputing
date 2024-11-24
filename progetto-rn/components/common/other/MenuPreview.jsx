@@ -1,4 +1,4 @@
-import {View, Text, Image, StyleSheet} from 'react-native';
+import {View, TouchableOpacity, Text, Image, StyleSheet} from 'react-native';
 import {globalStyles} from '../../../styles/global';
 import MyIcon, {IconNames} from '../icons/MyIcon';
 
@@ -15,7 +15,7 @@ export default MenuPreview = ({menuInformation, onPress}) => {
     let price = menuInformation.price.toFixed(2);
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={() => onPress()}>
             <View style={styles.textContainer}>
                 <Text style={styles.title}>{menuInformation.title}</Text>
                 <Text style={styles.price}>€{price}</Text>
@@ -26,7 +26,7 @@ export default MenuPreview = ({menuInformation, onPress}) => {
                 {image && <Image source={{ uri: image }} style={styles.image} /> }
                 {!image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray}/> }
             </View>
-        </View>
+        </TouchableOpacity>
     );
 }
 

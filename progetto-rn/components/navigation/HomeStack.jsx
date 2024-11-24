@@ -13,8 +13,8 @@ export default HomeStack = ({}) => {
             headerShown: false,
           }}        
         >
-          <Stack.Screen name="MenuDetails" component={MenuDetailsScreen} />
           <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="MenuDetails" component={MenuDetailsScreen} />
           <Stack.Screen name="ConfirmOrder" component={ConfirmOrderScreen} />
         </Stack.Navigator>
       );
