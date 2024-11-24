@@ -56,6 +56,7 @@ export default HomeScreen = ({ }) => {
                                 image: imageBase64,
                             }} 
                                 onPress={() => navigation.navigate("MenuDetails")}
+                                style={{borderTopWidth: 1}}
                             />
                             <MenuPreview menuInformation={{
                                 title: 'McMushroom Pizza2',
@@ -66,6 +67,7 @@ export default HomeScreen = ({ }) => {
                                 image: imageBase64,
                             }} 
                                 onPress={() => navigation.navigate("MenuDetails")}
+                                style={{borderTopWidth: 1}}
                             />
                             <MenuPreview menuInformation={{
                                 title: 'McMushroom Pizza',
@@ -76,6 +78,7 @@ export default HomeScreen = ({ }) => {
                                 image: imageBase64,
                             }} 
                                 onPress={() => navigation.navigate("MenuDetails")}
+                                style={{borderTopWidth: 1}}
                             />
                             <MenuPreview menuInformation={{
                                 title: 'McMushroom Pizza2',
@@ -85,6 +88,7 @@ export default HomeScreen = ({ }) => {
                                 distanceFromYou: 0.2,
                             }} 
                                 onPress={() => navigation.navigate("MenuDetails")}
+                                style={{borderTopWidth: 1}}
                             />
 
                         </View>

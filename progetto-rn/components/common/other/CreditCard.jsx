@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     },
 
     container: {
-        padding: 34,
+        padding: 30,
         alignItems: 'center',
         width: '100%',
     },
@@ -59,11 +59,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
-        marginBottom: 24,
+        marginBottom: 20,
     },
 
     number: {
-        fontSize: 26,
+        fontSize: 23,
         color: 'white',
         letterSpacing: 3,
         textAlign: 'left',
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     info: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 25,
+        marginTop: 20,
         width: '100%',
     },
 

@@ -3,6 +3,8 @@ import colors from '../../../styles/colors';
 
 export default ProgressBar = ({progress}) => {
 
+    const gap = (progress == 100) ? 0 : 12;
+
     let splitProgress = [];
     for (let i = 0; i < 5; i++) {
         splitProgress.push((progress >= 20) ? 100 : progress*100/20);
@@ -10,7 +12,7 @@ export default ProgressBar = ({progress}) => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {gap : gap}]}>
             {splitProgress.map((value, index) => {
                 return (
                     <View key={index} style={{flex: 1, width: '100%', height: '100%', backgroundColor: colors.gray,}}>
@@ -29,7 +31,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         height: 5,
         flexDirection: 'row',
-        gap: 12,
     },
 
     progress: {

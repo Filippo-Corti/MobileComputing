@@ -2,7 +2,7 @@ import {View, TouchableOpacity, Text, Image, StyleSheet} from 'react-native';
 import {globalStyles} from '../../../styles/global';
 import MyIcon, {IconNames} from '../icons/MyIcon';
 
-export default MenuPreview = ({menuInformation, onPress}) => {
+export default MenuPreview = ({menuInformation, onPress, style}) => {
 
     let image = menuInformation.image;
     if (image) {
@@ -11,11 +11,10 @@ export default MenuPreview = ({menuInformation, onPress}) => {
         }
     }
 
-
     let price = menuInformation.price.toFixed(2);
 
     return (
-        <TouchableOpacity style={styles.container} onPress={() => onPress()}>
+        <TouchableOpacity style={[styles.container, style]} onPress={() => onPress()}>
             <View style={styles.textContainer}>
                 <Text style={styles.title}>{menuInformation.title}</Text>
                 <Text style={styles.price}>€{price}</Text>
@@ -37,7 +36,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 15,
         gap: 15,
-        borderTopWidth: 1,
         borderTopColor: colors.lightGray,
     },
 
