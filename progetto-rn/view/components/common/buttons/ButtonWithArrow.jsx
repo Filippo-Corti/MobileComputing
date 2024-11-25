@@ -1,5 +1,5 @@
 import {TouchableOpacity, StyleSheet, Text} from 'react-native';
-import {globalStyles} from '../../../styles/global';
+import {globalStyles} from '../../../../styles/global';
 import MyIcon, {IconNames} from '../icons/MyIcon';
 
 export default ButtonWithArrow = ({text, onPress}) => {

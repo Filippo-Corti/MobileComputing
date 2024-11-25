@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import Modal from 'react-native-modal';
-import {globalStyles} from '../../styles/global';
+import {globalStyles} from '../../../styles/global';
 
 export default BottomModal = ({onConfirm, title, text, confirmText, rejectText, openButtonText}) => {
 

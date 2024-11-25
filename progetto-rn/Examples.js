@@ -2,20 +2,20 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView} from 'react-native';
 import {useFonts} from 'expo-font';
 import {fonts, globalStyles} from './styles/global';
-import MyIcon, {IconNames} from './components/common/icons/MyIcon';
-import MyLogo from './components/common/icons/MyLogo';
-import MinimalistButton from './components/common/buttons/MinimalistButton';
-import ButtonWithArrow from './components/common/buttons/ButtonWithArrow';
-import LargeButton from './components/common/buttons/LargeButton';
-import CreditCard from './components/common/other/CreditCard';
-import Separator from './components/common/other/Separator';
-import ProgressBar from './components/common/other/ProgressBar';
-import FormField from './components/common/forms/FormField';
+import MyIcon, {IconNames} from './view/components/common/icons/MyIcon';
+import MyLogo from './view/components/common/icons/MyLogo';
+import MinimalistButton from './view/components/common/buttons/MinimalistButton';
+import ButtonWithArrow from './view/components/common/buttons/ButtonWithArrow';
+import LargeButton from './view/components/common/buttons/LargeButton';
+import CreditCard from './view/components/common/other/CreditCard';
+import Separator from './view/components/common/other/Separator';
+import ProgressBar from './view/components/common/other/ProgressBar';
+import FormField from './view/components/common/forms/FormField';
 import {useForm} from 'react-hook-form';
-import SelectNumber from './components/common/forms/SelectNumber';
-import BottomModal from './components/navigation/BottomModal';
-import InfoTextBox from './components/common/other/InfoTextBox';
-import MenuPreview from './components/common/other/MenuPreview';
+import SelectNumber from './view/components/common/forms/SelectNumber';
+import BottomModal from './view/components/navigation/BottomModal';
+import InfoTextBox from './view/components/common/other/InfoTextBox';
+import MenuPreview from './view/components/common/other/MenuPreview';
 
 export default function App() {
 

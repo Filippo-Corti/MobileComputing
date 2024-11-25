@@ -3,11 +3,11 @@ import { useFonts } from 'expo-font';
 import { fonts } from './styles/global';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-import HomeStack from './components/navigation/HomeStack';
-import LastOrderScreen from './components/screens/LastOrderScreen';
-import AccountStack from './components/navigation/AccountStack';
-import MyTabBar from './components/navigation/MyTabBar';
-import MyLogo from './components/common/icons/MyLogo';
+import HomeStack from './view/components/navigation/HomeStack';
+import LastOrderScreen from './view/components/screens/LastOrderScreen';
+import AccountStack from './view/components/navigation/AccountStack';
+import MyTabBar from './view/components/navigation/MyTabBar';
+import MyLogo from './view/components/common/icons/MyLogo';
 import colors from './styles/colors';
 
 const Tab = createBottomTabNavigator();

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 import { Controller } from 'react-hook-form'
-import { globalStyles } from '../../../styles/global';
+import { globalStyles } from '../../../../styles/global';
 
 export default SelectNumer = ({ name, min, max, error, control, validate, style }) => {
 

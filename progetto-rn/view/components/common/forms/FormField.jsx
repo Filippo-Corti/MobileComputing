@@ -4,7 +4,7 @@ import {
     Text,
     StyleSheet,
 } from 'react-native'
-import {globalStyles} from '../../../styles/global'
+import {globalStyles} from '../../../../styles/global'
 import { Controller } from 'react-hook-form'
 
 

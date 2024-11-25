@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import MyIcon, {IconNames} from '../common/icons/MyIcon';
-import {globalStyles} from '../../styles/global';
+import {globalStyles} from '../../../styles/global';
 
 export default MyTabBar = ({state, descriptors, navigation}) => {
 

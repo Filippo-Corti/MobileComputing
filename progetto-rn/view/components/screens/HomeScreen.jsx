@@ -1,7 +1,7 @@
 import { View, ScrollView, Text, Button, StyleSheet, Dimensions } from 'react-native';
 import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../styles/global';
+import { globalStyles, imageBase64 } from '../../../styles/global';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
