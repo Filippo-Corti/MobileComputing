@@ -9,10 +9,13 @@ import LargeButton from '../common/buttons/LargeButton';
 import { useForm } from 'react-hook-form';
 import FormField from '../common/forms/FormField';
 import SelectNumber from '../common/forms/SelectNumber';
+import User from '../../../model/types/User';
 
 const { height } = Dimensions.get('window');
 
-export default ConfirmOrderScreen = ({ accountInfo }) => {
+export default ConfirmOrderScreen = ({ route, accountInfo }) => {
+
+    const { newAccount } = route?.params || false;
 
     accountInfo = {
         fName: 'John',
@@ -21,16 +24,22 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
         ccNumber: '1234 5678 9012 3456',
         ccExpMonth: 12,
         ccExpYear: 2026,
-        ccCCV: '123', //STRING OR DOESN'T WORK
+        ccCVV: '123', //STRING OR DOESN'T WORK
     }
 
-    const { control, handleSubmit, formState: { errors }, } = useForm({
+    const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount) ? {
         defaultValues: {
             ...accountInfo
+        }
+    } : {
+        defaultValues: {
+            ccExpMonth: 1,
+            ccExpYear: 2025,
         }
     });
 
     const handleSaveChanges = (formData) => {
+        console.log("Params OK")
         console.log(formData);
     }
 
@@ -48,7 +57,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                 <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                             </TouchableOpacity>
                             <Text style={[globalStyles.textBlack, globalStyles.textTitleRegular, { flex: 1, textAlign: 'center', marginEnd: 20 }]}>
-                                Your Account
+                                {(newAccount) ? "New Account" : "Your Account" }
                             </Text>
                         </View>
 
@@ -62,7 +71,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="First Name"
                                     control={control}
                                     error={errors.fName}
-                                    validate={() => true || "First Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={(fName) => User.validateFirstName(fName) || "First Name must be less than 15 characters long and not empty"} 
                                 />
 
                                 <FormField
@@ -70,7 +79,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="Last Name"
                                     control={control}
                                     error={errors.lName}
-                                    validate={() => true || "Last Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={(lName) => User.validateLastName(lName) || "Last Name must be less than 15 characters long and not empty"}
                                 />
                             </View>
                         </View>
@@ -87,7 +96,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="Holder Name"
                                     control={control}
                                     error={errors.ccFullName}
-                                    validate={() => true || "First Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={(ccFullName) => User.validateFullName(ccFullName) || "Holder Name must be less than 31 characters long and not empty"}
                                 />
 
                                 <FormField
@@ -95,7 +104,8 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="Number"
                                     control={control}
                                     error={errors.ccNumber}
-                                    validate={() => true || "Last Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={(ccNumber) => User.validateNumber(ccNumber) || "Number must be 16 digits long, with no blank spaces"}
+                                    inputMode="numeric"
                                 />
 
                                 <View style={{ marginVertical: 15 }}>
@@ -107,30 +117,28 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                             max={12}
                                             control={control}
                                             error={errors.ccExpMonth}
-                                            validate={() => true || "Abc"} //Edit to set the validation rule
+                                            validate={(ccExpMonth) => User.validateExpireMonth(ccExpMonth) || "Month must be a number between 1 and 12"} //This should never show
                                             style={{ width: '30%', marginRight: 10 }}
-                                        //{/* IMPORTANT: TODO - make the values part of the form using the Controller */}
                                         />
                                         <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>/</Text>
                                         <SelectNumber
                                             name="ccExpYear"
-                                            min={2024}
-                                            max={2034}
+                                            min={2025}
+                                            max={2035}
                                             control={control}
                                             error={errors.ccExpYear}
-                                            validate={() => true || "Abc"} //Edit to set the validation rule
+                                            validate={(ccExpYear) => User.validateExpireYear(ccExpYear) || "Year must be a number between 2025 and 2035"} //This should never show
                                             style={{ width: '30%', marginLeft: 10 }}
-                                        //{/* IMPORTANT: TODO - make the values part of the form using the Controller */}
                                         />
                                     </View>
                                 </View>
 
                                 <FormField
-                                    name="ccCCV"
-                                    label="CCV"
+                                    name="ccCVV"
+                                    label="CVV"
                                     control={control}
-                                    error={errors.ccCCV}
-                                    validate={() => true || "CCV"} //Edit to set the validation rule
+                                    error={errors.ccCVV}
+                                    validate={(ccCVV) => User.validateCVV(ccCVV) || "CVV must be 3 digits long, with no blank spaces"}
                                     inputMode="numeric"
                                 />
 
@@ -141,7 +149,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                     </View>
 
                     <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
-                        <LargeButton text="Save" onPress={handleSubmit(handleSaveChanges)} />
+                        <LargeButton text={(newAccount) ? "Create Account" : "Save"} onPress={handleSubmit(handleSaveChanges)} />
                     </View>
 
                 </ScrollView>

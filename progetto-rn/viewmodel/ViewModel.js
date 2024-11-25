@@ -42,7 +42,7 @@ export default class ViewModel {
         if (isRegistered) {
             userDetails = await this.getUserDetails();
         }
-        return [userDetails || null, isRegistered]
+        return userDetails || null;
     }
 
     async getUserDetails() {

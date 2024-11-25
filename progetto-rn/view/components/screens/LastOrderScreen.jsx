@@ -9,6 +9,10 @@ import MenuPreview from '../common/other/MenuPreview';
 import ProgressBar from '../common/other/ProgressBar';
 import InfoTextBox from '../common/other/InfoTextBox';
 import PositionViewModel from '../../../viewmodel/PositionViewModel';
+import { UserContext } from '../../context/UserContext';
+import { useContext } from 'react';
+import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
+
 
 const { height } = Dimensions.get('window');
 
@@ -49,9 +53,9 @@ export default LastOrderScreen = ({ }) => {
     let price = menuInformation.price.toFixed(2);
     let timeAtDelivery = "10:15";
 
-    const navigation = useNavigation();
+    const { userData } = useContext(UserContext);
 
-    console.log("OK");
+    const navigation = useNavigation();
 
     return (
         <SafeAreaProvider>
@@ -61,76 +65,96 @@ export default LastOrderScreen = ({ }) => {
                     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
                         <View style={{ flex: 1 }}>
                             <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
-                                Almost there...
+                                {(userData) ? "Almost there..." : "No orders yet..."}
                             </Text>
-                            <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
-                                Arriving at <Text style={[globalStyles.textNormalMedium]}>{timeAtDelivery}</Text> ({menuInformation.deliveryTime} minutes away)
-                            </Text>
-                            <ProgressBar progress={80} />
+                            {userData &&
+                                <>
+                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
+                                        Arriving at <Text style={[globalStyles.textNormalMedium]}>{timeAtDelivery}</Text> ({menuInformation.deliveryTime} minutes away)
+                                    </Text>
+                                    <ProgressBar progress={80} />
+                                </>
+                            }
                         </View>
                     </View>
-                    <MapView
-                        style={styles.map}
-                        provider="google"
-                        showsCompass={true}
-                        showsPointsOfInterest={false}
-                        loadingEnabled = {true}
-                        initialRegion={{
-                            longitude: orderInformation.userLocation.longitude,
-                            latitude: orderInformation.userLocation.latitude,
-                            latitudeDelta: latitudeDelta,
-                            longitudeDelta: longitudeDelta,
-                        }}
-                    >
-                        <Marker
-                            coordinate={orderInformation.deliveryLocation}
-                            title="Delivery Place"
-                            description="The Location where the drone will deliver the order"
-                            onPress={() => console.log("Hello Marker")}
-                        />
+                    {(userData)
+                        ? <>
+                            <MapView
+                                style={styles.map}
+                                provider="google"
+                                showsCompass={true}
+                                showsPointsOfInterest={false}
+                                loadingEnabled={true}
+                                initialRegion={{
+                                    longitude: orderInformation.userLocation.longitude,
+                                    latitude: orderInformation.userLocation.latitude,
+                                    latitudeDelta: latitudeDelta,
+                                    longitudeDelta: longitudeDelta,
+                                }}
+                            >
+                                <Marker
+                                    coordinate={orderInformation.deliveryLocation}
+                                    title="Delivery Place"
+                                    description="The Location where the drone will deliver the order"
+                                    onPress={() => console.log("Hello Marker")}
+                                />
 
-                        <Marker
-                            coordinate={orderInformation.droneLocation}
-                            title="Drone Location"
-                            description="The current location of the drone"
-                            onPress={() => console.log("Hello Marker")}
-                        />
+                                <Marker
+                                    coordinate={orderInformation.droneLocation}
+                                    title="Drone Location"
+                                    description="The current location of the drone"
+                                    onPress={() => console.log("Hello Marker")}
+                                />
 
-                        <Marker
-                            coordinate={orderInformation.userLocation}
-                            title="User Location"
-                            description="Your Location"
-                            onPress={() => console.log("Hello Marker")}
-                        />
+                                <Marker
+                                    coordinate={orderInformation.userLocation}
+                                    title="User Location"
+                                    description="Your Location"
+                                    onPress={() => console.log("Hello Marker")}
+                                />
 
-                    </MapView>
-                    <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
-                        <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                            Delivery details
-                        </Text>
-                        <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                            Pick it up at
-                        </Text>
-                        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                            Bay Area, San Francisco, California, USA
-                        </Text>
-                    </View>
-                    <Separator size={10} color={colors.lightGray} />
+                            </MapView>
+                            <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
+                                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                                    Delivery details
+                                </Text>
+                                <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                                    Pick it up at
+                                </Text>
+                                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                                    Bay Area, San Francisco, California, USA
+                                </Text>
+                            </View>
+                            <Separator size={10} color={colors.lightGray} />
 
-                    <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
-                        <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                            Order details
-                        </Text>
-                    </View>
-                    <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginBottom: 20, marginTop: 10 }]}>
-                        <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                            1x {menuInformation.title}
-                        </Text>
-                        <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                            €{price}
-                        </Text>
-                    </View>
-
+                            <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
+                                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                                    Order details
+                                </Text>
+                            </View>
+                            <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginBottom: 20, marginTop: 10 }]}>
+                                <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
+                                    1x {menuInformation.title}
+                                </Text>
+                                <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
+                                    €{price}
+                                </Text>
+                            </View>
+                        </>
+                        : <>
+                            <View style={[globalStyles.insetContainer, { marginTop: 20, marginHorizontal: 5 }]}>
+                                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                                    This is where your order will appear after you placed it. {'\n'}
+                                    You’ll be able to check how far it is from you and how long it will take the drone to deliver it. {'\n'}
+                                    {'\n'}
+                                    Right now you haven’t placed your first order yet. Go check some menus in the home page!
+                                </Text>
+                                <View style={{alignSelf: 'flex-end', marginTop: 20 }}>
+                                    <ButtonWithArrow text="Explore menus" onPress={() => console.log("Pressed")} />
+                                </View>
+                            </View>
+                        </>
+                    }
                     <StatusBar style="auto" />
                 </ScrollView>
             </SafeAreaView>

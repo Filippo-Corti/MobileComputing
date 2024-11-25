@@ -20,9 +20,7 @@ export default HomeScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const {userData, isRegistered} = useContext(UserContext);
-
-    console.log(userData, isRegistered);
+    const {userData} = useContext(UserContext);
 
     return (
         <SafeAreaProvider>
@@ -32,7 +30,7 @@ export default HomeScreen = ({ }) => {
                     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
                         <View>
                             <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                                Welcome Back, John
+                                Welcome Back {(userData) ? ", " + userData.fName : ""}
                             </Text>
                             <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
                                 What are you craving?

@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     },
 
     container: {
-        padding: 30,
+        padding: 26,
         alignItems: 'center',
         width: '100%',
     },
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     },
 
     number: {
-        fontSize: 23,
+        fontSize: 20,
         color: 'white',
         letterSpacing: 3,
         textAlign: 'left',

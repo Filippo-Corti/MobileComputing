@@ -27,7 +27,6 @@ export default function App() {
 
   const [viewModel, setViewModel] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [isRegistered, setIsRegistered] = useState(false);
 
   const initViewModel = async () => {
     try {
@@ -40,10 +39,9 @@ export default function App() {
 
   const fetchUserData = async () => {
     try {
-      const [userData, isRegistered] = await viewModel.fetchLaunchInformation();
+      const userData = await viewModel.fetchLaunchInformation();
       setUserData(userData);
-      setIsRegistered(isRegistered);
-      console.log("FetchUserData:", userData, isRegistered);
+      console.log("FetchUserData:", userData);
     } catch (err) {
       console.error("Error loading the Menu Data:", err);
     }
@@ -75,7 +73,7 @@ export default function App() {
   }
 
   return (
-    <UserContextProvider userDataInit={userData} isRegisteredInit={isRegistered}>
+    <UserContextProvider userDataInit={userData}>
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={{

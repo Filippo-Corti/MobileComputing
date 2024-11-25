@@ -21,6 +21,7 @@ export default SelectNumer = ({ name, min, max, error, control, validate, style 
             onBlur={onBlur}
             onSelect={(val) => onChange(val)}
             defaultValue={value}
+            defaultValueByIndex={0} //Fallback
             renderButton={(selectedItem, isOpen) => {
               return (
                 <View style={styles.dropdownButtonStyle}>
