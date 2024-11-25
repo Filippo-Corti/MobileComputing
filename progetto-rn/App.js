@@ -11,6 +11,7 @@ import MyLogo from './view/components/common/icons/MyLogo';
 import colors from './styles/colors';
 import ViewModel from './viewmodel/ViewModel';
 import { useEffect, useState } from 'react';
+import { UserContextProvider } from './view/context/UserContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -25,6 +26,8 @@ export default function App() {
 
 
   const [viewModel, setViewModel] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const initViewModel = async () => {
     try {
@@ -38,6 +41,8 @@ export default function App() {
   const fetchUserData = async () => {
     try {
       const [userData, isRegistered] = await viewModel.fetchLaunchInformation();
+      setUserData(userData);
+      setIsRegistered(isRegistered);
       console.log("FetchUserData:", userData, isRegistered);
     } catch (err) {
       console.error("Error loading the Menu Data:", err);
@@ -58,7 +63,9 @@ export default function App() {
 
   }, [viewModel]);
 
-  if (!fontsLoaded) {
+  console.log("------------ Reload ------------");
+
+  if (!fontsLoaded || !viewModel) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <MyLogo />
@@ -68,18 +75,20 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false
-        }}
-        tabBar={(props) => <MyTabBar {...props} />}
-      >
-        <Tab.Screen name="HomeStack" component={HomeStack} />
-        <Tab.Screen name="LastOrder" component={LastOrderScreen} />
-        <Tab.Screen name="AccountStack" component={AccountStack} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <UserContextProvider userDataInit={userData} isRegisteredInit={isRegistered}>
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false
+          }}
+          tabBar={(props) => <MyTabBar {...props} />}
+        >
+          <Tab.Screen name="HomeStack" component={HomeStack} />
+          <Tab.Screen name="LastOrder" component={LastOrderScreen} />
+          <Tab.Screen name="AccountStack" component={AccountStack} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </UserContextProvider>
   );
 }
 

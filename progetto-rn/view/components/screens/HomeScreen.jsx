@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
+import { useContext } from 'react';
+import { UserContext } from '../../context/UserContext';
 
 const { height } = Dimensions.get('window');
 
@@ -17,6 +19,10 @@ export default HomeScreen = ({ }) => {
     }
 
     const navigation = useNavigation();
+
+    const {userData, isRegistered} = useContext(UserContext);
+
+    console.log(userData, isRegistered);
 
     return (
         <SafeAreaProvider>
