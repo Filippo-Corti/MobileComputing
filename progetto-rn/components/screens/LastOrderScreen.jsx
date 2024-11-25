@@ -25,16 +25,16 @@ export default LastOrderScreen = ({ }) => {
 
     const orderInformation = {
         userLocation: {
-            longitude: 9.232131,
             latitude: 45.476770,
+            longitude: 9.232131,
         },
         droneLocation: {
-            longitude: 9.232021,
             latitude: 45.486911,
+            longitude: 9.232021,
         },
         deliveryLocation: {
-            longitude: 9.242321,
             latitude: 45.477211,
+            longitude: 9.242321,
         }
     }
 
@@ -44,7 +44,7 @@ export default LastOrderScreen = ({ }) => {
     const latitudeDelta = Math.max(deltasForDeliveryPlace.latitudeDelta, deltasForDrone.latitudeDelta).toFixed(6);
     const longitudeDelta = Math.max(deltasForDeliveryPlace.longitudeDelta, deltasForDrone.longitudeDelta).toFixed(6);
 
-    console.log(orderInformation.userLocation,latitudeDelta, longitudeDelta);
+    console.log(orderInformation.userLocation, latitudeDelta, longitudeDelta);
 
     let price = menuInformation.price.toFixed(2);
     let timeAtDelivery = "10:15";
@@ -74,12 +74,15 @@ export default LastOrderScreen = ({ }) => {
                         initialRegion={{
                             latitude: orderInformation.userLocation.latitude, // Centered on my location
                             longitude: orderInformation.userLocation.longitude,
-                            latitudeDelta: latitudeDelta,
-                            longitudeDelta: longitudeDelta,
+                            latitudeDelta: parseFloat(latitudeDelta),
+                            longitudeDelta: parseFloat(longitudeDelta),
                         }}
                     >
                         <Marker
-                            coordinate={orderInformation.deliveryLocation}
+                            coordinate={{
+                                latitude: parseFloat(orderInformation.deliveryLocation.latitude),
+                                longitude: parseFloat(orderInformation.deliveryLocation.longitude),
+                            }}
                             title="Delivery Place"
                             description="The Location where the drone will deliver the order"
                             onPress={() => console.log("Hello Marker")}
