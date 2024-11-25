@@ -149,34 +149,3 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
         </SafeAreaProvider>
     );
 }
-
-const styles = StyleSheet.create({
-
-    imageContainer: {
-        width: 50,
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'relative',
-    },
-
-    iconContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-
-    backArrowContainer: {
-        padding: 10,
-        backgroundColor: colors.white,
-        borderRadius: '50%',
-        position: 'absolute',
-        left: 15,
-        top: 15,
-    },
-
-    image: {
-        width: '100%',
-        height: '100%',
-    }
-
-});

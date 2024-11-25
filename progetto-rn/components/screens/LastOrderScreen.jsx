@@ -1,5 +1,5 @@
 import { View, ScrollView, Text, Button, StyleSheet, Dimensions } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles, imageBase64 } from '../../styles/global';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +8,7 @@ import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
 import ProgressBar from '../common/other/ProgressBar';
 import InfoTextBox from '../common/other/InfoTextBox';
+import PositionViewModel from '../../viewmodel/PositionViewModel';
 
 const { height } = Dimensions.get('window');
 
@@ -22,10 +23,35 @@ export default LastOrderScreen = ({ }) => {
         image: imageBase64,
     }
 
+    const orderInformation = {
+        userLocation: {
+            longitude: 9.232131,
+            latitude: 45.476770,
+        },
+        droneLocation: {
+            longitude: 9.232021,
+            latitude: 45.486911,
+        },
+        deliveryLocation: {
+            longitude: 9.242321,
+            latitude: 45.477211,
+        }
+    }
+
+    const deltasForDrone = PositionViewModel.calculateMapDeltas(orderInformation.userLocation, orderInformation.droneLocation);
+    const deltasForDeliveryPlace = PositionViewModel.calculateMapDeltas(orderInformation.userLocation, orderInformation.deliveryLocation);
+
+    const latitudeDelta = Math.max(deltasForDeliveryPlace.latitudeDelta, deltasForDrone.latitudeDelta).toFixed(6);
+    const longitudeDelta = Math.max(deltasForDeliveryPlace.longitudeDelta, deltasForDrone.longitudeDelta).toFixed(6);
+
+    console.log(orderInformation.userLocation,latitudeDelta, longitudeDelta);
+
     let price = menuInformation.price.toFixed(2);
     let timeAtDelivery = "10:15";
 
     const navigation = useNavigation();
+
+    console.log("OK");
 
     return (
         <SafeAreaProvider>
@@ -46,12 +72,34 @@ export default LastOrderScreen = ({ }) => {
                     <MapView
                         style={styles.map}
                         initialRegion={{
-                            latitude: 45.476770,
-                            longitude: 9.232131,
-                            latitudeDelta: 0.01,
-                            longitudeDelta: 0.01,
+                            latitude: orderInformation.userLocation.latitude, // Centered on my location
+                            longitude: orderInformation.userLocation.longitude,
+                            latitudeDelta: latitudeDelta,
+                            longitudeDelta: longitudeDelta,
                         }}
-                    />
+                    >
+                        <Marker
+                            coordinate={orderInformation.deliveryLocation}
+                            title="Delivery Place"
+                            description="The Location where the drone will deliver the order"
+                            onPress={() => console.log("Hello Marker")}
+                        />
+
+                        <Marker
+                            coordinate={orderInformation.droneLocation}
+                            title="Drone Location"
+                            description="The current location of the drone"
+                            onPress={() => console.log("Hello Marker")}
+                        />
+
+                        <Marker
+                            coordinate={orderInformation.userLocation}
+                            title="User Location"
+                            description="Your Location"
+                            onPress={() => console.log("Hello Marker")}
+                        />
+
+                    </MapView>
                     <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
                         <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
                             Delivery details
@@ -65,14 +113,14 @@ export default LastOrderScreen = ({ }) => {
                     </View>
                     <Separator size={10} color={colors.lightGray} />
 
-                    <View style={[globalStyles.insetContainer, {marginTop: 20}]}>
+                    <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
                         <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
                             Order details
                         </Text>
                     </View>
                     <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginBottom: 20, marginTop: 10 }]}>
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                           1x {menuInformation.title}
+                            1x {menuInformation.title}
                         </Text>
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
                             €{price}
