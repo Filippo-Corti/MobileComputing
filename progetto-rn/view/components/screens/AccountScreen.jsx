@@ -31,7 +31,7 @@ export default AccountScreen = ({ }) => {
                     <View style={{ marginBottom: 15, alignItems: 'center' }}>
                         <Image
                             style={styles.profileImage}
-                            source={require('../../assets/default-avatar.jpg')}
+                            source={require('../../../assets/default-avatar.jpg')}
                         />
 
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginBottom: 13, textAlign: 'center' }]}>

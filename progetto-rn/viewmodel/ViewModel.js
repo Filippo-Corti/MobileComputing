@@ -9,6 +9,9 @@ export default class ViewModel {
         if (ViewModel.#viewmodel) {
             throw new Error("Access should happen via getViewModel()");
         }
+        this.sid = null;
+        this.uid = null;
+        this.isFirstLaunch = false;
     }
 
     static getViewModel() {
@@ -18,20 +21,42 @@ export default class ViewModel {
         return ViewModel.#viewmodel;
     }
 
-    static async fetchLaunchInformation() {
-        let sid, uid, isFirstLaunch, isRegistered;
-        isFirstLaunch = AsyncStorageController.isFirstLaunch();
+    async fetchLaunchInformation() {
+        let sid, uid, isFirstLaunch, isRegistered, userDetails;
+        isFirstLaunch = await AsyncStorageController.isFirstLaunch();
         if (isFirstLaunch) {
+            this.isFirstLaunch = true;
             await AsyncStorageController.set(KEYS.IS_REGISTERED, false);
             const sessionData = await APIController.createNewUserSession();
-            uid = sessionData.uid;
             sid = sessionData.sid;
+            uid = sessionData.uid;
+            await AsyncStorageController.memorizeSessionKeys(sid, uid);
         } else {
             uid = await AsyncStorageController.get(KEYS.UID);
             sid = await AsyncStorageController.get(KEYS.SID);
         }
         isRegistered = await AsyncStorageController.get(KEYS.IS_REGISTERED)
         console.log("UID=", uid, "SID=", sid, "Is Registered?", isRegistered)
+        this.sid = sid;
+        this.uid = uid;
+        if (isRegistered) {
+            userDetails = await this.getUserDetails();
+        }
+        return [userDetails || null, isRegistered]
+    }
+
+    async getUserDetails() {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            return await APIController.getUserDetailsById(this.sid, this.uid);
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
     }
 
 }

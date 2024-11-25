@@ -11,6 +11,11 @@ const { height } = Dimensions.get('window');
 
 export default HomeScreen = ({ }) => {
 
+    const userLocation = {
+        longitude: 9.167285,
+        latitude: 47.662515,
+    }
+
     const navigation = useNavigation();
 
     return (
@@ -34,8 +39,7 @@ export default HomeScreen = ({ }) => {
                     <MapView
                         style={styles.map}
                         initialRegion={{
-                            latitude: 45.476770,
-                            longitude: 9.232131,
+                            ...userLocation,
                             latitudeDelta: 0.01,
                             longitudeDelta: 0.01,
                         }}

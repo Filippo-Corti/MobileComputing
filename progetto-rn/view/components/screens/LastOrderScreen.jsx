@@ -25,24 +25,24 @@ export default LastOrderScreen = ({ }) => {
 
     const orderInformation = {
         userLocation: {
-            latitude: 45.476770,
             longitude: 9.232131,
+            latitude: 45.476770,
         },
         droneLocation: {
-            latitude: 45.486911,
             longitude: 9.232021,
+            latitude: 45.486911,
         },
         deliveryLocation: {
-            latitude: 45.477211,
             longitude: 9.242321,
+            latitude: 45.477211,
         }
     }
 
     const deltasForDrone = PositionViewModel.calculateMapDeltas(orderInformation.userLocation, orderInformation.droneLocation);
     const deltasForDeliveryPlace = PositionViewModel.calculateMapDeltas(orderInformation.userLocation, orderInformation.deliveryLocation);
 
-    const latitudeDelta = Math.max(deltasForDeliveryPlace.latitudeDelta, deltasForDrone.latitudeDelta).toFixed(6);
-    const longitudeDelta = Math.max(deltasForDeliveryPlace.longitudeDelta, deltasForDrone.longitudeDelta).toFixed(6);
+    const latitudeDelta = parseFloat(Math.max(deltasForDeliveryPlace.latitudeDelta, deltasForDrone.latitudeDelta).toFixed(6));
+    const longitudeDelta = parseFloat(Math.max(deltasForDeliveryPlace.longitudeDelta, deltasForDrone.longitudeDelta).toFixed(6));
 
     console.log(orderInformation.userLocation, latitudeDelta, longitudeDelta);
 
@@ -71,18 +71,19 @@ export default LastOrderScreen = ({ }) => {
                     </View>
                     <MapView
                         style={styles.map}
+                        provider="google"
+                        showsCompass={true}
+                        showsPointsOfInterest={false}
+                        loadingEnabled = {true}
                         initialRegion={{
-                            latitude: orderInformation.userLocation.latitude, // Centered on my location
                             longitude: orderInformation.userLocation.longitude,
-                            latitudeDelta: parseFloat(latitudeDelta),
-                            longitudeDelta: parseFloat(longitudeDelta),
+                            latitude: orderInformation.userLocation.latitude,
+                            latitudeDelta: latitudeDelta,
+                            longitudeDelta: longitudeDelta,
                         }}
                     >
                         <Marker
-                            coordinate={{
-                                latitude: parseFloat(orderInformation.deliveryLocation.latitude),
-                                longitude: parseFloat(orderInformation.deliveryLocation.longitude),
-                            }}
+                            coordinate={orderInformation.deliveryLocation}
                             title="Delivery Place"
                             description="The Location where the drone will deliver the order"
                             onPress={() => console.log("Hello Marker")}

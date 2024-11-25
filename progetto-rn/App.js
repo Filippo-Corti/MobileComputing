@@ -9,6 +9,8 @@ import AccountStack from './view/components/navigation/AccountStack';
 import MyTabBar from './view/components/navigation/MyTabBar';
 import MyLogo from './view/components/common/icons/MyLogo';
 import colors from './styles/colors';
+import ViewModel from './viewmodel/ViewModel';
+import { useEffect, useState } from 'react';
 
 const Tab = createBottomTabNavigator();
 
@@ -21,6 +23,40 @@ export default function App() {
     [fonts.logo]: require('./assets/fonts/Geologica-Medium.ttf'),
   });
 
+
+  const [viewModel, setViewModel] = useState(null);
+
+  const initViewModel = async () => {
+    try {
+      const newViewModel = ViewModel.getViewModel();
+      setViewModel(newViewModel);
+    } catch (err) {
+      console.error("Error loading the View Model:", err);
+    }
+  }
+
+  const fetchUserData = async () => {
+    try {
+      const [userData, isRegistered] = await viewModel.fetchLaunchInformation();
+      console.log("FetchUserData:", userData, isRegistered);
+    } catch (err) {
+      console.error("Error loading the Menu Data:", err);
+    }
+  }
+
+  useEffect(() => {
+    const initializeAndFetch = async () => {
+      if (!viewModel) {
+        await initViewModel();
+      }
+      if (viewModel) {
+        await fetchUserData();
+      }
+    };
+
+    initializeAndFetch();
+
+  }, [viewModel]);
 
   if (!fontsLoaded) {
     return (

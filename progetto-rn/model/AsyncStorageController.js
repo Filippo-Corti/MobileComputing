@@ -16,7 +16,7 @@ export default class AsyncStorageController {
     }
 
     static async set(key, value) {
-        AsyncStorage.setItem(key, JSON.stringify(value))
+        await AsyncStorage.setItem(key, JSON.stringify(value))
     }
 
     static async memorizeSessionKeys(sid, uid) {
