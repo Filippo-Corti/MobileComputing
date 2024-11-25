@@ -1,36 +1,50 @@
 import { StyleSheet, Text, View } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
+import { Controller } from 'react-hook-form'
 import { globalStyles } from '../../../styles/global';
 
-export default SelectNumer = ({ min, max, style }) => {
+export default SelectNumer = ({ name, min, max, error, control, validate, style }) => {
 
   const data = new Array(max - min + 1).fill().map((_, idx) => (min + idx).toString().padStart(2, '0'));
 
   return (
     <View style={[style]}>
-      <SelectDropdown
-        data={data}
-        defaultValueByIndex={0}
-        renderButton={(selectedItem, isOpen) => {
-          return (
-            <View style={styles.dropdownButtonStyle}>
-              <Text style={styles.dropdownButtonTxtStyle}>{selectedItem || '00'}</Text>
-            </View>
-          );
+      <Controller
+        control={control}
+        name={name}
+        rules={{
+          validate: { validate },
         }}
-        renderItem={(item, index, isSelected) => {
-          return (
-            <View
-              style={{
-                ...styles.dropdownItemStyle,
-                ...(isSelected && { backgroundColor: '#D2D9DF' }),
-              }}>
-              <Text style={styles.dropdownItemTxtStyle}>{item}</Text>
-            </View>
-          );
-        }}
-        dropdownStyle={styles.dropdownMenuStyle}
+        render={({ field: { onChange, onBlur, value } }) => (
+          <SelectDropdown
+            data={data}
+            onBlur={onBlur}
+            onSelect={(val) => onChange(val)}
+            defaultValue={value}
+            renderButton={(selectedItem, isOpen) => {
+              return (
+                <View style={styles.dropdownButtonStyle}>
+                  <Text style={styles.dropdownButtonTxtStyle}>{selectedItem || '00'}</Text>
+                </View>
+              );
+            }}
+            renderItem={(item, index, isSelected) => {
+              return (
+                <View
+                  style={{
+                    ...styles.dropdownItemStyle,
+                    ...(isSelected && { backgroundColor: '#D2D9DF' }),
+                  }}>
+                  <Text style={styles.dropdownItemTxtStyle}>{item}</Text>
+                </View>
+              );
+            }}
+            dropdownStyle={styles.dropdownMenuStyle}
+          />
+        )}
       />
+      {error && <Text style={styles.textError}>{error.message}</Text>}
+
     </View>
   )
 }

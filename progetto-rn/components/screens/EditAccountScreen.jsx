@@ -30,6 +30,10 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
         }
     });
 
+    const handleSaveChanges = (formData) => {
+        console.log(formData);
+    }
+
     const navigation = useNavigation();
 
     return (
@@ -39,7 +43,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
 
                     <View style={{ flex: 1 }}>
 
-                        <View style={{ flexDirection: 'row', marginHorizontal: 15, marginBottom: 25, }}>
+                        <View style={{ flexDirection: 'row', marginHorizontal: 15, marginVertical: 25, }}>
                             <TouchableOpacity onPress={() => navigation.goBack()} >
                                 <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                             </TouchableOpacity>
@@ -58,7 +62,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="First Name"
                                     control={control}
                                     error={errors.fName}
-                                    validate={() => false || "First Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={() => true || "First Name must be less than 15 characters long"} //Edit to set the validation rule
                                 />
 
                                 <FormField
@@ -66,7 +70,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="Last Name"
                                     control={control}
                                     error={errors.lName}
-                                    validate={() => false || "Last Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={() => true || "Last Name must be less than 15 characters long"} //Edit to set the validation rule
                                 />
                             </View>
                         </View>
@@ -83,7 +87,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="Holder Name"
                                     control={control}
                                     error={errors.ccFullName}
-                                    validate={() => false || "First Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={() => true || "First Name must be less than 15 characters long"} //Edit to set the validation rule
                                 />
 
                                 <FormField
@@ -91,36 +95,44 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                                     label="Number"
                                     control={control}
                                     error={errors.ccNumber}
-                                    validate={() => false || "Last Name must be less than 15 characters long"} //Edit to set the validation rule
+                                    validate={() => true || "Last Name must be less than 15 characters long"} //Edit to set the validation rule
                                 />
+
+                                <View style={{ marginVertical: 15 }}>
+                                    <Text style={[globalStyles.textDarkGray, globalStyles.textRegularNormal, { marginBottom: 10, }]}>Expiry Date </Text>
+                                    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                                        <SelectNumber
+                                            name="ccExpMonth"
+                                            min={1}
+                                            max={12}
+                                            control={control}
+                                            error={errors.ccExpMonth}
+                                            validate={() => true || "Abc"} //Edit to set the validation rule
+                                            style={{ width: '30%', marginRight: 10 }}
+                                        //{/* IMPORTANT: TODO - make the values part of the form using the Controller */}
+                                        />
+                                        <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>/</Text>
+                                        <SelectNumber
+                                            name="ccExpYear"
+                                            min={2024}
+                                            max={2034}
+                                            control={control}
+                                            error={errors.ccExpYear}
+                                            validate={() => true || "Abc"} //Edit to set the validation rule
+                                            style={{ width: '30%', marginLeft: 10 }}
+                                        //{/* IMPORTANT: TODO - make the values part of the form using the Controller */}
+                                        />
+                                    </View>
+                                </View>
 
                                 <FormField
                                     name="ccCCV"
                                     label="CCV"
                                     control={control}
                                     error={errors.ccCCV}
-                                    validate={() => false || "CCV"} //Edit to set the validation rule
+                                    validate={() => true || "CCV"} //Edit to set the validation rule
                                     inputMode="numeric"
                                 />
-
-                                <View style={{marginVertical: 15}}>
-                                    <Text style={[globalStyles.textDarkGray, globalStyles.textRegularNormal, {marginBottom: 10,}]}>Expiry Date </Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                                    <SelectNumber
-                                        min={1}
-                                        max={12}
-                                        style={{ width: '30%', marginRight: 10 }}
-                                        //{/* IMPORTANT: TODO - make the values part of the form using the Controller */}
-                                    /> 
-                                    <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>/</Text>
-                                    <SelectNumber
-                                        min={2024}
-                                        max={2034}
-                                        style={{ width: '30%', marginLeft: 10 }}
-                                        //{/* IMPORTANT: TODO - make the values part of the form using the Controller */}
-                                    /> 
-                                </View>
-                                </View>
 
                             </View>
                         </View>
@@ -129,7 +141,7 @@ export default ConfirmOrderScreen = ({ accountInfo }) => {
                     </View>
 
                     <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
-                        <LargeButton text="Save" onPress={() => navigation.goBack()} />
+                        <LargeButton text="Save" onPress={handleSubmit(handleSaveChanges)} />
                     </View>
 
                 </ScrollView>

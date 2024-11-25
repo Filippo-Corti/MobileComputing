@@ -40,7 +40,7 @@ export default ConfirmOrderScreen = ({ menuInformation }) => {
 
                     <View style={{ flex: 1 }}>
 
-                        <View style={{ flexDirection: 'row', marginHorizontal: 15, marginBottom: 25, }}>
+                        <View style={{ flexDirection: 'row', marginHorizontal: 15, marginVertical: 25, }}>
                             <TouchableOpacity onPress={() => navigation.goBack()} >
                                 <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                             </TouchableOpacity>
