@@ -1,5 +1,5 @@
 import {View, TouchableOpacity, Text, Image, StyleSheet} from 'react-native';
-import {globalStyles} from '../../../styles/global';
+import {globalStyles} from '../../../../styles/global';
 import MyIcon, {IconNames} from '../icons/MyIcon';
 
 export default MenuPreview = ({menuInformation, onPress, style}) => {

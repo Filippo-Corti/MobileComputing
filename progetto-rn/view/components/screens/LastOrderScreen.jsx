@@ -1,14 +1,14 @@
 import { View, ScrollView, Text, Button, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../styles/global';
+import { globalStyles, imageBase64 } from '../../../styles/global';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
 import ProgressBar from '../common/other/ProgressBar';
 import InfoTextBox from '../common/other/InfoTextBox';
-import PositionViewModel from '../../viewmodel/PositionViewModel';
+import PositionViewModel from '../../../viewmodel/PositionViewModel';
 
 const { height } = Dimensions.get('window');
 

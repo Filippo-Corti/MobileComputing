@@ -1,5 +1,5 @@
 import {View, Text, StyleSheet} from 'react-native';
-import {fonts, globalStyles} from '../../../styles/global';
+import {fonts, globalStyles} from '../../../../styles/global';
 
 export default MyLogo = () => {
 

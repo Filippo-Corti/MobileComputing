@@ -1,6 +1,6 @@
 import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../styles/global';
+import { globalStyles, imageBase64 } from '../../../styles/global';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import Separator from '../common/other/Separator';

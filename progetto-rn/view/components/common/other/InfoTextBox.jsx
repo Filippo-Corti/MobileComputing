@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet} from 'react-native';
 import MyIcon from '../icons/MyIcon';
-import {globalStyles} from '../../../styles/global';
+import {globalStyles} from '../../../../styles/global';
 
 export default InfoTextBox = ({text, label, iconName}) => {
 
