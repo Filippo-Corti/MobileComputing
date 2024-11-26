@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
         width: '100%',
         borderBottomWidth: 1,
         borderRadius: 4,
-        padding: 8,
+        paddingVertical: 8,
         ...globalStyles.textBlack,
         ...globalStyles.textNormalMedium,
     },

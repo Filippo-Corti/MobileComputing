@@ -30,7 +30,7 @@ export default HomeScreen = ({ }) => {
                     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
                         <View>
                             <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                                Welcome Back {(userData) ? ", " + userData.fName : ""}
+                                Welcome Back{(userData) ? ", " + userData.fName : ""}
                             </Text>
                             <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
                                 What are you craving?

@@ -1,35 +1,31 @@
-import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles, imageBase64 } from '../../../styles/global';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import Separator from '../common/other/Separator';
-import InfoTextBox from '../common/other/InfoTextBox';
 import LargeButton from '../common/buttons/LargeButton';
-import { useForm } from 'react-hook-form';
+import { set, useForm } from 'react-hook-form';
 import FormField from '../common/forms/FormField';
 import SelectNumber from '../common/forms/SelectNumber';
 import User from '../../../model/types/User';
+import { UserContext } from '../../context/UserContext';
+import { useContext } from 'react';
+import ViewModel from '../../../viewmodel/ViewModel';
 
-const { height } = Dimensions.get('window');
+export default ConfirmOrderScreen = ({ route }) => {
+    
+    const viewModel = ViewModel.getViewModel();
 
-export default ConfirmOrderScreen = ({ route, accountInfo }) => {
+    const navigation = useNavigation();
 
     const { newAccount } = route?.params || false;
 
-    accountInfo = {
-        fName: 'John',
-        lName: 'Doe',
-        ccFullName: 'John Doe',
-        ccNumber: '1234 5678 9012 3456',
-        ccExpMonth: 12,
-        ccExpYear: 2026,
-        ccCVV: '123', //STRING OR DOESN'T WORK
-    }
+    const { userData, setUserData } = useContext(UserContext);
 
-    const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount) ? {
+    const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount && userData) ? {
         defaultValues: {
-            ...accountInfo
+            ...userData
         }
     } : {
         defaultValues: {
@@ -38,12 +34,20 @@ export default ConfirmOrderScreen = ({ route, accountInfo }) => {
         }
     });
 
-    const handleSaveChanges = (formData) => {
+    const handleSaveChanges = async (formData) => {
         console.log("Params OK")
         console.log(formData);
+
+        // Update user details on the server
+        await viewModel.updateUserDetails(formData);
+
+        // Update user details in the app context
+        setUserData(formData);
+        console.log("Update OK");
+
+        navigation.navigate("Account");
     }
 
-    const navigation = useNavigation();
 
     return (
         <SafeAreaProvider>
@@ -57,7 +61,7 @@ export default ConfirmOrderScreen = ({ route, accountInfo }) => {
                                 <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                             </TouchableOpacity>
                             <Text style={[globalStyles.textBlack, globalStyles.textTitleRegular, { flex: 1, textAlign: 'center', marginEnd: 20 }]}>
-                                {(newAccount) ? "New Account" : "Your Account" }
+                                {(newAccount) ? "New Account" : "Your Account"}
                             </Text>
                         </View>
 
@@ -71,7 +75,9 @@ export default ConfirmOrderScreen = ({ route, accountInfo }) => {
                                     label="First Name"
                                     control={control}
                                     error={errors.fName}
-                                    validate={(fName) => User.validateFirstName(fName) || "First Name must be less than 15 characters long and not empty"} 
+                                    validate={(fName) => User.validateFirstName(fName) || "First Name must be less than 15 characters long and not empty"}
+                                    inputMode="text"
+                                    autoCapitalize="words"
                                 />
 
                                 <FormField
@@ -80,6 +86,8 @@ export default ConfirmOrderScreen = ({ route, accountInfo }) => {
                                     control={control}
                                     error={errors.lName}
                                     validate={(lName) => User.validateLastName(lName) || "Last Name must be less than 15 characters long and not empty"}
+                                    inputMode="text"
+                                    autoCapitalize="words"
                                 />
                             </View>
                         </View>
@@ -97,6 +105,8 @@ export default ConfirmOrderScreen = ({ route, accountInfo }) => {
                                     control={control}
                                     error={errors.ccFullName}
                                     validate={(ccFullName) => User.validateFullName(ccFullName) || "Holder Name must be less than 31 characters long and not empty"}
+                                    inputMode="text"
+                                    autoCapitalize="words"
                                 />
 
                                 <FormField

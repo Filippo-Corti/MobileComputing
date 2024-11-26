@@ -53,8 +53,13 @@ export default class APIController {
         }   
         return await this.genericRequest("user/" + userId, "PUT", bodyParams);
     }
+
+    static async getOrderDetails(sId, orderId) {
+        const queryParams = { sid: sId};
+        return await this.genericGETRequest("order/" + orderId, queryParams);
+    }
     
-    static async getMenuDetailsById(sId, menuId, latitude=45.4642, longitude=9.19) { //TODO: remove defaults
+    static async getMenuDetailsById(sId, menuId, latitude, longitude) {
         const queryParams = { 
             lat: latitude,
             lng: longitude,
@@ -69,4 +74,6 @@ export default class APIController {
         };
         return (await this.genericGETRequest("menu/" + menuId + "/image", queryParams)).base64;
     }
+
+
 }

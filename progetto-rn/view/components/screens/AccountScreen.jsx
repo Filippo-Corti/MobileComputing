@@ -12,19 +12,16 @@ import { useContext } from 'react';
 
 export default AccountScreen = ({ }) => {
 
-    const accountInfo = {
-        fName: 'John',
-        lName: 'Doe',
-        ccFullName: 'John Doe',
-        ccNumber: '1234 5678 9012 3456',
-        ccExpMonth: 12,
-        ccExpYear: 2026,
-        ccCCV: 123,
-    }
-
     const navigation = useNavigation();
 
-    const { userData } = useContext(UserContext);
+    const { userData, orderData, setOrderData } = useContext(UserContext);
+
+    console.log("User Data is", userData);
+    console.log("Order data is", orderData);
+
+    if (orderData.oid && !orderData.orderDetailsRetrieved) { // If there is an order but we don't have the details
+        console.log("Need to retrieve order details");
+    }
 
     return (
         <SafeAreaProvider>
@@ -38,18 +35,18 @@ export default AccountScreen = ({ }) => {
                         />
 
                         {userData && <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginBottom: 13, textAlign: 'center' }]}>
-                            {accountInfo.fName} {accountInfo.lName}
+                            {userData.fName} {userData.lName}
                         </Text>}
 
                         {(userData)
                             ? <MinimalistButton text="EDIT ACCOUNT" onPress={() => navigation.navigate("EditAccount")} />
-                            : <MinimalistButton text="NEW ACCOUNT" onPress={() => navigation.navigate("EditAccount", {newAccount:true})} />
+                            : <MinimalistButton text="NEW ACCOUNT" onPress={() => navigation.navigate("EditAccount", { newAccount: true })} />
                         }
                     </View>
 
                     <Separator size={1} color={colors.lightGray} />
-                    
-                    {userData && <>
+
+                    {orderData.oid && orderData.orderDetailsRetrieved && <>
 
                         <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
                             <View style={[globalStyles.flexBetween, { width: '100%' }]}>
@@ -76,14 +73,17 @@ export default AccountScreen = ({ }) => {
                         </View>
 
                         <Separator size={1} color={colors.lightGray} />
+                    </>
+                    }
 
+                    {userData && <>
                         <View style={[globalStyles.insetContainer, { marginTop: 20, marginBottom: 40, width: '95%' }]}>
 
                             <CreditCard cardInformation={{
-                                number: accountInfo.ccNumber,
-                                holder: accountInfo.ccFullName,
-                                expiryMonth: accountInfo.ccExpMonth,
-                                expiryYear: accountInfo.ccExpYear,
+                                number: userData.ccNumber,
+                                holder: userData.ccFullName,
+                                expiryMonth: userData.ccExpMonth,
+                                expiryYear: userData.ccExpYear,
                             }} />
 
                         </View>

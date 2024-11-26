@@ -1,5 +1,7 @@
 import APIController from "../model/APIController";
 import AsyncStorageController, { KEYS } from "../model/AsyncStorageController";
+import User from "../model/types/User";
+import Order from "../model/types/Order";
 
 export default class ViewModel {
 
@@ -42,7 +44,21 @@ export default class ViewModel {
         if (isRegistered) {
             userDetails = await this.getUserDetails();
         }
-        return userDetails || null;
+        const parsedUserDetails = userDetails
+            ? new User(
+                userDetails.id,
+                userDetails.firstName,
+                userDetails.lastName,
+                userDetails.cardFullName,
+                userDetails.cardNumber,
+                userDetails.cardExpireMonth,
+                userDetails.cardExpireYear,
+                userDetails.cardCVV)
+            : null;
+        const parsedOrderDetails = userDetails
+            ? new Order(userDetails.lastOid, userDetails.orderStatus)
+            : null;
+        return [parsedUserDetails, parsedOrderDetails];
     }
 
     async getUserDetails() {
@@ -53,6 +69,65 @@ export default class ViewModel {
 
         try {
             return await APIController.getUserDetailsById(this.sid, this.uid);
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async updateUserDetails(userFormData) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        let userDetails = {
+            firstName: userFormData.fName,
+            lastName: userFormData.lName,
+            cardFullName: userFormData.ccFullName,
+            cardNumber: userFormData.ccNumber,
+            cardExpireMonth: parseInt(userFormData.ccExpMonth),
+            cardExpireYear: parseInt(userFormData.ccExpYear),
+            cardCVV: userFormData.ccCVV,
+        }
+
+        // Filter out undefined values
+        userDetails = Object.fromEntries(
+            Object.entries(userDetails).filter(([_, value]) => value !== undefined)
+        );
+
+        try {
+            const result = await APIController.updateUserDetails(this.sid, this.uid, userDetails);
+            // Update the local storage
+            await AsyncStorageController.set(KEYS.IS_REGISTERED, true);
+            return result;
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async getOrderDetails(orderId) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const orderDetails = await APIController.getOrderDetails(this.sid, orderId);
+            if (orderDetails) {
+                return new Order(
+                    orderDetails.oid, 
+                    orderDetails.status, 
+                    orderDetailsRetrieved=true,
+                    orderDetails.mid,
+                    orderDetails.creationTimestamp,
+                    orderDetails.deliveryTimestamp,
+                    orderDetails.deliveryLocation,
+                    orderDetails.currentLocation,
+                );
+            }
+            return null;
         } catch (err) {
             console.error(err);
             throw new Error("An Unexpected Error occurred contacting the App Server");

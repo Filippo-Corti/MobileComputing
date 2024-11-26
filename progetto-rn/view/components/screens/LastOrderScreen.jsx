@@ -10,13 +10,16 @@ import ProgressBar from '../common/other/ProgressBar';
 import InfoTextBox from '../common/other/InfoTextBox';
 import PositionViewModel from '../../../viewmodel/PositionViewModel';
 import { UserContext } from '../../context/UserContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
+import ViewModel from '../../../viewmodel/ViewModel';
 
 
 const { height } = Dimensions.get('window');
 
 export default LastOrderScreen = ({ }) => {
+
+    const viewModel = ViewModel.getViewModel();
 
     const menuInformation = {
         title: 'McMushroom Pizza',
@@ -53,9 +56,31 @@ export default LastOrderScreen = ({ }) => {
     let price = menuInformation.price.toFixed(2);
     let timeAtDelivery = "10:15";
 
-    const { userData } = useContext(UserContext);
+    const { userData, orderData, setOrderData } = useContext(UserContext);
+    const showOrder = (orderData?.oid && orderData.orderDetailsRetrieved);
+
+    console.log("User Data is", userData);
+    console.log("Order data is", orderData);
 
     const navigation = useNavigation();
+
+    // Fetch order details if necessary
+    useEffect(() => {
+        const fetchOrderDetails = async () => {
+            if (orderData?.oid && !orderData.orderDetailsRetrieved) { // If there is an order but we don't have the details
+                try {
+                    const orderDetails = await viewModel.getOrderDetails(orderData.oid);
+                    if (orderDetails) setOrderData(orderDetails);
+                } catch (error) {
+                    console.error("Error fetching order details:", error);
+                }
+            }
+        };
+
+        fetchOrderDetails();
+    }, [orderData, viewModel, setOrderData]);
+
+    const arrivalTimeInfo = orderData?.extractArrivalTimeInformation();
 
     return (
         <SafeAreaProvider>
@@ -65,19 +90,19 @@ export default LastOrderScreen = ({ }) => {
                     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
                         <View style={{ flex: 1 }}>
                             <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
-                                {(userData) ? "Almost there..." : "No orders yet..."}
+                                {(showOrder) ? "Almost there..." : "No orders yet..."}
                             </Text>
-                            {userData &&
+                            {showOrder &&
                                 <>
                                     <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
-                                        Arriving at <Text style={[globalStyles.textNormalMedium]}>{timeAtDelivery}</Text> ({menuInformation.deliveryTime} minutes away)
+                                        Arriving at <Text style={[globalStyles.textNormalMedium]}>{arrivalTimeInfo.formattedTime}</Text> ({arrivalTimeInfo.minutesAway} minutes away)
                                     </Text>
                                     <ProgressBar progress={80} />
                                 </>
                             }
                         </View>
                     </View>
-                    {(userData)
+                    {(showOrder)
                         ? <>
                             <MapView
                                 style={styles.map}
@@ -149,8 +174,8 @@ export default LastOrderScreen = ({ }) => {
                                     {'\n'}
                                     Right now you haven’t placed your first order yet. Go check some menus in the home page!
                                 </Text>
-                                <View style={{alignSelf: 'flex-end', marginTop: 20 }}>
-                                    <ButtonWithArrow text="Explore menus" onPress={() => console.log("Pressed")} />
+                                <View style={{ alignSelf: 'flex-end', marginTop: 20 }}>
+                                    <ButtonWithArrow text="Explore menus" onPress={() => navigation.navigate("HomeStack")} />
                                 </View>
                             </View>
                         </>

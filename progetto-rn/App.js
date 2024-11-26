@@ -27,6 +27,7 @@ export default function App() {
 
   const [viewModel, setViewModel] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [orderData, setOrderData] = useState(null);
 
   const initViewModel = async () => {
     try {
@@ -39,9 +40,10 @@ export default function App() {
 
   const fetchUserData = async () => {
     try {
-      const userData = await viewModel.fetchLaunchInformation();
+      const [userData, orderData] = await viewModel.fetchLaunchInformation();
       setUserData(userData);
-      console.log("FetchUserData:", userData);
+      setOrderData(orderData);
+      console.log("FetchUserData:", userData, orderData);
     } catch (err) {
       console.error("Error loading the Menu Data:", err);
     }
@@ -73,7 +75,7 @@ export default function App() {
   }
 
   return (
-    <UserContextProvider userDataInit={userData}>
+    <UserContextProvider userDataInit={userData} orderDataInit={orderData}>
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={{
