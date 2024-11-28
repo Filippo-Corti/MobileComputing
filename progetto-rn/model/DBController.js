@@ -4,6 +4,7 @@ export default class DBController {
 
     constructor() {
         this.db = null;
+        this.openDB();
     }
 
     async openDB() {

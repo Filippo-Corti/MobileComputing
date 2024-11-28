@@ -46,7 +46,7 @@ export default AccountScreen = ({ }) => {
 
                     <Separator size={1} color={colors.lightGray} />
 
-                    {orderData?.oid && orderData.orderDetailsRetrieved && <>
+                    {orderData?.oid && orderData?.orderDetailsRetrieved && <>
 
                         <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
                             <View style={[globalStyles.flexBetween, { width: '100%' }]}>

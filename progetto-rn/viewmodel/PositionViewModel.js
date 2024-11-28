@@ -1,3 +1,4 @@
+import * as Location from 'expo-location';
 
 export default class PositionViewModel {
 
@@ -10,6 +11,25 @@ export default class PositionViewModel {
             latitudeDelta: Math.max(0.001, latitudeDelta),
             longitudeDelta: Math.max(0.001, longitudeDelta),
         }
+    }
+
+    static async askForLocationPermission() {
+        console.log("Asking for permission")
+        let canUseLocation = false;
+        const grantedPermission = await Location.getForegroundPermissionsAsync()
+        if (grantedPermission.status === "granted") {
+            canUseLocation = true;
+        } else {
+            const permissionResponse = await Location.requestForegroundPermissionsAsync()
+            if (permissionResponse.status === "granted") {
+                canUseLocation = true;
+            }
+        }
+        return canUseLocation;
+    }
+
+    static async getPosition() {
+        return await Location.getCurrentPositionAsync()
     }
 
 }

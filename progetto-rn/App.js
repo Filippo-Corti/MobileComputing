@@ -12,6 +12,7 @@ import colors from './styles/colors';
 import ViewModel from './viewmodel/ViewModel';
 import { useEffect, useState } from 'react';
 import { UserContextProvider } from './view/context/UserContext';
+import PositionViewModel from './viewmodel/PositionViewModel';
 
 const Tab = createBottomTabNavigator();
 
@@ -56,6 +57,7 @@ export default function App() {
       }
       if (viewModel) {
         await fetchUserData();
+        await PositionViewModel.askForLocationPermission();
       }
     };
 

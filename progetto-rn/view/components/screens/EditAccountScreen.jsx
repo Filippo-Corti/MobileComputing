@@ -12,6 +12,7 @@ import User from '../../../model/types/User';
 import { UserContext } from '../../context/UserContext';
 import { useContext } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
+import Order from '../../../model/types/Order';
 
 export default ConfirmOrderScreen = ({ route }) => {
     
@@ -21,7 +22,7 @@ export default ConfirmOrderScreen = ({ route }) => {
 
     const { newAccount } = route?.params || false;
 
-    const { userData, setUserData } = useContext(UserContext);
+    const { userData, setUserData, orderData, setOrderData } = useContext(UserContext);
 
     const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount && userData) ? {
         defaultValues: {
@@ -43,6 +44,9 @@ export default ConfirmOrderScreen = ({ route }) => {
 
         // Update user details in the app context
         setUserData(formData);
+        if (!orderData) {
+            setOrderData(new Order(null, null, false)); 
+        }
         console.log("Update OK");
 
         navigation.navigate("Account");

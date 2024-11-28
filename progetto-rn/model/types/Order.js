@@ -1,6 +1,6 @@
 export default class Order {
 
-    constructor(oid, status, orderDetailsRetrieved = false, menuId = null, creationTimeStamp = null, deliveryTimeStamp = null, deliveryLocation = null, currentLocation = null) {
+    constructor(oid, status, orderDetailsRetrieved = false, menuId = null, creationTimeStamp = null, deliveryTimeStamp = null, deliveryLocation = null, currentLocation = null, menu = null) {
         this.oid = oid;
         this.status = status;
         this.orderDetailsRetrieved = orderDetailsRetrieved;
@@ -10,6 +10,7 @@ export default class Order {
         this.deliveryTimeStamp = deliveryTimeStamp;
         this.deliveryLocation = deliveryLocation;
         this.currentLocation = currentLocation;
+        this.menu = menu;
     }
 
     extractArrivalTimeInformation() {

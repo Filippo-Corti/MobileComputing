@@ -10,9 +10,10 @@ import ProgressBar from '../common/other/ProgressBar';
 import InfoTextBox from '../common/other/InfoTextBox';
 import PositionViewModel from '../../../viewmodel/PositionViewModel';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import ViewModel from '../../../viewmodel/ViewModel';
+import * as Location from 'expo-location';
 
 
 const { height } = Dimensions.get('window');
@@ -20,15 +21,6 @@ const { height } = Dimensions.get('window');
 export default LastOrderScreen = ({ }) => {
 
     const viewModel = ViewModel.getViewModel();
-
-    const menuInformation = {
-        title: 'McMushroom Pizza',
-        price: 17,
-        description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        deliveryTime: 30,
-        distanceFromYou: 0.2,
-        image: imageBase64,
-    }
 
     const orderInformation = {
         userLocation: {
@@ -53,24 +45,36 @@ export default LastOrderScreen = ({ }) => {
 
     console.log(orderInformation.userLocation, latitudeDelta, longitudeDelta);
 
-    let price = menuInformation.price.toFixed(2);
     let timeAtDelivery = "10:15";
 
+    const [deliveryAddress, setDeliveryAddress] = useState(null);
     const { userData, orderData, setOrderData } = useContext(UserContext);
-    const showOrder = (orderData?.oid && orderData.orderDetailsRetrieved);
+    const showOrder = (orderData?.oid && orderData?.orderDetailsRetrieved);
 
     console.log("User Data is", userData);
     console.log("Order data is", orderData);
 
     const navigation = useNavigation();
 
-    // Fetch order details if necessary
     useEffect(() => {
         const fetchOrderDetails = async () => {
-            if (orderData?.oid && !orderData.orderDetailsRetrieved) { // If there is an order but we don't have the details
+            if (orderData?.oid && !orderData?.orderDetailsRetrieved) { // If there is an order but we don't have the details
                 try {
+                    console.log("Fetching order data");
                     const orderDetails = await viewModel.getOrderDetails(orderData.oid);
-                    if (orderDetails) setOrderData(orderDetails);
+                    if (orderDetails) {
+                        setOrderData(orderDetails);
+                        const delAddress = await Location.reverseGeocodeAsync({
+                            latitude: orderDetails.deliveryLocation.lat,
+                            longitude: orderDetails.deliveryLocation.lng,
+                        });
+                        if (delAddress?.length > 0) {
+                            const delAddressString = delAddress[0].formattedAddress;
+                            setDeliveryAddress(delAddressString)
+                        } else {
+                            setDeliveryAddress("(" + orderDetails.deliveyLocation.lat + ", " + orderDetails.deliveryLocation.lng + ")");
+                        }
+                    }
                 } catch (error) {
                     console.error("Error fetching order details:", error);
                 }
@@ -81,6 +85,11 @@ export default LastOrderScreen = ({ }) => {
     }, [orderData, viewModel, setOrderData]);
 
     const arrivalTimeInfo = orderData?.extractArrivalTimeInformation();
+    const price = orderData?.menu?.price.toFixed(2);
+
+
+
+    console.log("ArrivalTimeInfo is", arrivalTimeInfo);
 
     return (
         <SafeAreaProvider>
@@ -95,7 +104,7 @@ export default LastOrderScreen = ({ }) => {
                             {showOrder &&
                                 <>
                                     <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
-                                        Arriving at <Text style={[globalStyles.textNormalMedium]}>{arrivalTimeInfo.formattedTime}</Text> ({arrivalTimeInfo.minutesAway} minutes away)
+                                        Arriving at <Text style={[globalStyles.textNormalMedium]}>{arrivalTimeInfo?.formattedTime}</Text> ({arrivalTimeInfo?.minutesAway} minutes away)
                                     </Text>
                                     <ProgressBar progress={80} />
                                 </>
@@ -111,30 +120,29 @@ export default LastOrderScreen = ({ }) => {
                                 showsPointsOfInterest={false}
                                 loadingEnabled={true}
                                 initialRegion={{
-                                    longitude: orderInformation.userLocation.longitude,
-                                    latitude: orderInformation.userLocation.latitude,
+                                    longitude: orderData.deliveryLocation.lng,
+                                    latitude: orderData.deliveryLocation.lat,
                                     latitudeDelta: latitudeDelta,
                                     longitudeDelta: longitudeDelta,
                                 }}
                             >
                                 <Marker
-                                    coordinate={orderInformation.deliveryLocation}
+                                    coordinate={{
+                                       latitude: orderData.deliveryLocation.lat,
+                                       longitude: orderData.deliveryLocation.lng,
+                                    }}
                                     title="Delivery Place"
                                     description="The Location where the drone will deliver the order"
                                     onPress={() => console.log("Hello Marker")}
                                 />
 
                                 <Marker
-                                    coordinate={orderInformation.droneLocation}
+                                    coordinate={{
+                                       latitude: orderData.currentLocation.lat,
+                                       longitude: orderData.currentLocation.lng,
+                                    }}
                                     title="Drone Location"
                                     description="The current location of the drone"
-                                    onPress={() => console.log("Hello Marker")}
-                                />
-
-                                <Marker
-                                    coordinate={orderInformation.userLocation}
-                                    title="User Location"
-                                    description="Your Location"
                                     onPress={() => console.log("Hello Marker")}
                                 />
 
@@ -147,7 +155,7 @@ export default LastOrderScreen = ({ }) => {
                                     Pick it up at
                                 </Text>
                                 <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                                    Bay Area, San Francisco, California, USA
+                                    {deliveryAddress}
                                 </Text>
                             </View>
                             <Separator size={10} color={colors.lightGray} />
@@ -159,7 +167,7 @@ export default LastOrderScreen = ({ }) => {
                             </View>
                             <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginBottom: 20, marginTop: 10 }]}>
                                 <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                    1x {menuInformation.title}
+                                    1x {orderData.menu.name}
                                 </Text>
                                 <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
                                     €{price}
