@@ -19,7 +19,7 @@ export default AccountScreen = ({ }) => {
     console.log("User Data is", userData);
     console.log("Order data is", orderData);
 
-    if (orderData.oid && !orderData.orderDetailsRetrieved) { // If there is an order but we don't have the details
+    if (orderData?.oid && !orderData.orderDetailsRetrieved) { // If there is an order but we don't have the details
         console.log("Need to retrieve order details");
     }
 
@@ -46,7 +46,7 @@ export default AccountScreen = ({ }) => {
 
                     <Separator size={1} color={colors.lightGray} />
 
-                    {orderData.oid && orderData.orderDetailsRetrieved && <>
+                    {orderData?.oid && orderData.orderDetailsRetrieved && <>
 
                         <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
                             <View style={[globalStyles.flexBetween, { width: '100%' }]}>
