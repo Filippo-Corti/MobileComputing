@@ -145,6 +145,32 @@ export default class ViewModel {
         }
     }
 
+    async getMenuImage(menuId, imageVersion) {
+        try {
+            const menuImageInStorage = await this.dbController.getMenuImageByVersion(menuId, imageVersion);
+            if (menuImageInStorage) {
+                // If it is, just return it
+                console.log("Image retrieved from Local DB Storage");
+                return menuImageInStorage.Image;
+            }
+    
+            // If it's not, ask the server for the new version...
+            let menuImageFromServer = await APIController.getMenuImage(this.sid, menuId);
+            if (!menuImageFromServer.startsWith("data:image/jpeg;base64,")) {
+                menuImageFromServer = "data:image/jpeg;base64," + menuImageFromServer;
+            }
+    
+            // ...then save the new version in Local DB Storage...
+            this.dbController.insertMenuImage(menuId, menuImageFromServer, imageVersion);
+    
+            // ...then return it
+            console.log("Image retrieved via API. Now saved in Storage");
+            return menuImageFromServer;
+        } catch (err) {
+            console.error("Error loading the Menu Image:", err)
+        }
+    }
+
     // Retrieves Menu Details + Image, either from Local Storage or from the App Server
     async getMenuDetailsWithImage(menuId) {
         if (!this.sid) {
@@ -156,30 +182,69 @@ export default class ViewModel {
         try {
             //Check if Image is in Local DB Storage
             const menu = await this.getMenuDetails(menuId);
-            const menuImageInStorage = await this.dbController.getMenuImageByVersion(menuId, menu.imageVersion);
-            if (menuImageInStorage) {
-                // If it is, just return it
-                console.log("Image retrieved from Local DB Storage");
-                menu.image = menuImageInStorage.Image;
-                return menu;
-            }
-
-            // If it's not, ask the server for the new version...
-            let menuImageFromServer = await APIController.getMenuImage(this.sid, menuId);
-            if (!menuImageFromServer.startsWith("data:image/jpeg;base64,")) {
-                menuImageFromServer = "data:image/jpeg;base64," + menuImageFromServer;
-            }
-
-            // ...then save the new version in Local DB Storage...
-            this.dbController.insertMenuImage(menuId, menuImageFromServer, menu.imageVersion);
-
-            // ...then return it
-            console.log("Image retrieved via API. Now saved in Storage");
-            menu.image = menuImageFromServer;
+            menu.image = await this.getMenuImage(menuId, menu.imageVersion);
             return menu;
         } catch (err) {
             console.error(err);
             throw new Error("An Unexpected Error occurred retrieving Data for the Application");
+        }
+    }
+
+    async getNearestMenus(userPosition) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const menus = [];
+            const fetchedMenus = await APIController.getNearestMenus(this.sid, userPosition.latitude, userPosition.longitude);
+            console.log("Menus:", fetchedMenus);
+            for (const menu of fetchedMenus) {
+                menus.push(new Menu(
+                    id = menu.mid,
+                    name = menu.name,
+                    price = menu.price,
+                    location = PositionViewModel.parseLocation(menu.location),
+                    imageVersion = menu.imageVersion,
+                    shortDescription = menu.shortDescription,
+                    deliveryTime = menu.deliveryTime,
+                    longDescription = menu.longDescription,
+                ))
+            }
+            return menus;
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async getNearestMenusWithImages(userPosition) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const menus = [];
+            const fetchedMenus = await APIController.getNearestMenus(this.sid, userPosition.latitude, userPosition.longitude);
+            console.log("Menus:", fetchedMenus);
+            for (const menu of fetchedMenus) {
+                menus.push(new Menu(
+                    id = menu.mid,
+                    name = menu.name,
+                    price = menu.price,
+                    location = PositionViewModel.parseLocation(menu.location),
+                    imageVersion = menu.imageVersion,
+                    shortDescription = menu.shortDescription,
+                    deliveryTime = menu.deliveryTime,
+                    longDescription = menu.longDescription,
+                ))
+            }
+            return menus;
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
         }
     }
 

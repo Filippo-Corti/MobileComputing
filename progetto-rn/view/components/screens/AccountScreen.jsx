@@ -92,15 +92,7 @@ export default AccountScreen = ({ }) => {
                                     <ButtonWithArrow text="See More" onPress={() => navigation.navigate("LastOrder")} />
                                 </View>
                             </View>
-                            <MenuPreview menuInformation={{
-                                title: orderData.menu.name,
-                                price: orderData.menu.formatPrice(),
-                                description: orderData.menu.shortDescription,
-                                deliveryTime: orderData.menu.deliveryTime,
-                                distanceFromYou: "--",
-                                image: orderData.menu.image,
-                            }}
-                                onPress={() => navigation.navigate("HomeStack", { screen: "MenuDetails" })}
+                            <MenuPreview menuInformation={orderData.menu}
                                 style={{ marginTop: 8, }}
                             />
                         </View>

@@ -1,26 +1,33 @@
 import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import { globalStyles } from '../../../../styles/global';
 import MyIcon, { IconNames } from '../icons/MyIcon';
+import PositionViewModel from '../../../../viewmodel/PositionViewModel';
 
 export default MenuPreview = ({ menuInformation, onPress, style }) => {
 
+    const userLocation = {
+        longitude: -122.427,
+        latitude: 37.422,
+    }
+
+    onPress = onPress || (() => {})
+
     let image = menuInformation.image;
     if (image) {
-        if (!image.startsWith("data:image/jpeg;base64,")) {
-            image = "data:image/jpeg;base64," + image;
-        }
     }
+
+    const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(userLocation, menuInformation.location).toFixed(1);
 
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={() => onPress()}>
             <View style={styles.textContainer}>
                 <View>
-                    <Text style={styles.title}>{menuInformation.title}</Text>
-                    <Text style={styles.price}>€{menuInformation.price}</Text>
-                    <Text style={styles.description}>{menuInformation.description}</Text>
+                    <Text style={styles.title}>{menuInformation.name}</Text>
+                    <Text style={styles.price}>€{menuInformation.formatPrice()}</Text>
+                    <Text style={styles.description}>{menuInformation.shortDescription}</Text>
                 </View>
                 <View>
-                    <Text style={styles.otherInfo}>{menuInformation.deliveryTime}min • {menuInformation.distanceFromYou}km from you</Text>
+                    <Text style={styles.otherInfo}>{menuInformation.deliveryTime}min • {distanceFromYou}km from you</Text>
                 </View>
             </View>
             <View style={styles.imageContainer}>

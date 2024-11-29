@@ -1,4 +1,4 @@
-import { View, ScrollView, Text, Button, StyleSheet, Dimensions } from 'react-native';
+import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
 import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles, imageBase64 } from '../../../styles/global';
@@ -6,26 +6,64 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../context/UserContext';
+import ViewModel from '../../../viewmodel/ViewModel';
 
 const { height } = Dimensions.get('window');
 
 export default HomeScreen = ({ }) => {
 
     const userLocation = {
-        longitude: 9.167285,
-        latitude: 47.662515,
+        longitude: -122.427,
+        latitude: 37.422,
     }
 
     const navigation = useNavigation();
 
-    const {userData} = useContext(UserContext);
+    const [viewModel, setViewModel] = useState(null);
+    const [nearestMenus, setNearestMenus] = useState([]);
+    const { userData } = useContext(UserContext);
+
+
+    const initViewModel = async () => {
+        try {
+            const newViewModel = ViewModel.getViewModel();
+            setViewModel(newViewModel);
+        } catch (err) {
+            console.error("Error loading the View Model:", err);
+        }
+    }
+
+    const fetchNearestMenus = async () => {
+        try {
+            const menus = await viewModel.getNearestMenusWithImages(userLocation);
+            setNearestMenus(menus);
+            console.log("Fetched Nearest Menus Data:", menus);
+        } catch (err) {
+            console.error("Error fetching the last order details:", err);
+        }
+    }
+
+    useEffect(() => {
+        const initializeAndFetch = async () => {
+            if (!viewModel)
+                await initViewModel();
+
+            if (viewModel) {
+                await fetchNearestMenus();
+            }
+        };
+
+        initializeAndFetch();
+    }, [viewModel]);
+
+    console.log("Nearest menus are", nearestMenus.length > 0, nearestMenus)
 
     return (
         <SafeAreaProvider>
             <SafeAreaView style={globalStyles.container}>
-                <ScrollView>
+                <View>
 
                     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
                         <View>
@@ -54,56 +92,34 @@ export default HomeScreen = ({ }) => {
                                 Menus Around You
                             </Text>
                         </View>
-                        <View style={[globalStyles.flexCenter, { flexDirection: 'column', marginHorizontal: 8 }]}>
-                            <MenuPreview menuInformation={{
-                                title: 'McMushroom Pizza',
-                                price: 21,
-                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
-                                deliveryTime: 30,
-                                distanceFromYou: 0.2,
-                                image: imageBase64,
-                            }} 
-                                onPress={() => navigation.navigate("MenuDetails")}
-                                style={{borderTopWidth: 1}}
-                            />
-                            <MenuPreview menuInformation={{
-                                title: 'McMushroom Pizza2',
-                                price: 17,
-                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
-                                deliveryTime: 30,
-                                distanceFromYou: 0.2,
-                                image: imageBase64,
-                            }} 
-                                onPress={() => navigation.navigate("MenuDetails")}
-                                style={{borderTopWidth: 1}}
-                            />
-                            <MenuPreview menuInformation={{
-                                title: 'McMushroom Pizza',
-                                price: 21,
-                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
-                                deliveryTime: 30,
-                                distanceFromYou: 0.2,
-                                image: imageBase64,
-                            }} 
-                                onPress={() => navigation.navigate("MenuDetails")}
-                                style={{borderTopWidth: 1}}
-                            />
-                            <MenuPreview menuInformation={{
-                                title: 'McMushroom Pizza2',
-                                price: 17,
-                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
-                                deliveryTime: 30,
-                                distanceFromYou: 0.2,
-                            }} 
-                                onPress={() => navigation.navigate("MenuDetails")}
-                                style={{borderTopWidth: 1}}
-                            />
+                        {(nearestMenus.length > 0) &&
+                            <View style={[globalStyles.flexCenter, { flexDirection: 'column', marginHorizontal: 8 }]}>
+                                <FlatList
+                                    data={nearestMenus}
+                                    renderItem={async ({ item }) => {
+                                        if (!item.image) {
+                                            const image = await viewModel.getMenuImage(item.id, item.imageVersion);
+                                            item.image = image;
+                                        }
+                                        return (<MenuPreview
+                                            menuInformation={item}
+                                            onPress={() => navigation.navigate("MenuDetails")}
+                                            style={{ borderTopWidth: 1 }}
+                                        />)
+                                    }}
+                                    keyExtractor={item => item.id}
+                                    style={{
+                                        width: '100%',
+                                        marginBottom: 55,
+                                    }}
+                                />
 
-                        </View>
+                            </View>
+                        }
                     </View>
 
                     <StatusBar style="auto" />
-                </ScrollView>
+                </View>
             </SafeAreaView>
         </SafeAreaProvider>
     );

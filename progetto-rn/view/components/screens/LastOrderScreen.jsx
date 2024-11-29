@@ -30,6 +30,7 @@ export default LastOrderScreen = ({ }) => {
 
     const [viewModel, setViewModel] = useState(null);
     const [deliveryAddress, setDeliveryAddress] = useState(null);
+    const [droneAddress, setDroneAddress] = useState(null);
     const { userData, orderData, setOrderData } = useContext(UserContext);
 
     const initViewModel = async () => {
@@ -51,16 +52,26 @@ export default LastOrderScreen = ({ }) => {
         }
     }
 
-    const fetchOrderAddress = async () => {
+    const fetchDeliveryAddress = async () => {
         try {
-            console.log("Fetching address, with orderData", orderData);
-            const delAddress = await Location.reverseGeocodeAsync(orderData.deliveryLocation);
-            const delAddressString = delAddress[0].formattedAddress;
+            const delAddressString = await PositionViewModel.getAddressFromCoordinates(orderData.deliveryLocation)
             setDeliveryAddress(delAddressString)
             console.log("Fetched Order Address via Reverse Geocoding:", delAddressString);
         } catch (err) {
             console.error("Error fetching the last order address:", err);
             setDeliveryAddress("(" + orderData.deliveryLocation.latitude + ", " + orderData.deliveryLocation.longitude + ")");
+        }
+    }
+
+    const fetchDroneAddress = async () => {
+        try {
+            console.log("Fetching drone address, with orderData", orderData)
+            const droneAddressString = await PositionViewModel.getAddressFromCoordinates(orderData.currentLocation)
+            setDroneAddress(droneAddressString)
+            console.log("Fetched Drone Address via Reverse Geocoding:", droneAddressString);
+        } catch (err) {
+            console.error("Error fetching the drone address:", err);
+            setDeliveryAddress("(" + orderData.currentLocation.latitude + ", " + orderData.currentLocation.longitude + ")");
         }
     }
 
@@ -74,7 +85,10 @@ export default LastOrderScreen = ({ }) => {
                     await fetchLastOrder();
 
                 if (orderData && orderData.deliveryLocation)
-                    await fetchOrderAddress();
+                    await fetchDeliveryAddress();
+
+                if (orderData && orderData.currentLocation)
+                    await fetchDroneAddress();
             }
         };
 
@@ -109,7 +123,7 @@ export default LastOrderScreen = ({ }) => {
                                     <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
                                         Arriving at <Text style={[globalStyles.textNormalMedium]}>{arrivalTimeInfo?.formattedTime}</Text> ({arrivalTimeInfo?.minutesAway} minutes away)
                                     </Text>
-                                    <ProgressBar progress={80} />
+                                    <ProgressBar progress={70} />
                                 </>
                             }
                         </View>
@@ -148,12 +162,22 @@ export default LastOrderScreen = ({ }) => {
                                 <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
                                     Delivery details
                                 </Text>
-                                <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                                    Pick it up at
-                                </Text>
-                                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                                    {deliveryAddress}
-                                </Text>
+                                <View style={{marginVertical: 5}}>
+                                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                                        Pick it up at
+                                    </Text>
+                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                                        {deliveryAddress}
+                                    </Text>
+                                </View>
+                                <View style={{marginVertical: 5}}>
+                                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                                        Drone is currently at
+                                    </Text>
+                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                                        {droneAddress}
+                                    </Text>
+                                </View>
                             </View>
                             <Separator size={10} color={colors.lightGray} />
 

@@ -75,5 +75,13 @@ export default class APIController {
         return (await this.genericGETRequest("menu/" + menuId + "/image", queryParams)).base64;
     }
 
+    static async getNearestMenus(sId, latitude, longitude) {
+        const queryParams = {
+            lat: latitude,
+            lng: longitude,
+            sid: sId,
+        };
+        return await this.genericGETRequest("menu", queryParams);
+    }
 
 }
