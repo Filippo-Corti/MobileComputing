@@ -41,7 +41,7 @@ export default class APIController {
         return await this.genericRequest("user", "POST");
     }
 
-    static async getUserDetailsById(sId, userId) {
+    static async getUserDetails(sId, userId) {
         const queryParams = { sid: sId};
         return await this.genericGETRequest("user/" + userId, queryParams);
     }
@@ -59,7 +59,7 @@ export default class APIController {
         return await this.genericGETRequest("order/" + orderId, queryParams);
     }
     
-    static async getMenuDetailsById(sId, menuId, latitude, longitude) {
+    static async getMenuDetails(sId, menuId, latitude, longitude) {
         const queryParams = { 
             lat: latitude,
             lng: longitude,
@@ -68,7 +68,7 @@ export default class APIController {
         return await this.genericGETRequest("menu/" + menuId, queryParams);
     }
 
-    static async getMenuImageById(sId, menuId) {
+    static async getMenuImage(sId, menuId) {
         const queryParams = { 
             sid: sId, 
         };

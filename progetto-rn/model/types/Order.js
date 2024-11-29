@@ -1,7 +1,7 @@
 export default class Order {
 
-    constructor(oid, status, orderDetailsRetrieved = false, menuId = null, creationTimeStamp = null, deliveryTimeStamp = null, deliveryLocation = null, currentLocation = null, menu = null) {
-        this.oid = oid;
+    constructor(id, status, orderDetailsRetrieved = false, menuId = null, creationTimeStamp = null, deliveryTimeStamp = null, deliveryLocation = null, currentLocation = null, menu = null) {
+        this.id = id;
         this.status = status;
         this.orderDetailsRetrieved = orderDetailsRetrieved;
 

@@ -20,76 +20,81 @@ const { height } = Dimensions.get('window');
 
 export default LastOrderScreen = ({ }) => {
 
-    const viewModel = ViewModel.getViewModel();
-
-    const orderInformation = {
-        userLocation: {
-            longitude: 9.232131,
-            latitude: 45.476770,
-        },
-        droneLocation: {
-            longitude: 9.232021,
-            latitude: 45.486911,
-        },
-        deliveryLocation: {
-            longitude: 9.242321,
-            latitude: 45.477211,
-        }
+    const userLocation = {
+        longitude: 9.232131,
+        latitude: 45.476770,
     }
-
-    const deltasForDrone = PositionViewModel.calculateMapDeltas(orderInformation.userLocation, orderInformation.droneLocation);
-    const deltasForDeliveryPlace = PositionViewModel.calculateMapDeltas(orderInformation.userLocation, orderInformation.deliveryLocation);
-
-    const latitudeDelta = parseFloat(Math.max(deltasForDeliveryPlace.latitudeDelta, deltasForDrone.latitudeDelta).toFixed(6));
-    const longitudeDelta = parseFloat(Math.max(deltasForDeliveryPlace.longitudeDelta, deltasForDrone.longitudeDelta).toFixed(6));
-
-    console.log(orderInformation.userLocation, latitudeDelta, longitudeDelta);
-
-    let timeAtDelivery = "10:15";
-
-    const [deliveryAddress, setDeliveryAddress] = useState(null);
-    const { userData, orderData, setOrderData } = useContext(UserContext);
-    const showOrder = (orderData?.oid && orderData?.orderDetailsRetrieved);
-
-    console.log("User Data is", userData);
-    console.log("Order data is", orderData);
 
     const navigation = useNavigation();
 
+    const [viewModel, setViewModel] = useState(null);
+    const [deliveryAddress, setDeliveryAddress] = useState(null);
+    const { userData, orderData, setOrderData } = useContext(UserContext);
+
+    const initViewModel = async () => {
+        try {
+            const newViewModel = ViewModel.getViewModel();
+            setViewModel(newViewModel);
+        } catch (err) {
+            console.error("Error loading the View Model:", err);
+        }
+    }
+
+    const fetchLastOrder = async () => {
+        try {
+            const orderDetails = await viewModel.getOrderAndMenuDetails(orderData.id);
+            setOrderData(orderDetails);
+            console.log("Fetched Order Data:", orderDetails.deliveryLocation);
+        } catch (err) {
+            console.error("Error fetching the last order details:", err);
+        }
+    }
+
+    const fetchOrderAddress = async () => {
+        try {
+            console.log("Fetching address, with orderData", orderData);
+            const delAddress = await Location.reverseGeocodeAsync(orderData.deliveryLocation);
+            const delAddressString = delAddress[0].formattedAddress;
+            setDeliveryAddress(delAddressString)
+            console.log("Fetched Order Address via Reverse Geocoding:", delAddressString);
+        } catch (err) {
+            console.error("Error fetching the last order address:", err);
+            setDeliveryAddress("(" + orderData.deliveryLocation.latitude + ", " + orderData.deliveryLocation.longitude + ")");
+        }
+    }
+
     useEffect(() => {
-        const fetchOrderDetails = async () => {
-            if (orderData?.oid && !orderData?.orderDetailsRetrieved) { // If there is an order but we don't have the details
-                try {
-                    console.log("Fetching order data");
-                    const orderDetails = await viewModel.getOrderDetails(orderData.oid);
-                    if (orderDetails) {
-                        setOrderData(orderDetails);
-                        const delAddress = await Location.reverseGeocodeAsync({
-                            latitude: orderDetails.deliveryLocation.lat,
-                            longitude: orderDetails.deliveryLocation.lng,
-                        });
-                        if (delAddress?.length > 0) {
-                            const delAddressString = delAddress[0].formattedAddress;
-                            setDeliveryAddress(delAddressString)
-                        } else {
-                            setDeliveryAddress("(" + orderDetails.deliveyLocation.lat + ", " + orderDetails.deliveryLocation.lng + ")");
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error fetching order details:", error);
-                }
+        const initializeAndFetch = async () => {
+            if (!viewModel)
+                await initViewModel();
+
+            if (viewModel) {
+                if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
+                    await fetchLastOrder();
+
+                if (orderData && orderData.deliveryLocation)
+                    await fetchOrderAddress();
             }
         };
 
-        fetchOrderDetails();
-    }, [orderData, viewModel, setOrderData]);
+        initializeAndFetch();
+    }, [orderData, viewModel]);
 
     const arrivalTimeInfo = orderData?.extractArrivalTimeInformation();
     const price = orderData?.menu?.price.toFixed(2);
 
+    const showOrder = (orderData && orderData.id && orderData.orderDetailsRetrieved);
+    const deltas = (showOrder) 
+        ? PositionViewModel.calculateMapDeltas2Positions(userLocation, orderData.deliveryLocation, orderData.currentLocation)
+        : null;
+    
+        
 
-
+    console.log("User Data is ", userData);
+    //console.log("Order Data is ", orderData);
     console.log("ArrivalTimeInfo is", arrivalTimeInfo);
+    console.log("Showing order:", showOrder)
+    console.log("Address is", deliveryAddress);
 
     return (
         <SafeAreaProvider>
@@ -118,29 +123,23 @@ export default LastOrderScreen = ({ }) => {
                                 provider="google"
                                 showsCompass={true}
                                 showsPointsOfInterest={false}
+                                showsUserLocation={true}
+                                followsUserLocation={true}
                                 loadingEnabled={true}
                                 initialRegion={{
-                                    longitude: orderData.deliveryLocation.lng,
-                                    latitude: orderData.deliveryLocation.lat,
-                                    latitudeDelta: latitudeDelta,
-                                    longitudeDelta: longitudeDelta,
+                                    ...orderData.deliveryLocation,
+                                    ...deltas
                                 }}
                             >
                                 <Marker
-                                    coordinate={{
-                                       latitude: orderData.deliveryLocation.lat,
-                                       longitude: orderData.deliveryLocation.lng,
-                                    }}
+                                    coordinate={orderData.deliveryLocation}
                                     title="Delivery Place"
                                     description="The Location where the drone will deliver the order"
                                     onPress={() => console.log("Hello Marker")}
                                 />
 
                                 <Marker
-                                    coordinate={{
-                                       latitude: orderData.currentLocation.lat,
-                                       longitude: orderData.currentLocation.lng,
-                                    }}
+                                    coordinate={orderData.currentLocation}
                                     title="Drone Location"
                                     description="The current location of the drone"
                                     onPress={() => console.log("Hello Marker")}

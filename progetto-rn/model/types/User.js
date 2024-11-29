@@ -1,6 +1,6 @@
 export default class User {
 
-    constructor(id, fName, lName, ccFullName, ccNumber, ccExpMonth, ccExpYear, ccCVV) {
+    constructor(id, fName, lName, ccFullName, ccNumber, ccExpMonth, ccExpYear, ccCVV, lastOrderId, lastOrderStatus) {
         this.id = id;
         this.fName = fName;
         this.lName = lName;
@@ -10,6 +10,8 @@ export default class User {
         this.ccExpMonth = ccExpMonth;
         this.ccExpYear = ccExpYear;
         this.ccCVV = ccCVV;
+        this.lastOrderId = lastOrderId;
+        this.lastOrderStatus = lastOrderStatus;
     }
 
     static validateId(id) {

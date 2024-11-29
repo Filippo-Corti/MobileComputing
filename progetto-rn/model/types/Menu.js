@@ -1,7 +1,7 @@
 export default class Menu {
 
-    constructor(menuId, name, price, location, imageVersion, shortDescription, deliveryTime, longDescription, image=null) {
-        this.menuId = menuId;
+    constructor(id, name, price, location, imageVersion, shortDescription, deliveryTime, longDescription, image=null) {
+        this.id = id;
         this.name = name;
         this.price = price;
         this.location = location;

@@ -4,6 +4,7 @@ import User from "../model/types/User";
 import Order from "../model/types/Order";
 import Menu from "../model/types/Menu";
 import DBController from "../model/DBController";
+import PositionViewModel from "./PositionViewModel";
 
 export default class ViewModel {
 
@@ -17,6 +18,7 @@ export default class ViewModel {
         this.uid = null;
         this.isFirstLaunch = false;
         this.dbController = new DBController();
+        this.locationAllowed = false;
     }
 
     static getViewModel() {
@@ -27,41 +29,29 @@ export default class ViewModel {
     }
 
     async fetchLaunchInformation() {
-        let sid, uid, isFirstLaunch, isRegistered, userDetails;
-        isFirstLaunch = await AsyncStorageController.isFirstLaunch();
-        if (isFirstLaunch) {
-            this.isFirstLaunch = true;
+        let sid, uid;
+        this.isFirstLaunch = await AsyncStorageController.isFirstLaunch();
+        if (this.isFirstLaunch) {
             await AsyncStorageController.set(KEYS.IS_REGISTERED, false);
             const sessionData = await APIController.createNewUserSession();
-            sid = sessionData.sid;
-            uid = sessionData.uid;
+            this.sid = sessionData.sid;
+            this.uid = sessionData.uid;
             await AsyncStorageController.memorizeSessionKeys(sid, uid);
         } else {
-            uid = await AsyncStorageController.get(KEYS.UID);
-            sid = await AsyncStorageController.get(KEYS.SID);
+            this.uid = await AsyncStorageController.get(KEYS.UID);
+            this.sid = await AsyncStorageController.get(KEYS.SID);
         }
-        isRegistered = await AsyncStorageController.get(KEYS.IS_REGISTERED)
-        console.log("UID=", uid, "SID=", sid, "Is Registered?", isRegistered)
-        this.sid = sid;
-        this.uid = uid;
-        if (isRegistered) {
-            userDetails = await this.getUserDetails();
-        }
-        const parsedUserDetails = userDetails
-            ? new User(
-                userDetails.id,
-                userDetails.firstName,
-                userDetails.lastName,
-                userDetails.cardFullName,
-                userDetails.cardNumber,
-                userDetails.cardExpireMonth,
-                userDetails.cardExpireYear,
-                userDetails.cardCVV)
-            : null;
-        const parsedOrderDetails = userDetails
-            ? new Order(userDetails.lastOid, userDetails.orderStatus)
-            : null;
-        return [parsedUserDetails, parsedOrderDetails];
+        const isRegistered = await AsyncStorageController.get(KEYS.IS_REGISTERED)
+        console.log("UID=", this.uid, "SID=", this.sid, "Is Registered?", isRegistered)
+
+        if (!isRegistered) return [null, null]
+
+        const user = await this.getUserDetails();
+        const order = new Order(
+            id = user.lastOrderId,
+            status = user.lastOrderStatus,
+        )
+        return [user, order];
     }
 
     async getUserDetails() {
@@ -71,10 +61,125 @@ export default class ViewModel {
         }
 
         try {
-            return await APIController.getUserDetailsById(this.sid, this.uid);
+            const userDetails = await APIController.getUserDetails(this.sid, this.uid);
+            return new User(
+                id = userDetails.uid,
+                fName = userDetails.firstName,
+                lName = userDetails.lastName,
+                ccFullName = userDetails.cardFullName,
+                ccNumber = userDetails.cardNumber,
+                ccExpMonth = userDetails.cardExpireMonth,
+                ccExpYear = userDetails.cardExpireYear,
+                ccCVV = userDetails.cardCVV,
+                lastOrderId = userDetails.lastOid,
+                lastOrderStatus = userDetails.orderStatus,
+            );
         } catch (err) {
             console.error(err);
             throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async getOrderDetails(orderId) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const orderDetails = await APIController.getOrderDetails(this.sid, orderId);
+            return new Order(
+                id = orderDetails.oid,
+                status = orderDetails.status,
+                orderDetailsRetrieved = true,
+                menuId = orderDetails.mid,
+                creationTimeStamp = orderDetails.creationTimestamp,
+                deliveryTimeStamp = orderDetails.deliveryTimestamp,
+                deliveryLocation = PositionViewModel.parseLocation(orderDetails.deliveryLocation),
+                currentLocation = PositionViewModel.parseLocation(orderDetails.currentPosition),
+            )
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async getMenuDetails(menuId) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const menuDetails = await APIController.getMenuDetails(this.sid, menuId, latitude = 45.4642, longitude = 9.19); //TODO Fix this;
+            return new Menu(
+                id = menuDetails.mid,
+                name = menuDetails.name,
+                price = menuDetails.price,
+                location = PositionViewModel.parseLocation(menuDetails.location),
+                imageVersion = menuDetails.imageVersion,
+                shortDescription = menuDetails.shortDescription,
+                deliveryTime = menuDetails.deliveryTime,
+                longDescription = menuDetails.longDescription,
+            )
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async getOrderAndMenuDetails(orderId) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null")
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const orderDetails = await this.getOrderDetails(orderId)
+            const menuDetails = await this.getMenuDetailsWithImage(orderDetails?.menuId)
+            orderDetails.menu = menuDetails
+            return orderDetails
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    // Retrieves Menu Details + Image, either from Local Storage or from the App Server
+    async getMenuDetailsWithImage(menuId) {
+        if (!this.sid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+        console.log("Fetching All Details for Menu number", menuId);
+
+        try {
+            //Check if Image is in Local DB Storage
+            const menu = await this.getMenuDetails(menuId);
+            const menuImageInStorage = await this.dbController.getMenuImageByVersion(menuId, menu.imageVersion);
+            if (menuImageInStorage) {
+                // If it is, just return it
+                console.log("Image retrieved from Local DB Storage");
+                menu.image = menuImageInStorage.Image;
+                return menu;
+            }
+
+            // If it's not, ask the server for the new version...
+            let menuImageFromServer = await APIController.getMenuImage(this.sid, menuId);
+            if (!menuImageFromServer.startsWith("data:image/jpeg;base64,")) {
+                menuImageFromServer = "data:image/jpeg;base64," + menuImageFromServer;
+            }
+
+            // ...then save the new version in Local DB Storage...
+            this.dbController.insertMenuImage(menuId, menuImageFromServer, menu.imageVersion);
+
+            // ...then return it
+            console.log("Image retrieved via API. Now saved in Storage");
+            menu.image = menuImageFromServer;
+            return menu;
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred retrieving Data for the Application");
         }
     }
 
@@ -109,92 +214,6 @@ export default class ViewModel {
             throw new Error("An Unexpected Error occurred contacting the App Server");
         }
     }
-
-    async getOrderDetails(orderId) {
-        if (!this.sid || !this.uid) {
-            console.error("Session Data is required but it's null");
-            throw new Error("An Unexpected Internal Error occurred")
-        }
-
-        try {
-            const orderDetails = await APIController.getOrderDetails(this.sid, orderId);
-            const orderedMenuDetails = await this.getMenuFullDetailsById(orderDetails?.mid);
-            if (orderDetails && orderedMenuDetails) {
-                return new Order(
-                    orderDetails.oid,
-                    orderDetails.status,
-                    orderDetailsRetrieved = true,
-                    orderDetails.mid,
-                    orderDetails.creationTimestamp,
-                    orderDetails.deliveryTimestamp,
-                    orderDetails.deliveryLocation,
-                    orderDetails.currentPosition,
-                    new Menu(
-                        orderedMenuDetails.mid,
-                        orderedMenuDetails.name,
-                        orderedMenuDetails.price,
-                        orderedMenuDetails.location,
-                        orderedMenuDetails.imageVersion,
-                        orderedMenuDetails.shortDescription,
-                        orderedMenuDetails.deliveryTime,
-                        orderedMenuDetails.longDescription,
-                        orderedMenuDetails.image
-                    )
-                );
-            }
-            return null;
-        } catch (err) {
-            console.error(err);
-            throw new Error("An Unexpected Error occurred contacting the App Server");
-        }
-    }
-
-    // Retrieves Menu Details + Image, either from Local Storage or from the App Server
-    async getMenuFullDetailsById(menuId) {
-        if (!this.sid) {
-            console.error("Session Data is required but it's null");
-            throw new Error("An Unexpected Internal Error occurred")
-        }
-
-        console.log("Fetching All Details for Menu number", menuId);
-        try {
-            //Check if Image is in Local DB Storage
-            const menuDetails = await APIController.getMenuDetailsById(this.sid, menuId, latitude=45.4642, longitude=9.19); //TODO Fix this
-            const menuImageInStorage = await this.dbController.getMenuImageByVersion(menuId, menuDetails.imageVersion);
-            if (menuImageInStorage) {
-
-                // If it is, just return it
-                console.log("Image retrieved from Local DB Storage");
-                return {
-                    ...menuDetails,
-                    image: menuImageInStorage.Image,
-                };
-
-            } else {
-
-                // If it's not, ask the server for the new version...
-                let menuImageFromServer = await APIController.getMenuImageById(this.sid, menuId);
-                if (!menuImageFromServer.startsWith("data:image/jpeg;base64,")) {
-                    menuImageFromServer = "data:image/jpeg;base64," + menuImageFromServer;
-                }
-
-                // ...then save the new version in Local DB Storage...
-                this.dbController.insertMenuImage(menuId, menuImageFromServer, menuDetails.imageVersion);
-
-                // ...then return it
-                console.log("Image retrieved via API. Now saved in Storage");
-                return {
-                    ...menuDetails,
-                    image: menuImageFromServer,
-                }
-
-            }
-        } catch (err) {
-            console.error(err);
-            throw new Error("An Unexpected Error occurred retrieving Data for the Application");
-        }
-    }
-
 
 }
 

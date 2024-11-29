@@ -44,10 +44,16 @@ export default function App() {
       const [userData, orderData] = await viewModel.fetchLaunchInformation();
       setUserData(userData);
       setOrderData(orderData);
-      console.log("FetchUserData:", userData, orderData);
+      console.log("FetchUserData:", userData != null, orderData != null);
     } catch (err) {
       console.error("Error loading the Menu Data:", err);
     }
+  }
+
+  const askForLocation = async () => {
+    const locationAllowed = await PositionViewModel.askForLocationPermission();
+    viewModel.locationAllowed = locationAllowed;
+    console.log("Location Allowed?", viewModel.locationAllowed)
   }
 
   useEffect(() => {
@@ -57,7 +63,7 @@ export default function App() {
       }
       if (viewModel) {
         await fetchUserData();
-        await PositionViewModel.askForLocationPermission();
+        await askForLocation();
       }
     };
 
