@@ -11,4 +11,9 @@ export default class Menu {
         this.longDescription = longDescription;
         this.image = image;
     }
+
+    formatPrice() {
+        return (this.price) ? this.price.toFixed(2) : "";
+    }
+
 }

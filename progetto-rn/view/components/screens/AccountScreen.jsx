@@ -8,20 +8,53 @@ import CreditCard from '../common/other/CreditCard';
 import MinimalistButton from '../common/buttons/MinimalistButton';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import { UserContext } from '../../context/UserContext';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
+import ViewModel from '../../../viewmodel/ViewModel';
 
 export default AccountScreen = ({ }) => {
 
     const navigation = useNavigation();
 
+    const [viewModel, setViewModel] = useState(null);
     const { userData, orderData, setOrderData } = useContext(UserContext);
+
+    const initViewModel = async () => {
+        try {
+            const newViewModel = ViewModel.getViewModel();
+            setViewModel(newViewModel);
+        } catch (err) {
+            console.error("Error loading the View Model:", err);
+        }
+    }
+
+    const fetchLastOrder = async () => {
+        try {
+            const orderDetails = await viewModel.getOrderAndMenuDetails(orderData.id);
+            setOrderData(orderDetails);
+            console.log("Fetched Order Data:", orderDetails.deliveryLocation);
+        } catch (err) {
+            console.error("Error fetching the last order details:", err);
+        }
+    }
+
+    useEffect(() => {
+        const initializeAndFetch = async () => {
+            if (!viewModel)
+                await initViewModel();
+
+            if (viewModel) {
+                if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
+                    await fetchLastOrder();
+            }
+        };
+
+        initializeAndFetch();
+    }, [userData, orderData, viewModel]);
 
     console.log("User Data is", userData);
     console.log("Order data is", orderData);
 
-    if (orderData?.oid && !orderData.orderDetailsRetrieved) { // If there is an order but we don't have the details
-        console.log("Need to retrieve order details");
-    }
+    const showOrder = (orderData && orderData.id && orderData.orderDetailsRetrieved);
 
     return (
         <SafeAreaProvider>
@@ -46,7 +79,7 @@ export default AccountScreen = ({ }) => {
 
                     <Separator size={1} color={colors.lightGray} />
 
-                    {orderData?.oid && orderData?.orderDetailsRetrieved && <>
+                    {showOrder && <>
 
                         <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
                             <View style={[globalStyles.flexBetween, { width: '100%' }]}>
@@ -56,16 +89,16 @@ export default AccountScreen = ({ }) => {
                                     </Text>
                                 </View>
                                 <View>
-                                    <ButtonWithArrow text="Order Again" onPress={() => console.log("Pressed")} />
+                                    <ButtonWithArrow text="See More" onPress={() => navigation.navigate("LastOrder")} />
                                 </View>
                             </View>
                             <MenuPreview menuInformation={{
-                                title: 'McMushroom Pizza',
-                                price: 21,
-                                description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge',
-                                deliveryTime: 30,
-                                distanceFromYou: 0.2,
-                                image: imageBase64,
+                                title: orderData.menu.name,
+                                price: orderData.menu.formatPrice(),
+                                description: orderData.menu.shortDescription,
+                                deliveryTime: orderData.menu.deliveryTime,
+                                distanceFromYou: "--",
+                                image: orderData.menu.image,
                             }}
                                 onPress={() => navigation.navigate("HomeStack", { screen: "MenuDetails" })}
                                 style={{ marginTop: 8, }}

@@ -1,8 +1,8 @@
-import {View, TouchableOpacity, Text, Image, StyleSheet} from 'react-native';
-import {globalStyles} from '../../../../styles/global';
-import MyIcon, {IconNames} from '../icons/MyIcon';
+import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
+import { globalStyles } from '../../../../styles/global';
+import MyIcon, { IconNames } from '../icons/MyIcon';
 
-export default MenuPreview = ({menuInformation, onPress, style}) => {
+export default MenuPreview = ({ menuInformation, onPress, style }) => {
 
     let image = menuInformation.image;
     if (image) {
@@ -11,19 +11,21 @@ export default MenuPreview = ({menuInformation, onPress, style}) => {
         }
     }
 
-    let price = menuInformation.price.toFixed(2);
-
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={() => onPress()}>
             <View style={styles.textContainer}>
-                <Text style={styles.title}>{menuInformation.title}</Text>
-                <Text style={styles.price}>€{price}</Text>
-                <Text style={styles.description}>{menuInformation.description}</Text>
-                <Text style={styles.otherInfo}>{menuInformation.deliveryTime}min • {menuInformation.distanceFromYou}km from you</Text>
+                <View>
+                    <Text style={styles.title}>{menuInformation.title}</Text>
+                    <Text style={styles.price}>€{menuInformation.price}</Text>
+                    <Text style={styles.description}>{menuInformation.description}</Text>
+                </View>
+                <View>
+                    <Text style={styles.otherInfo}>{menuInformation.deliveryTime}min • {menuInformation.distanceFromYou}km from you</Text>
+                </View>
             </View>
             <View style={styles.imageContainer}>
-                {image && <Image source={{ uri: image }} style={styles.image} /> }
-                {!image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray}/> }
+                {image && <Image source={{ uri: image }} style={styles.image} />}
+                {!image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />}
             </View>
         </TouchableOpacity>
     );
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
 
     textContainer: {
         width: '60%',
+        justifyContent: 'space-between',
     },
 
     title: {
@@ -51,6 +54,7 @@ const styles = StyleSheet.create({
     price: {
         ...globalStyles.textBlack,
         ...globalStyles.textSmallRegular,
+        marginBottom: 4,
     },
 
     description: {

@@ -14,6 +14,7 @@ import { useContext, useEffect, useState } from 'react';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import ViewModel from '../../../viewmodel/ViewModel';
 import * as Location from 'expo-location';
+import MenuSmallPreview from '../common/other/MenuSmallPreview';
 
 
 const { height } = Dimensions.get('window');
@@ -69,7 +70,7 @@ export default LastOrderScreen = ({ }) => {
                 await initViewModel();
 
             if (viewModel) {
-                if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
+                if (orderData && orderData.id && !orderData.orderDetailsRetrieved)
                     await fetchLastOrder();
 
                 if (orderData && orderData.deliveryLocation)
@@ -81,14 +82,11 @@ export default LastOrderScreen = ({ }) => {
     }, [orderData, viewModel]);
 
     const arrivalTimeInfo = orderData?.extractArrivalTimeInformation();
-    const price = orderData?.menu?.price.toFixed(2);
 
     const showOrder = (orderData && orderData.id && orderData.orderDetailsRetrieved);
-    const deltas = (showOrder) 
+    const deltas = (showOrder)
         ? PositionViewModel.calculateMapDeltas2Positions(userLocation, orderData.deliveryLocation, orderData.currentLocation)
         : null;
-    
-        
 
     console.log("User Data is ", userData);
     //console.log("Order Data is ", orderData);
@@ -164,14 +162,11 @@ export default LastOrderScreen = ({ }) => {
                                     Order details
                                 </Text>
                             </View>
-                            <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginBottom: 20, marginTop: 10 }]}>
-                                <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                    1x {orderData.menu.name}
-                                </Text>
-                                <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                    €{price}
-                                </Text>
-                            </View>
+                            <MenuSmallPreview
+                                image={orderData.menu.image}
+                                title={"1x " + orderData.menu.name}
+                                price={orderData.menu.formatPrice()}
+                            />
                         </>
                         : <>
                             <View style={[globalStyles.insetContainer, { marginTop: 20, marginHorizontal: 5 }]}>

@@ -6,6 +6,7 @@ import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import Separator from '../common/other/Separator';
 import InfoTextBox from '../common/other/InfoTextBox';
 import LargeButton from '../common/buttons/LargeButton';
+import MenuSmallPreview from '../common/other/MenuSmallPreview';
 
 
 const { height } = Dimensions.get('window');
@@ -71,18 +72,11 @@ export default ConfirmOrderScreen = ({ menuInformation }) => {
                         </View>
                         <Separator size={10} color={colors.lightGray} />
 
-                        <View style={[globalStyles.flexBetween, { gap: 20, marginHorizontal: 30, marginVertical: 20 }]}>
-                            <View style={styles.imageContainer}>
-                                {image && <Image source={{ uri: image }} style={styles.image} />}
-                                {!image && <View style={styles.iconContainer}>
-                                    <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />
-                                </View>}
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>{menuInformation.title}</Text>
-                                <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>{"€" + price}</Text>
-                            </View>
-                        </View>
+                        <MenuSmallPreview
+                            image={image}
+                            title={menuInformation.title}
+                            price={menuInformation.price}
+                        />
                         <Separator size={1} color={colors.lightGray} />
                         <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginVertical: 20 }]}>
                             <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
