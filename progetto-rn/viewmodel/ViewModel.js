@@ -219,35 +219,6 @@ export default class ViewModel {
         }
     }
 
-    async getNearestMenusWithImages(userPosition) {
-        if (!this.sid || !this.uid) {
-            console.error("Session Data is required but it's null");
-            throw new Error("An Unexpected Internal Error occurred")
-        }
-
-        try {
-            const menus = [];
-            const fetchedMenus = await APIController.getNearestMenus(this.sid, userPosition.latitude, userPosition.longitude);
-            console.log("Menus:", fetchedMenus);
-            for (const menu of fetchedMenus) {
-                menus.push(new Menu(
-                    id = menu.mid,
-                    name = menu.name,
-                    price = menu.price,
-                    location = PositionViewModel.parseLocation(menu.location),
-                    imageVersion = menu.imageVersion,
-                    shortDescription = menu.shortDescription,
-                    deliveryTime = menu.deliveryTime,
-                    longDescription = menu.longDescription,
-                ))
-            }
-            return menus;
-        } catch (err) {
-            console.error(err);
-            throw new Error("An Unexpected Error occurred contacting the App Server");
-        }
-    }
-
     async updateUserDetails(userFormData) {
         if (!this.sid || !this.uid) {
             console.error("Session Data is required but it's null");
