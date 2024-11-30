@@ -29,6 +29,7 @@ export default function App() {
   const [viewModel, setViewModel] = useState(null);
   const [userData, setUserData] = useState(null);
   const [orderData, setOrderData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const initViewModel = async () => {
     try {
@@ -63,6 +64,7 @@ export default function App() {
       }
       if (viewModel) {
         await fetchUserData();
+        setIsLoading(false);
         await askForLocation();
       }
     };
@@ -73,7 +75,7 @@ export default function App() {
 
   console.log("------------ Reload ------------");
 
-  if (!fontsLoaded || !viewModel) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <MyLogo />

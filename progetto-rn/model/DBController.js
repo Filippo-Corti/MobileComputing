@@ -33,7 +33,6 @@ export default class DBController {
     }
 
     async getMenuImageByVersion(menuId, imageVersion) {
-        console.log("Querying ", menuId, imageVersion)
         const query = `
             SELECT * FROM MenuImages
             WHERE MenuId = ? AND Version = ?            

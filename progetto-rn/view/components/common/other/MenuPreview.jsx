@@ -12,9 +12,6 @@ export default MenuPreview = ({ menuInformation, onPress, style }) => {
 
     onPress = onPress || (() => {})
 
-    let image = menuInformation.image;
-    if (image) {
-    }
 
     const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(userLocation, menuInformation.location).toFixed(1);
 
@@ -31,8 +28,8 @@ export default MenuPreview = ({ menuInformation, onPress, style }) => {
                 </View>
             </View>
             <View style={styles.imageContainer}>
-                {image && <Image source={{ uri: image }} style={styles.image} />}
-                {!image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />}
+                {menuInformation.image && <Image source={{ uri: menuInformation.image }} style={styles.image} />}
+                {!menuInformation.image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />}
             </View>
         </TouchableOpacity>
     );

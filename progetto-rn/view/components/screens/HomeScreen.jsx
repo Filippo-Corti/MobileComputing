@@ -37,11 +37,11 @@ export default HomeScreen = ({ }) => {
 
     const fetchNearestMenus = async () => {
         try {
-            const menus = await viewModel.getNearestMenus(userLocation);
+            const menus = await viewModel.getNearestMenusWithImages(userLocation);
             setNearestMenus(menus);
-            console.log("Fetched Nearest Menus Data:", menus);
+            console.log("Fetched Nearest Menus Data:", menus.length);
         } catch (err) {
-            console.error("Error fetching the last order details:", err);
+            console.error("Error fetching the nearest menus details:", err);
         }
     }
 
@@ -58,7 +58,9 @@ export default HomeScreen = ({ }) => {
         initializeAndFetch();
     }, [viewModel]);
 
-    console.log("Nearest menus are", nearestMenus.length > 0, nearestMenus.length)
+
+    console.log("Nearest menus are", nearestMenus.length)
+
 
     return (
         <SafeAreaProvider>
@@ -96,13 +98,9 @@ export default HomeScreen = ({ }) => {
                             </Text>
                         </View>
 
-                        <FlatList
+                        {viewModel && nearestMenus && <FlatList
                             data={nearestMenus}
-                            renderItem={async ({ item }) => {
-                                if (!item.image) {
-                                    const image = await viewModel.getMenuImage(item.id, item.imageVersion);
-                                    item.image = image;
-                                }
+                            renderItem={({ item }) => {
                                 return (<MenuPreview
                                     menuInformation={item}
                                     onPress={() => navigation.navigate("MenuDetails")}
@@ -115,7 +113,7 @@ export default HomeScreen = ({ }) => {
                             style={{
                                 flex: 1,
                             }}
-                        />
+                        />}
                     </View>
 
                     <StatusBar style="auto" />

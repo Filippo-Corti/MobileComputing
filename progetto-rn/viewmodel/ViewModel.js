@@ -34,9 +34,10 @@ export default class ViewModel {
         if (this.isFirstLaunch) {
             await AsyncStorageController.set(KEYS.IS_REGISTERED, false);
             const sessionData = await APIController.createNewUserSession();
+            console.log("Created New User Session:", sessionData);
             this.sid = sessionData.sid;
             this.uid = sessionData.uid;
-            await AsyncStorageController.memorizeSessionKeys(sid, uid);
+            await AsyncStorageController.memorizeSessionKeys(this.sid, this.uid);
         } else {
             this.uid = await AsyncStorageController.get(KEYS.UID);
             this.sid = await AsyncStorageController.get(KEYS.SID);
@@ -63,16 +64,16 @@ export default class ViewModel {
         try {
             const userDetails = await APIController.getUserDetails(this.sid, this.uid);
             return new User(
-                id = userDetails.uid,
-                fName = userDetails.firstName,
-                lName = userDetails.lastName,
-                ccFullName = userDetails.cardFullName,
-                ccNumber = userDetails.cardNumber,
-                ccExpMonth = userDetails.cardExpireMonth,
-                ccExpYear = userDetails.cardExpireYear,
-                ccCVV = userDetails.cardCVV,
-                lastOrderId = userDetails.lastOid,
-                lastOrderStatus = userDetails.orderStatus,
+                userDetails.uid,
+                userDetails.firstName,
+                userDetails.lastName,
+                userDetails.cardFullName,
+                userDetails.cardNumber,
+                userDetails.cardExpireMonth,
+                userDetails.cardExpireYear,
+                userDetails.cardCVV,
+                userDetails.lastOid,
+                userDetails.orderStatus,
             );
         } catch (err) {
             console.error(err);
@@ -89,14 +90,14 @@ export default class ViewModel {
         try {
             const orderDetails = await APIController.getOrderDetails(this.sid, orderId);
             return new Order(
-                id = orderDetails.oid,
-                status = orderDetails.status,
-                orderDetailsRetrieved = true,
-                menuId = orderDetails.mid,
-                creationTimeStamp = orderDetails.creationTimestamp,
-                deliveryTimeStamp = orderDetails.deliveryTimestamp,
-                deliveryLocation = PositionViewModel.parseLocation(orderDetails.deliveryLocation),
-                currentLocation = PositionViewModel.parseLocation(orderDetails.currentPosition),
+                orderDetails.oid,
+                orderDetails.status,
+                true,
+                orderDetails.mid,
+                orderDetails.creationTimestamp,
+                orderDetails.deliveryTimestamp,
+                PositionViewModel.parseLocation(orderDetails.deliveryLocation),
+                PositionViewModel.parseLocation(orderDetails.currentPosition),
             )
         } catch (err) {
             console.error(err);
@@ -145,12 +146,13 @@ export default class ViewModel {
         }
     }
 
+    // Retrieves Menu Details + Image, either from Local Storage or from the App Server
     async getMenuImage(menuId, imageVersion) {
         try {
             const menuImageInStorage = await this.dbController.getMenuImageByVersion(menuId, imageVersion);
             if (menuImageInStorage) {
                 // If it is, just return it
-                console.log("Image retrieved from Local DB Storage");
+                //console.log("Image retrieved from Local DB Storage");
                 return menuImageInStorage.Image;
             }
     
@@ -164,14 +166,13 @@ export default class ViewModel {
             this.dbController.insertMenuImage(menuId, menuImageFromServer, imageVersion);
     
             // ...then return it
-            console.log("Image retrieved via API. Now saved in Storage");
+            //console.log("Image retrieved via API. Now saved in Storage");
             return menuImageFromServer;
         } catch (err) {
             console.error("Error loading the Menu Image:", err)
         }
     }
 
-    // Retrieves Menu Details + Image, either from Local Storage or from the App Server
     async getMenuDetailsWithImage(menuId) {
         if (!this.sid) {
             console.error("Session Data is required but it's null");
@@ -199,17 +200,46 @@ export default class ViewModel {
         try {
             const menus = [];
             const fetchedMenus = await APIController.getNearestMenus(this.sid, userPosition.latitude, userPosition.longitude);
-            console.log("Menus:", fetchedMenus);
             for (const menu of fetchedMenus) {
                 menus.push(new Menu(
-                    id = menu.mid,
-                    name = menu.name,
-                    price = menu.price,
-                    location = PositionViewModel.parseLocation(menu.location),
-                    imageVersion = menu.imageVersion,
-                    shortDescription = menu.shortDescription,
-                    deliveryTime = menu.deliveryTime,
-                    longDescription = menu.longDescription,
+                    menu.mid,
+                    menu.name,
+                    menu.price,
+                    PositionViewModel.parseLocation(menu.location),
+                    menu.imageVersion,
+                    menu.shortDescription,
+                    menu.deliveryTime,
+                    menuDetails.longDescription,
+                ))
+            }
+            return menus;
+        } catch (err) {
+            console.error(err);
+            throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    async getNearestMenusWithImages(userPosition) {
+        if (!this.sid || !this.uid) {
+            console.error("Session Data is required but it's null");
+            throw new Error("An Unexpected Internal Error occurred")
+        }
+
+        try {
+            const menus = [];
+            const fetchedMenus = await APIController.getNearestMenus(this.sid, userPosition.latitude, userPosition.longitude);
+            for (const menu of fetchedMenus) {
+                const fetchedImage = await this.getMenuImage(menu.mid, menu.imageVersion);
+                menus.push(new Menu(
+                    menu.mid,
+                    menu.name,
+                    menu.price,
+                    PositionViewModel.parseLocation(menu.location),
+                    menu.imageVersion,
+                    menu.shortDescription,
+                    menu.deliveryTime,
+                    menu.longDescription,
+                    fetchedImage,
                 ))
             }
             return menus;
