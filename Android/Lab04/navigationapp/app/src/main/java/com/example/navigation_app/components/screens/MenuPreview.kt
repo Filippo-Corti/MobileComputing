@@ -1,4 +1,4 @@
-package com.example.navigation_app.components
+package com.example.navigation_app.components.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
