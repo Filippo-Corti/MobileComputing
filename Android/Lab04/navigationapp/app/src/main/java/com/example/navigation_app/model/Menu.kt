@@ -1,3 +1,8 @@
 package com.example.navigation_app.model
 
-data class Menu(val title :String, val shortDescription :String, val longDescription :String)
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class Menu(val title :String, val shortDescription :String, val longDescription :String) :
+    Parcelable

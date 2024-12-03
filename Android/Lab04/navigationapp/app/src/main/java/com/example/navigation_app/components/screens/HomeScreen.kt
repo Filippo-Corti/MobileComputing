@@ -23,11 +23,13 @@ import com.example.navigation_app.components.common.other.MenuPreview
 import com.example.navigation_app.model.Menu
 
 @Composable
-fun HomeScreen(navController: NavController, handleNavigate: (String) -> Unit) {
+fun HomeScreen(
+    handleNavigate: (String) -> Unit,
+    handleNavigateToMenuDetails : (Menu) -> Unit
+) {
 
     val menus by remember { mutableStateOf(createSampleMenus()) }
 
-    Log.d("HomeScreen", "Stack: " + navController.backQueue.map {it.destination.route})
 
     Column {
 
@@ -51,7 +53,7 @@ fun HomeScreen(navController: NavController, handleNavigate: (String) -> Unit) {
                     menu = it,
                     onPress = {
                         Log.d("HomeScreen", "Menu pressed")
-                        handleNavigate("MenuDetails")
+                        handleNavigateToMenuDetails(it)
                     }
                 )
             }

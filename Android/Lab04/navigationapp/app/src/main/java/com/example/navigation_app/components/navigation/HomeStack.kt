@@ -20,15 +20,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.navigation_app.components.screens.HomeScreen
 import com.example.navigation_app.components.screens.MenuDetailsScreen
+import com.example.navigation_app.model.Menu
 
 
 @Composable
-fun HomeStack(tabController: NavController, selectedRoute: String, onSelectedRouteChange: (String) -> Unit) {
+fun HomeStack(
+    tabController: NavController,
+    selectedRoute: String,
+    selectedRouteParams : Map<String, Any>?,
+    onSelectedRouteChange: (String) -> Unit
+) {
 
     val navController = rememberNavController()
 
-
-    val navigateToRoute : (String) -> Unit = {  newRoute ->
+    val navigateToRoute : (String) -> Unit = { newRoute ->
         onSelectedRouteChange(newRoute)
         navController.navigate(newRoute) {
             launchSingleTop = true
@@ -47,8 +52,11 @@ fun HomeStack(tabController: NavController, selectedRoute: String, onSelectedRou
     }
 
     // Navigate to the last selected route when HomeStack is selected
-    LaunchedEffect(selectedRoute) {
+    LaunchedEffect(selectedRoute, selectedRouteParams) {
         Log.d("HomeStack", "Selected Route is $selectedRoute")
+        selectedRouteParams?.forEach() { (key, value) ->
+            navController.currentBackStackEntry?.savedStateHandle?.set(key, value)
+        }
         navigateToRoute(selectedRoute)
     }
 
@@ -63,16 +71,22 @@ fun HomeStack(tabController: NavController, selectedRoute: String, onSelectedRou
             ) {
                 composable(NavigationItem.Home.route) {
                     HomeScreen(
-                        navController = navController,
                         handleNavigate = navigateToRoute,
+                        handleNavigateToMenuDetails = { menu ->
+                            navController.currentBackStackEntry?.savedStateHandle?.set("menu", menu)
+                            navigateToRoute(NavigationItem.MenuDetails.route)
+                        }
                     )
                 }
                 composable(NavigationItem.MenuDetails.route) {
-                    MenuDetailsScreen(
-                        navController = navController,
-                        menu = null,
-                        handleNavigateBack = navigateBack,
-                    )
+                    val menu : Menu? = navController.previousBackStackEntry?.savedStateHandle?.get("menu")
+                    if (menu != null) {
+                        MenuDetailsScreen(
+                            navController = navController,
+                            menu = menu,
+                            handleNavigateBack = navigateBack,
+                        )
+                    }
                 }
             }
         }

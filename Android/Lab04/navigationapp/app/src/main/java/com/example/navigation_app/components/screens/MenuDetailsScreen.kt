@@ -26,7 +26,10 @@ import com.example.navigation_app.R
 import com.example.navigation_app.model.Menu
 
 @Composable
-fun MenuDetailsScreen(navController: NavController, menu: Menu?, handleNavigateBack: () -> Unit) {
+fun MenuDetailsScreen(
+    navController: NavController,
+    menu: Menu,
+    handleNavigateBack: () -> Unit) {
 
 
     Log.d("MenuDetailsScreen", "Stack: " + navController.backQueue.map {it.destination.route})
@@ -45,7 +48,7 @@ fun MenuDetailsScreen(navController: NavController, menu: Menu?, handleNavigateB
         )
 
         Text(
-            text = menu?.title ?: "Menu Title",
+            text = menu.title,
             modifier = Modifier
                 .padding(0.dp, 0.dp, 0.dp, 8.dp),
             fontSize = 20.sp,
@@ -53,7 +56,7 @@ fun MenuDetailsScreen(navController: NavController, menu: Menu?, handleNavigateB
         )
 
         Text(
-            text = menu?.longDescription ?: "Menu Description",
+            text = menu.longDescription,
         )
 
         Button(onClick = {

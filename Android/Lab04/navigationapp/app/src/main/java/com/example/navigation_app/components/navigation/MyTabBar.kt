@@ -14,7 +14,9 @@ import androidx.navigation.NavController
 
 @Composable
 fun MyTabBar(
-    navController: NavController
+    navController: NavController,
+    selectedItem : Int,
+    setSelectedItem : (Int) -> Unit
 ) {
 
     val items = listOf(
@@ -22,8 +24,6 @@ fun MyTabBar(
         NavigationItem.AccountStack // 1
     )
 
-    var selectedItem by remember { mutableIntStateOf(0) }
-    var currentRoute by remember { mutableStateOf(items[selectedItem].route) }
 
 
     NavigationBar {
@@ -34,8 +34,7 @@ fun MyTabBar(
                 label = { Text(item.title) },
                 selected = selectedItem  == index,
                 onClick = {
-                    selectedItem = index
-                    currentRoute = item.route
+                    setSelectedItem(index)
 
                     navController.navigate(item.route) {
                         popUpTo(item.route) {

@@ -40,13 +40,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             val tabController = rememberNavController()
 
+            var selectedTabIndex by remember { mutableIntStateOf(0) }
             var homeStackSelectedRoute by remember { mutableStateOf(NavigationItem.Home.route) }
+            var homeStackSelectedRouteParams by remember { mutableStateOf<Map<String, Any>?>(emptyMap()) }
+            var accountStackSelectedRoute by remember { mutableStateOf(NavigationItem.Account.route) }
 
             Scaffold (
                 bottomBar = {
                     BottomAppBar {
                         MyTabBar(
                             navController = tabController,
+                            selectedItem = selectedTabIndex,
+                            setSelectedItem = { index -> selectedTabIndex = index }
                         )
                     }
                 }
@@ -62,12 +67,21 @@ class MainActivity : ComponentActivity() {
                             HomeStack(
                                 tabController = tabController,
                                 selectedRoute = homeStackSelectedRoute,
+                                selectedRouteParams = homeStackSelectedRouteParams,
                                 onSelectedRouteChange = { route -> homeStackSelectedRoute = route }
                             )
                         }
                         composable(NavigationItem.AccountStack.route) {
                             AccountStack(
                                 tabController = tabController,
+                                selectedRoute = accountStackSelectedRoute,
+                                onSelectedRouteChange = { route -> accountStackSelectedRoute = route },
+                                jumpToMenuDetails = { menu ->
+                                    homeStackSelectedRoute = NavigationItem.MenuDetails.route
+                                    homeStackSelectedRouteParams = mapOf("menu" to menu)
+                                    selectedTabIndex = 0
+                                    tabController.navigate(NavigationItem.HomeStack.route)
+                                }
                             )
                         }
                     }

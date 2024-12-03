@@ -22,12 +22,7 @@ import com.example.navigation_app.R
 import com.example.navigation_app.model.User
 
 @Composable
-fun AccountScreen(
-    handleNavigate: (String) -> Unit,
-    handleNavigateToMenuDetails: () -> Unit
-) {
-
-    val user = User("Filippo", "Corti")
+fun EditAccountScreen(handleNavigateBack : () -> Unit) {
 
     Column (
         modifier = Modifier
@@ -36,31 +31,13 @@ fun AccountScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.default_avatar),
-            contentDescription = "Profile Image",
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Text(
-            text = user.fName + " " + user.lName,
+            text = "This is the Edit Account Screen",
             fontSize = 20.sp
         )
 
-        Button(onClick = { handleNavigate("EditAccount")}) {
-            Text(
-                text = "Edit Account"
-            )
-        }
-
-        Button(onClick = handleNavigateToMenuDetails) {
-            Text(
-                text = "Jump to the other Stack"
-            )
+        Button(onClick = handleNavigateBack) {
+            Text("Go Back")
         }
 
     }

@@ -14,4 +14,5 @@ sealed class NavigationItem(var route: String, val icon: ImageVector?, var title
 
     data object AccountStack : NavigationItem("AccountStack", Icons.Rounded.AccountBox, "Account")
     data object Account : NavigationItem("Account", null, "Account")
+    data object EditAccount : NavigationItem("EditAccount", null, "Edit Account")
 }
