@@ -1,5 +1,6 @@
 package com.example.navigation_app.components.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,12 +17,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import com.example.navigation_app.components.common.other.MenuPreview
 import com.example.navigation_app.model.Menu
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController, handleNavigate: (String) -> Unit) {
 
     val menus by remember { mutableStateOf(createSampleMenus()) }
+
+    Log.d("HomeScreen", "Stack: " + navController.backQueue.map {it.destination.route})
 
     Column {
 
@@ -39,10 +45,15 @@ fun HomeScreen() {
             modifier = Modifier
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
-
         ){
             items(menus) {
-                MenuPreview(it)
+                MenuPreview(
+                    menu = it,
+                    onPress = {
+                        Log.d("HomeScreen", "Menu pressed")
+                        handleNavigate("MenuDetails")
+                    }
+                )
             }
         }
     }
@@ -51,7 +62,15 @@ fun HomeScreen() {
 
 fun createSampleMenus() : List<Menu> {
     return listOf(
-        Menu("Pizza", "Una buona pizza margherita con pomodoro, mozzarella"),
-        Menu("Pasta", "Una pasta alla carbonara che dalla foto sembra una pizza"),
+        Menu(
+            "Pizza",
+            "Una buona pizza margherita con pomodoro, mozzarella",
+            longDescription = "Una buona pizza margherita con pomodoro, mozzarella, basilico e olio d'oliva. Cotta in forno a legna a 400 gradi per 4 minuti",
+        ),
+        Menu(
+            "Pasta",
+            "Una pasta alla carbonara che dalla foto sembra una pizza",
+            longDescription = "Una pasta alla carbonara che dalla foto sembra una pizza. Con uova, pancetta, pecorino e pepe",
+        ),
     )
 }

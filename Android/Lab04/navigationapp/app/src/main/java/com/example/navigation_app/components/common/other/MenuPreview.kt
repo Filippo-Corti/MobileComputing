@@ -1,6 +1,7 @@
-package com.example.navigation_app.components.screens
+package com.example.navigation_app.components.common.other
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,11 +18,12 @@ import com.example.navigation_app.R
 import com.example.navigation_app.model.Menu
 
 @Composable
-fun MenuPreview(menu : Menu) {
+fun MenuPreview(menu : Menu, onPress : () -> Unit) {
     Row (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable { onPress() }
     ) {
         Column (
             modifier = Modifier

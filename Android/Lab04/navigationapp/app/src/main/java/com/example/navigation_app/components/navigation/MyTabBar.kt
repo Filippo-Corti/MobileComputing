@@ -13,33 +13,35 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 
 @Composable
-fun MyTabBar(navController: NavController) {
+fun MyTabBar(
+    navController: NavController
+) {
+
     val items = listOf(
-        NavigationItem.Home, // 0
-        NavigationItem.Account // 1
+        NavigationItem.HomeStack, // 0
+        NavigationItem.AccountStack // 1
     )
 
     var selectedItem by remember { mutableIntStateOf(0) }
-    var currentItemRoute by remember { mutableStateOf(items[selectedItem].route) }
+    var currentRoute by remember { mutableStateOf(items[selectedItem].route) }
+
 
     NavigationBar {
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 alwaysShowLabel = true,
-                icon = { Icon(item.icon, contentDescription = item.title) },
+                icon = { item.icon?.let { Icon(it, contentDescription = item.title) } },
                 label = { Text(item.title) },
-                selected = selectedItem == index,
+                selected = selectedItem  == index,
                 onClick = {
                     selectedItem = index
-                    currentItemRoute = item.route
+                    currentRoute = item.route
+
                     navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) {
-                                saveState = true
-                            }
+                        popUpTo(item.route) {
+                            inclusive = true
                         }
                         launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
