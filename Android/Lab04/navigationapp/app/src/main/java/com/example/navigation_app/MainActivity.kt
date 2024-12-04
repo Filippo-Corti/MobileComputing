@@ -47,12 +47,15 @@ class MainActivity : ComponentActivity() {
 
             Scaffold (
                 bottomBar = {
-                    BottomAppBar {
-                        MyTabBar(
-                            navController = tabController,
-                            selectedItem = selectedTabIndex,
-                            setSelectedItem = { index -> selectedTabIndex = index }
-                        )
+                    if ((homeStackSelectedRoute == NavigationItem.Home.route && selectedTabIndex == 0) ||
+                        (accountStackSelectedRoute == NavigationItem.Account.route) && selectedTabIndex == 1) {
+                        BottomAppBar {
+                            MyTabBar(
+                                navController = tabController,
+                                selectedItem = selectedTabIndex,
+                                setSelectedItem = { index -> selectedTabIndex = index }
+                            )
+                        }
                     }
                 }
             ) { padding ->
