@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
+    id("kotlinx-serialization")
 }
 
 android {
@@ -69,5 +70,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.navigation.compose)
+
+    // Core
+    implementation(libs.ktor.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    // Logging
+    implementation(libs.ktor.client.logging)
+    // JSON Serialization
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.io.ktor.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json.v210)
 
 }
