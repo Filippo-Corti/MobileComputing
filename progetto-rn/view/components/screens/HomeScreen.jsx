@@ -6,13 +6,15 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { UserContext } from '../../context/UserContext';
 import ViewModel from '../../../viewmodel/ViewModel';
 
 const { height } = Dimensions.get('window');
 
 export default HomeScreen = ({ }) => {
+
+    const viewModel = ViewModel.getViewModel()
 
     const userLocation = {
         longitude: -122.427,
@@ -21,19 +23,8 @@ export default HomeScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const [viewModel, setViewModel] = useState(null);
     const [nearestMenus, setNearestMenus] = useState([]);
     const { userData } = useContext(UserContext);
-
-
-    const initViewModel = async () => {
-        try {
-            const newViewModel = ViewModel.getViewModel();
-            setViewModel(newViewModel);
-        } catch (err) {
-            console.error("Error loading the View Model:", err);
-        }
-    }
 
     const fetchNearestMenus = async () => {
         try {
@@ -47,16 +38,11 @@ export default HomeScreen = ({ }) => {
 
     useEffect(() => {
         const initializeAndFetch = async () => {
-            if (!viewModel)
-                await initViewModel();
-
-            if (viewModel) {
-                await fetchNearestMenus();
-            }
+            await fetchNearestMenus();
         };
 
         initializeAndFetch();
-    }, [viewModel]);
+    }, []);
 
 
     console.log("Nearest menus are", nearestMenus.length)

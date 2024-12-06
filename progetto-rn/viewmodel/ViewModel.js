@@ -96,6 +96,7 @@ export default class ViewModel {
                 orderDetails.mid,
                 orderDetails.creationTimestamp,
                 orderDetails.deliveryTimestamp,
+                orderDetails.expectedDeliveryTimestamp,
                 PositionViewModel.parseLocation(orderDetails.deliveryLocation),
                 PositionViewModel.parseLocation(orderDetails.currentPosition),
             )
@@ -278,6 +279,32 @@ export default class ViewModel {
         } catch (err) {
             console.error(err);
             throw new Error("An Unexpected Error occurred contacting the App Server");
+        }
+    }
+
+    
+
+    extractFormattedOrderInformation(orderData) {
+        const now = new Date()
+        const creationTime = new Date(orderData.creationTimeStamp)
+        const expectedDeliveryTime = new Date(orderData.expectedDeliveryTimeStamp)
+        const deliveryTime = new Date(orderData.deliveryTimeStamp)
+        const completed = (orderData.status === "COMPLETED")
+    
+        const totalTime = expectedDeliveryTime - creationTime
+        const elapsedTime = now - creationTime
+    
+        const progress = (completed)
+            ? 100 
+            : Math.max(0, Math.min(100, (elapsedTime / totalTime) * 100))
+    
+        const minutesAway = Math.floor((((completed) ? deliveryTime : expectedDeliveryTime) - now) / 60000)
+
+        return  {
+            deliveryText: (!completed) ? "Arriving at " + expectedDeliveryTime.toLocaleTimeString() : "Arrived at " + deliveryTime.toLocaleTimeString(),
+            minutesText: (completed) ? (- minutesAway) + " minutes ago" : minutesAway + " minutes away",
+            progress: progress,
+            statusText: (completed) ? "Your order has arrived!" : "Almost there..."
         }
     }
 

@@ -8,20 +8,20 @@ import CreditCard from '../common/other/CreditCard';
 import MinimalistButton from '../common/buttons/MinimalistButton';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
 
 export default AccountScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const [viewModel, setViewModel] = useState(null);
+    const viewModel = useRef(null);
     const { userData, orderData, setOrderData } = useContext(UserContext);
 
     const initViewModel = async () => {
         try {
             const newViewModel = ViewModel.getViewModel();
-            setViewModel(newViewModel);
+            viewModel.current = newViewModel
         } catch (err) {
             console.error("Error loading the View Model:", err);
         }
@@ -29,7 +29,7 @@ export default AccountScreen = ({ }) => {
 
     const fetchLastOrder = async () => {
         try {
-            const orderDetails = await viewModel.getOrderAndMenuDetails(orderData.id);
+            const orderDetails = await viewModel.current.getOrderAndMenuDetails(orderData.id);
             setOrderData(orderDetails);
             console.log("Fetched Order Data:", orderDetails.deliveryLocation);
         } catch (err) {
@@ -39,17 +39,17 @@ export default AccountScreen = ({ }) => {
 
     useEffect(() => {
         const initializeAndFetch = async () => {
-            if (!viewModel)
+            if (!viewModel.current)
                 await initViewModel();
 
-            if (viewModel) {
+            if (viewModel.current) {
                 if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
                     await fetchLastOrder();
             }
         };
 
         initializeAndFetch();
-    }, [userData, orderData, viewModel]);
+    }, [userData, orderData]);
 
     console.log("User Data is", userData);
     console.log("Order data is", orderData);

@@ -17,6 +17,7 @@ export default class PositionViewModel {
     static async getAddressFromCoordinates(coordinates) {
         try {
             const delAddress = await Location.reverseGeocodeAsync(coordinates);
+            console.log(delAddress.length)
             return delAddress[0].formattedAddress;
         } catch (err) {
             throw new Error("Error using Reverse Geocoding service: ", err)

@@ -10,7 +10,7 @@ import ProgressBar from '../common/other/ProgressBar';
 import InfoTextBox from '../common/other/InfoTextBox';
 import PositionViewModel from '../../../viewmodel/PositionViewModel';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import ViewModel from '../../../viewmodel/ViewModel';
 import * as Location from 'expo-location';
@@ -21,6 +21,8 @@ const { height } = Dimensions.get('window');
 
 export default LastOrderScreen = ({ }) => {
 
+    const viewModel = ViewModel.getViewModel()
+
     const userLocation = {
         longitude: 9.232131,
         latitude: 45.476770,
@@ -28,25 +30,16 @@ export default LastOrderScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const [viewModel, setViewModel] = useState(null);
     const [deliveryAddress, setDeliveryAddress] = useState(null);
     const [droneAddress, setDroneAddress] = useState(null);
     const { userData, orderData, setOrderData } = useContext(UserContext);
 
-    const initViewModel = async () => {
-        try {
-            const newViewModel = ViewModel.getViewModel();
-            setViewModel(newViewModel);
-        } catch (err) {
-            console.error("Error loading the View Model:", err);
-        }
-    }
-
     const fetchLastOrder = async () => {
+        console.log("Executing Fetch")
         try {
             const orderDetails = await viewModel.getOrderAndMenuDetails(orderData.id);
             setOrderData(orderDetails);
-            console.log("Fetched Order Data:", orderDetails.deliveryLocation);
+            //console.log("Fetched Order Data:", orderDetails.deliveryLocation);
         } catch (err) {
             console.error("Error fetching the last order details:", err);
         }
@@ -54,59 +47,92 @@ export default LastOrderScreen = ({ }) => {
 
     const fetchDeliveryAddress = async () => {
         try {
+            //console.log("Fetching delivery address, with orderData", orderData, orderData.deliveryLocation)
             const delAddressString = await PositionViewModel.getAddressFromCoordinates(orderData.deliveryLocation)
             setDeliveryAddress(delAddressString)
-            console.log("Fetched Order Address via Reverse Geocoding:", delAddressString);
+            //console.log("Fetched Order Address via Reverse Geocoding:", delAddressString);
         } catch (err) {
-            console.error("Error fetching the last order address:", err);
+            console.log("Error fetching the last order address:", err, orderData.menuId);
             setDeliveryAddress("(" + orderData.deliveryLocation.latitude + ", " + orderData.deliveryLocation.longitude + ")");
         }
     }
 
     const fetchDroneAddress = async () => {
         try {
-            console.log("Fetching drone address, with orderData", orderData)
+            //console.log("Fetching drone address, with orderData", orderData != null)
             const droneAddressString = await PositionViewModel.getAddressFromCoordinates(orderData.currentLocation)
             setDroneAddress(droneAddressString)
-            console.log("Fetched Drone Address via Reverse Geocoding:", droneAddressString);
+            //console.log("Fetched Drone Address via Reverse Geocoding:", droneAddressString);
         } catch (err) {
-            console.error("Error fetching the drone address:", err);
-            setDeliveryAddress("(" + orderData.currentLocation.latitude + ", " + orderData.currentLocation.longitude + ")");
+            console.log("Error fetching the drone address:", err);
+            setDroneAddress("(" + orderData.currentLocation.latitude + ", " + orderData.currentLocation.longitude + ")");
+        }
+    }
+
+    const fetchData = async () => {
+        if (orderData && orderData.id)
+            await fetchLastOrder();
+
+        if (orderData.deliveryLocation)
+            await fetchDeliveryAddress();
+
+        if (orderData.currentLocation)
+            await fetchDroneAddress();
+    };
+    
+
+    // Auto - Reload every 5 seconds
+    let intervalId = useRef(null);
+
+    const loadTimer = () => {
+        console.log("Componente montato");
+        intervalId.current = setInterval(() => {
+          console.log("E' passato 5 secondi!");
+          fetchData();
+        }, 5000);
+    }
+  
+    const unloadTimer = () => {
+        console.log("Componente smontato");
+        if (intervalId.current) {
+            clearInterval(intervalId.current);
+            intervalId.current = null;
         }
     }
 
     useEffect(() => {
+        loadTimer();
+        return unloadTimer; // on Unmount
+    }, [])
+
+    useEffect(() => {
         const initializeAndFetch = async () => {
-            if (!viewModel)
-                await initViewModel();
-
-            if (viewModel) {
-                if (orderData && orderData.id && !orderData.orderDetailsRetrieved)
-                    await fetchLastOrder();
-
-                if (orderData && orderData.deliveryLocation)
-                    await fetchDeliveryAddress();
-
-                if (orderData && orderData.currentLocation)
-                    await fetchDroneAddress();
-            }
+            if (orderData && orderData.id && !orderData.orderDetailsRetrieved)
+                await fetchLastOrder();
+    
+            if (orderData.deliveryLocation)
+                await fetchDeliveryAddress();
+    
+            if (orderData.currentLocation)
+                await fetchDroneAddress();
         };
 
         initializeAndFetch();
-    }, [orderData, viewModel]);
+    }, [orderData]);
 
-    const arrivalTimeInfo = orderData?.extractArrivalTimeInformation();
 
-    const showOrder = (orderData && orderData.id && orderData.orderDetailsRetrieved);
+    const showOrder = (viewModel && orderData && orderData.id && orderData.orderDetailsRetrieved);
     const deltas = (showOrder)
         ? PositionViewModel.calculateMapDeltas2Positions(userLocation, orderData.deliveryLocation, orderData.currentLocation)
         : null;
 
-    console.log("User Data is ", userData);
-    //console.log("Order Data is ", orderData);
-    console.log("ArrivalTimeInfo is", arrivalTimeInfo);
-    console.log("Showing order:", showOrder)
-    console.log("Address is", deliveryAddress);
+    const timeInfo = (showOrder) ? viewModel.extractFormattedOrderInformation(orderData) : null
+
+    // console.log("User Data is ", userData);
+    // console.log("Order Data is ", orderData);
+    // console.log("Showing order:", showOrder)
+    // console.log("Address is", deliveryAddress);
+    console.log("Time Info is", timeInfo)
 
     return (
         <SafeAreaProvider>
@@ -116,14 +142,14 @@ export default LastOrderScreen = ({ }) => {
                     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
                         <View style={{ flex: 1 }}>
                             <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
-                                {(showOrder) ? "Almost there..." : "No orders yet..."}
+                                {(showOrder) && timeInfo.statusText}
                             </Text>
                             {showOrder &&
                                 <>
                                     <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
-                                        Arriving at <Text style={[globalStyles.textNormalMedium]}>{arrivalTimeInfo?.formattedTime}</Text> ({arrivalTimeInfo?.minutesAway} minutes away)
+                                       <Text style={[globalStyles.textNormalMedium]}>{timeInfo.deliveryText}</Text> ({timeInfo.minutesText})
                                     </Text>
-                                    <ProgressBar progress={70} />
+                                    <ProgressBar progress={timeInfo.progress} />
                                 </>
                             }
                         </View>
