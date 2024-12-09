@@ -9,9 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,13 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.api_storage.model.DBController
 import com.example.api_storage.model.types.MenuDetails
-import com.example.api_storage.model.types.PreferencesController
-import com.example.api_storage.ui.theme.ApistorageTheme
+import com.example.api_storage.model.PreferencesController
 import com.example.navigation_app.model.APIController
 import com.example.navigation_app.model.types.UserSession
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +36,8 @@ class MainActivity : ComponentActivity() {
     private val Context.dataStore by preferencesDataStore(name = "appStatus")
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        DBController.initDB(this)
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -51,6 +50,8 @@ class MainActivity : ComponentActivity() {
 fun MyApp(dataStore : DataStore<Preferences>) {
 
     var responseText by remember { mutableStateOf("") }
+
+
 
     Column (
         modifier = Modifier
@@ -126,6 +127,42 @@ fun MyApp(dataStore : DataStore<Preferences>) {
             )
         }
 
+
+        Button(
+            onClick = {
+                Log.d("MainActivity", "Clicked" )
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val data = DBController.dao!!.insertMenuImage()
+                        Log.d("MainActivity", "Data is: $data")
+                    } catch (e : Exception) {
+                        Log.e("MainActivity", "Error fetching a Menu: $e")
+                    }
+                }
+            }
+        ) {
+            Text(
+                text = "Add Dummy Image to DB"
+            )
+        }
+
+        Button(
+            onClick = {
+                Log.d("MainActivity", "Clicked")
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val data = DBController.dao!!.getMenuImageByVersion()
+                        Log.d("MainActivity", "Data is: $data")
+                    } catch (e : Exception) {
+                        Log.e("MainActivity", "Error fetching a Menu: $e")
+                    }
+                }
+            }
+        ) {
+            Text(
+                text = "Get Dummy Image from DB"
+            )
+        }
         Text(
             text = "Result: $responseText"
         )
