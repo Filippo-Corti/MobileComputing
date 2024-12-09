@@ -15,6 +15,7 @@ import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import ViewModel from '../../../viewmodel/ViewModel';
 import * as Location from 'expo-location';
 import MenuSmallPreview from '../common/other/MenuSmallPreview';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const { height } = Dimensions.get('window');
@@ -79,40 +80,41 @@ export default LastOrderScreen = ({ }) => {
         if (orderData.currentLocation)
             await fetchDroneAddress();
     };
-    
+
 
     // Auto - Reload every 5 seconds
-    let intervalId = useRef(null);
-
-    const loadTimer = () => {
-        console.log("Componente montato");
-        intervalId.current = setInterval(() => {
-          console.log("E' passato 5 secondi!");
-          fetchData();
-        }, 5000);
-    }
-  
-    const unloadTimer = () => {
-        console.log("Componente smontato");
-        if (intervalId.current) {
-            clearInterval(intervalId.current);
-            intervalId.current = null;
-        }
-    }
+    const isFocused = useIsFocused(); // Tracks if the screen is currently focused
+    const intervalId = useRef(null);
 
     useEffect(() => {
-        loadTimer();
-        return unloadTimer; // on Unmount
-    }, [])
+        if (isFocused) {
+            console.log("Screen is focused, starting timer");
+            intervalId.current = setInterval(fetchData, 5000);
+        } else {
+            console.log("Screen is not focused, stopping timer");
+            if (intervalId.current) {
+                clearInterval(intervalId.current);
+                intervalId.current = null;
+            }
+        }
+
+        // Cleanup function to stop the timer when the component unmounts
+        return () => {
+            if (intervalId.current) {
+                clearInterval(intervalId.current);
+                intervalId.current = null;
+            }
+        };
+    }, [isFocused]);
 
     useEffect(() => {
         const initializeAndFetch = async () => {
             if (orderData && orderData.id && !orderData.orderDetailsRetrieved)
                 await fetchLastOrder();
-    
+
             if (orderData.deliveryLocation)
                 await fetchDeliveryAddress();
-    
+
             if (orderData.currentLocation)
                 await fetchDroneAddress();
         };
@@ -135,109 +137,119 @@ export default LastOrderScreen = ({ }) => {
     console.log("Time Info is", timeInfo)
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={globalStyles.container}>
-                <ScrollView>
+        <SafeAreaView style={globalStyles.container}>
+            <ScrollView>
 
-                    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
-                        <View style={{ flex: 1 }}>
-                            <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
-                                {(showOrder) && timeInfo.statusText}
-                            </Text>
-                            {showOrder &&
-                                <>
-                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
-                                       <Text style={[globalStyles.textNormalMedium]}>{timeInfo.deliveryText}</Text> ({timeInfo.minutesText})
-                                    </Text>
-                                    <ProgressBar progress={timeInfo.progress} />
-                                </>
-                            }
-                        </View>
-                    </View>
-                    {(showOrder)
-                        ? <>
-                            <MapView
-                                style={styles.map}
-                                provider="google"
-                                showsCompass={true}
-                                showsPointsOfInterest={false}
-                                showsUserLocation={true}
-                                followsUserLocation={true}
-                                loadingEnabled={true}
-                                initialRegion={{
-                                    ...orderData.deliveryLocation,
-                                    ...deltas
-                                }}
-                            >
-                                <Marker
-                                    coordinate={orderData.deliveryLocation}
-                                    title="Delivery Place"
-                                    description="The Location where the drone will deliver the order"
-                                    onPress={() => console.log("Hello Marker")}
-                                />
-
-                                <Marker
-                                    coordinate={orderData.currentLocation}
-                                    title="Drone Location"
-                                    description="The current location of the drone"
-                                    onPress={() => console.log("Hello Marker")}
-                                />
-
-                            </MapView>
-                            <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
-                                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                                    Delivery details
-                                </Text>
-                                <View style={{marginVertical: 5}}>
-                                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                                        Pick it up at
-                                    </Text>
-                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                                        {deliveryAddress}
-                                    </Text>
-                                </View>
-                                <View style={{marginVertical: 5}}>
-                                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                                        Drone is currently at
-                                    </Text>
-                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                                        {droneAddress}
-                                    </Text>
-                                </View>
-                            </View>
-                            <Separator size={10} color={colors.lightGray} />
-
-                            <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
-                                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                                    Order details
-                                </Text>
-                            </View>
-                            <MenuSmallPreview
-                                image={orderData.menu.image}
-                                title={"1x " + orderData.menu.name}
-                                price={orderData.menu.formatPrice()}
-                            />
-                        </>
-                        : <>
-                            <View style={[globalStyles.insetContainer, { marginTop: 20, marginHorizontal: 5 }]}>
-                                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                                    This is where your order will appear after you placed it. {'\n'}
-                                    You’ll be able to check how far it is from you and how long it will take the drone to deliver it. {'\n'}
-                                    {'\n'}
-                                    Right now you haven’t placed your first order yet. Go check some menus in the home page!
-                                </Text>
-                                <View style={{ alignSelf: 'flex-end', marginTop: 20 }}>
-                                    <ButtonWithArrow text="Explore menus" onPress={() => navigation.navigate("HomeStack")} />
-                                </View>
-                            </View>
-                        </>
-                    }
-                    <StatusBar style="auto" />
-                </ScrollView>
-            </SafeAreaView>
-        </SafeAreaProvider>
+                {(showOrder)
+                    ? <ShowOrderState orderData={orderData} deliveryAddress={deliveryAddress} droneAddress={droneAddress} timeInfo={timeInfo} deltas={deltas} />
+                    : <NoOrderState navigation={navigation} />
+                }
+                <StatusBar style="auto" />
+            </ScrollView>
+        </SafeAreaView>
     );
 }
+
+const Header = ({timeInfo}) => (
+    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
+        <View style={{ flex: 1 }}>
+            <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
+                {timeInfo.statusText}
+            </Text>
+            {
+                <>
+                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
+                        <Text style={[globalStyles.textNormalMedium]}>{timeInfo.deliveryText}</Text> ({timeInfo.minutesText})
+                    </Text>
+                    <ProgressBar progress={timeInfo.progress} />
+                </>
+            }
+        </View>
+    </View>
+)
+
+const NoOrderState = ({ navigation }) => (
+    <View style={[globalStyles.insetContainer, { marginTop: 20, marginHorizontal: 5 }]}>
+        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+            This is where your order will appear after you placed it. {'\n'}
+            You’ll be able to check how far it is from you and how long it will take the drone to deliver it. {'\n'}
+            {'\n'}
+            Right now you haven’t placed your first order yet. Go check some menus in the home page!
+        </Text>
+        <View style={{ alignSelf: 'flex-end', marginTop: 20 }}>
+            <ButtonWithArrow text="Explore menus" onPress={() => navigation.navigate("HomeStack")} />
+        </View>
+    </View>
+)
+
+const ShowOrderState = ({ orderData, deliveryAddress, droneAddress, timeInfo, deltas }) => (
+    <>
+
+        <Header timeInfo={timeInfo} />
+
+        <MapView
+            style={styles.map}
+            provider="google"
+            showsCompass={true}
+            showsPointsOfInterest={false}
+            showsUserLocation={true}
+            followsUserLocation={true}
+            loadingEnabled={true}
+            initialRegion={{
+                ...orderData.deliveryLocation,
+                ...deltas
+            }}
+        >
+            <Marker
+                coordinate={orderData.deliveryLocation}
+                title="Delivery Place"
+                description="The Location where the drone will deliver the order"
+                onPress={() => console.log("Hello Marker")}
+            />
+
+            <Marker
+                coordinate={orderData.currentLocation}
+                title="Drone Location"
+                description="The current location of the drone"
+                onPress={() => console.log("Hello Marker")}
+            />
+
+        </MapView>
+        <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
+            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                Delivery details
+            </Text>
+            <View style={{ marginVertical: 5 }}>
+                <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                    Pick it up at
+                </Text>
+                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                    {deliveryAddress}
+                </Text>
+            </View>
+            <View style={{ marginVertical: 5 }}>
+                <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                    Drone is currently at
+                </Text>
+                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                    {droneAddress}
+                </Text>
+            </View>
+        </View>
+        <Separator size={10} color={colors.lightGray} />
+
+        <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
+            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                Order details
+            </Text>
+        </View>
+        <MenuSmallPreview
+            image={orderData.menu.image}
+            title={"1x " + orderData.menu.name}
+            price={orderData.menu.formatPrice()}
+        />
+    </>
+)
 
 const styles = StyleSheet.create({
 

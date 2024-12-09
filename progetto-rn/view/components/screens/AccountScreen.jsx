@@ -15,17 +15,8 @@ export default AccountScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const viewModel = useRef(null);
+    const viewModel = ViewModel.getViewModel()
     const { userData, orderData, setOrderData } = useContext(UserContext);
-
-    const initViewModel = async () => {
-        try {
-            const newViewModel = ViewModel.getViewModel();
-            viewModel.current = newViewModel
-        } catch (err) {
-            console.error("Error loading the View Model:", err);
-        }
-    }
 
     const fetchLastOrder = async () => {
         try {
@@ -39,13 +30,8 @@ export default AccountScreen = ({ }) => {
 
     useEffect(() => {
         const initializeAndFetch = async () => {
-            if (!viewModel.current)
-                await initViewModel();
-
-            if (viewModel.current) {
-                if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
-                    await fetchLastOrder();
-            }
+            if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
+                await fetchLastOrder();
         };
 
         initializeAndFetch();
@@ -55,71 +41,98 @@ export default AccountScreen = ({ }) => {
     console.log("Order data is", orderData);
 
     const showOrder = (orderData && orderData.id && orderData.orderDetailsRetrieved);
+    const isLogged = (userData)
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
-                <ScrollView contentContainerStyle={[globalStyles.flexCenter, { flexDirection: 'column', justifyContent: 'flex-start', flexGrow: 1, marginTop: 35, }]}>
+        <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
+            <ScrollView contentContainerStyle={[globalStyles.flexCenter, { flexDirection: 'column', justifyContent: 'flex-start', flexGrow: 1, marginTop: 35, }]}>
 
-                    <View style={{ marginBottom: 15, alignItems: 'center' }}>
-                        <Image
-                            style={styles.profileImage}
-                            source={require('../../../assets/default-avatar.jpg')}
-                        />
+                { (isLogged)
+                    ?   
+                    <>
+                        <LoggedHeader userData={userData} navigation={navigation} />
+                        <Separator size={1} color={colors.lightGray} />
 
-                        {userData && <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginBottom: 13, textAlign: 'center' }]}>
-                            {userData.fName} {userData.lName}
-                        </Text>}
+                        { showOrder && <LastOrder orderData={orderData} /> }
+                        <Separator size={1} color={colors.lightGray} />
 
-                        {(userData)
-                            ? <MinimalistButton text="EDIT ACCOUNT" onPress={() => navigation.navigate("EditAccount")} />
-                            : <MinimalistButton text="NEW ACCOUNT" onPress={() => navigation.navigate("EditAccount", { newAccount: true })} />
-                        }
-                    </View>
-
-                    <Separator size={1} color={colors.lightGray} />
-
-                    {showOrder && <>
-
-                        <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
-                            <View style={[globalStyles.flexBetween, { width: '100%' }]}>
-                                <View>
-                                    <Text style={[globalStyles.textBlack, globalStyles.textSubtitleRegular]}>
-                                        Your last order
-                                    </Text>
-                                </View>
-                                <View>
-                                    <ButtonWithArrow text="See More" onPress={() => navigation.navigate("LastOrder")} />
-                                </View>
-                            </View>
-                            <MenuPreview menuInformation={orderData.menu}
-                                style={{ marginTop: 8, }}
-                            />
-                        </View>
-
+                        <CreditCardBox userData={userData} />
+                    </>
+                    :
+                    <>
+                        <NotLoggedHeader userData={userData} navigation={navigation} />
                         <Separator size={1} color={colors.lightGray} />
                     </>
-                    }
+                }
 
-                    {userData && <>
-                        <View style={[globalStyles.insetContainer, { marginTop: 20, marginBottom: 40, width: '95%' }]}>
 
-                            <CreditCard cardInformation={{
-                                number: userData.ccNumber,
-                                holder: userData.ccFullName,
-                                expiryMonth: userData.ccExpMonth,
-                                expiryYear: userData.ccExpYear,
-                            }} />
-
-                        </View>
-                    </>
-                    }
-
-                </ScrollView>
-            </SafeAreaView>
-        </SafeAreaProvider>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
+
+
+const NotLoggedHeader = ({navigation}) => (
+    <View style={{ marginBottom: 15, alignItems: 'center' }}>
+
+        <Image
+            style={styles.profileImage}
+            source={require('../../../assets/default-avatar.jpg')}
+        />
+
+        <MinimalistButton text="NEW ACCOUNT" onPress={() => navigation.navigate("EditAccount", { newAccount: true })} />
+
+    </View>
+)
+
+const LoggedHeader = ({userData, navigation}) => (
+    <View style={{ marginBottom: 15, alignItems: 'center' }}>
+        
+        <Image
+            style={styles.profileImage}
+            source={require('../../../assets/default-avatar.jpg')}
+        />
+
+        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginBottom: 13, textAlign: 'center' }]}>
+            {userData.fName} {userData.lName}
+        </Text>
+
+        
+        <MinimalistButton text="EDIT ACCOUNT" onPress={() => navigation.navigate("EditAccount")} />
+        
+    </View>
+)
+
+const LastOrder = ({orderData}) => (
+    <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
+        <View style={[globalStyles.flexBetween, { width: '100%' }]}>
+            <View>
+                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleRegular]}>
+                    Your last order
+                </Text>
+            </View>
+            <View>
+                <ButtonWithArrow text="See More" onPress={() => navigation.navigate("LastOrder")} />
+            </View>
+        </View>
+        <MenuPreview menuInformation={orderData.menu}
+            style={{ marginTop: 8, }}
+        />
+    </View>
+)
+
+const CreditCardBox = ({userData}) => (
+    <View style={[globalStyles.insetContainer, { marginTop: 20, marginBottom: 40, width: '95%' }]}>
+
+        <CreditCard cardInformation={{
+            number: userData.ccNumber,
+            holder: userData.ccFullName,
+            expiryMonth: userData.ccExpMonth,
+            expiryYear: userData.ccExpYear,
+        }} />
+
+    </View>
+)
 
 const styles = StyleSheet.create({
 

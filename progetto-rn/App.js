@@ -25,20 +25,11 @@ export default function App() {
     [fonts.logo]: require('./assets/fonts/Geologica-Medium.ttf'),
   });
 
+  const viewModel = ViewModel.getViewModel()
 
-  const [viewModel, setViewModel] = useState(null);
   const [userData, setUserData] = useState(null);
   const [orderData, setOrderData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const initViewModel = async () => {
-    try {
-      const newViewModel = ViewModel.getViewModel();
-      setViewModel(newViewModel);
-    } catch (err) {
-      console.error("Error loading the View Model:", err);
-    }
-  }
 
   const fetchUserData = async () => {
     try {
@@ -59,23 +50,18 @@ export default function App() {
 
   useEffect(() => {
     const initializeAndFetch = async () => {
-      if (!viewModel) {
-        await initViewModel();
-      }
-      if (viewModel) {
-        await fetchUserData();
-        setIsLoading(false);
-        await askForLocation();
-      }
+      await fetchUserData();
+      setIsLoading(false);
+      await askForLocation();
     };
 
     initializeAndFetch();
 
-  }, [viewModel]);
+  }, []);
 
   console.log("------------ Reload ------------");
 
-  if (isLoading) {
+  if (isLoading || !fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <MyLogo />

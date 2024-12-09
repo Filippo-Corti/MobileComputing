@@ -47,67 +47,72 @@ export default HomeScreen = ({ }) => {
 
     console.log("Nearest menus are", nearestMenus.length)
 
-
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={globalStyles.container}>
-                <ScrollView>
+        <SafeAreaView style={globalStyles.container}>
+            <ScrollView>
 
-                    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginTop: 22 }]}>
-                        <View>
-                            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                                Welcome Back{(userData) ? ", " + userData.fName : ""}
-                            </Text>
-                            <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
-                                What are you craving?
-                            </Text>
-                        </View>
-                        <View>
-                            <MyLogo />
-                        </View>
-                    </View>
+                <Header userData={userData} />
 
-                    <MapView
-                        style={styles.map}
-                        initialRegion={{
-                            ...userLocation,
-                            latitudeDelta: 0.01,
-                            longitudeDelta: 0.01,
-                        }}
-                    />
+                <MapView
+                    style={styles.map}
+                    initialRegion={{
+                        ...userLocation,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                    }}
+                />
 
-                    <View style={[globalStyles.insetContainer, styles.afterMap, { flex: 1 }]}>
+                <MenusList nearestMenus={nearestMenus} navigation={navigation} />
 
-                        <View style={[globalStyles.flexCenter, { marginVertical: 20 }]}>
-                            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleBold]}>
-                                Menus Around You
-                            </Text>
-                        </View>
-
-                        {viewModel && nearestMenus && <FlatList
-                            data={nearestMenus}
-                            renderItem={({ item }) => {
-                                return (<MenuPreview
-                                    menuInformation={item}
-                                    onPress={() => navigation.navigate("MenuDetails")}
-                                    style={{ borderTopWidth: 1 }}
-                                />)
-                            }}
-                            contentContainerStyle={{ flexGrow: 1 }}
-                            keyExtractor={item => item.id}
-                            scrollEnabled={false}
-                            style={{
-                                flex: 1,
-                            }}
-                        />}
-                    </View>
-
-                    <StatusBar style="auto" />
-                </ScrollView>
-            </SafeAreaView>
-        </SafeAreaProvider>
+                <StatusBar style="auto" />
+            </ScrollView>
+        </SafeAreaView>
     );
 }
+
+const Header = ({ userData }) => (
+    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginTop: 22 }]}>
+        <View>
+            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                Welcome Back{(userData) ? ", " + userData.fName : ""}
+            </Text>
+            <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
+                What are you craving?
+            </Text>
+        </View>
+        <View>
+            <MyLogo />
+        </View>
+    </View>
+);
+
+const MenusList = ({ nearestMenus, navigation }) => (
+    <View style={[globalStyles.insetContainer, styles.afterMap, { flex: 1 }]}>
+
+        <View style={[globalStyles.flexCenter, { marginVertical: 20 }]}>
+            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleBold]}>
+                Menus Around You
+            </Text>
+        </View>
+
+        {nearestMenus && <FlatList
+            data={nearestMenus}
+            renderItem={({ item }) => {
+                return (<MenuPreview
+                    menuInformation={item}
+                    onPress={() => navigation.navigate("MenuDetails")}
+                    style={{ borderTopWidth: 1 }}
+                />)
+            }}
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyExtractor={item => item.id}
+            scrollEnabled={false}
+            style={{
+                flex: 1,
+            }}
+        />}
+    </View>
+)
 
 const styles = StyleSheet.create({
 
