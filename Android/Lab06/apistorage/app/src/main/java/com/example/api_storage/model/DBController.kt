@@ -15,10 +15,10 @@ import com.example.api_storage.model.types.MenuImageWithVersion
 interface MenuImageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMenuImage(new : MenuImageWithVersion)
+    suspend fun insertMenuImage(newData : MenuImageWithVersion)
 
     @Query("SELECT * FROM MenuImageWithVersion WHERE menuId = :menuId AND version = :imageVersion")
-    suspend fun getMenuImageByVersion(menuId : Int, imageVersion : String) : Array<MenuImageWithVersion>
+    suspend fun getMenuImageByVersion(menuId : Int, imageVersion : Int) : Array<MenuImageWithVersion>
 
 }
 
@@ -29,23 +29,18 @@ abstract class AppDatabase : RoomDatabase() {
 
 object DBController {
 
-    var database : AppDatabase? = null
-    var dao : MenuImageDao? = null
+    lateinit var database : AppDatabase
+    lateinit var dao : MenuImageDao
 
     fun initDB(context : Context) {
-        if (database == null) {
-            database = Room.databaseBuilder(
-                context,
-                AppDatabase::class.java,
-                "images-database"
-            ).build()
+        database = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "images-database"
+        ).build()
 
-            if (database != null) { // ????
-                dao = database!!.menuImageDao()
-            }
-        }
+
+        dao = database.menuImageDao()
     }
-
-
 
 }

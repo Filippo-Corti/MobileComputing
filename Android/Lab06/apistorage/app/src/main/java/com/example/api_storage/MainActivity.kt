@@ -24,6 +24,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.api_storage.model.DBController
 import com.example.api_storage.model.types.MenuDetails
 import com.example.api_storage.model.PreferencesController
+import com.example.api_storage.model.types.MenuImageWithVersion
 import com.example.navigation_app.model.APIController
 import com.example.navigation_app.model.types.UserSession
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +114,7 @@ fun MyApp(dataStore : DataStore<Preferences>) {
                     try {
                         val menu : MenuDetails? = APIController.getMenuDetails(12)
                         withContext(Dispatchers.Main) {
-                            responseText = menu.toString() ?: "ERRORE"
+                            responseText = menu.toString()
                         }
                         Log.d("MainActivity", "MenuDetails is: $menu")
                     } catch (e : Exception) {
@@ -133,8 +134,8 @@ fun MyApp(dataStore : DataStore<Preferences>) {
                 Log.d("MainActivity", "Clicked" )
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        val data = DBController.dao!!.insertMenuImage()
-                        Log.d("MainActivity", "Data is: $data")
+                        DBController.dao.insertMenuImage(MenuImageWithVersion(8, 1, "imageimageimage"))
+                        Log.d("MainActivity", "Inserted Dummy Image")
                     } catch (e : Exception) {
                         Log.e("MainActivity", "Error fetching a Menu: $e")
                     }
@@ -151,8 +152,8 @@ fun MyApp(dataStore : DataStore<Preferences>) {
                 Log.d("MainActivity", "Clicked")
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        val data = DBController.dao!!.getMenuImageByVersion()
-                        Log.d("MainActivity", "Data is: $data")
+                        val data = DBController.dao.getMenuImageByVersion(8, 1)
+                        Log.d("MainActivity", "Data Fetched from DB is ${data.size}: ${data[0]}")
                     } catch (e : Exception) {
                         Log.e("MainActivity", "Error fetching a Menu: $e")
                     }
