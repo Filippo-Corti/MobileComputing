@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,10 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.ViewModel
 import com.example.api_storage.model.DBController
 import com.example.api_storage.model.types.MenuDetails
 import com.example.api_storage.model.PreferencesController
 import com.example.api_storage.model.types.MenuImageWithVersion
+import com.example.api_storage.viewmodel.MainViewModel
 import com.example.navigation_app.model.APIController
 import com.example.navigation_app.model.types.UserSession
 import kotlinx.coroutines.CoroutineScope
@@ -39,20 +42,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         DBController.initDB(this)
 
+        val viewModel = MainViewModel(dataStore)
+        viewModel.fetchLaunchInformation()
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApp(dataStore)
+            MyApp(viewModel)
         }
     }
 }
 
 @Composable
-fun MyApp(dataStore : DataStore<Preferences>) {
+fun MyApp(
+    viewModel: MainViewModel
+) {
 
-    var responseText by remember { mutableStateOf("") }
-
-
+    val sid = viewModel.sid.collectAsState()
+    val uid = viewModel.uid.collectAsState()
 
     Column (
         modifier = Modifier
@@ -62,10 +69,10 @@ fun MyApp(dataStore : DataStore<Preferences>) {
     ){
 
         Text(
-            text = "Hello"
+            text = "Hello ${sid.value} - ${uid.value}"
         )
 
-        Button(
+       /* Button(
           onClick = {
               Log.d("MainActivity", "Clicked")
               CoroutineScope(Dispatchers.IO).launch {
@@ -166,7 +173,7 @@ fun MyApp(dataStore : DataStore<Preferences>) {
         }
         Text(
             text = "Result: $responseText"
-        )
+        )*/
     }
 
 }
