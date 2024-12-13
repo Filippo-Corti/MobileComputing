@@ -1,4 +1,4 @@
-package com.example.progetto_kt.model.dataclasses.util
+package com.example.progetto_kt.model.dataclasses
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

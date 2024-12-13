@@ -25,7 +25,7 @@ sealed class AppScreen(
 
     data object MenuDetails : AppScreen(
         ScreenParams(
-            route = "menu_details",
+            route = "menu_details/{menuId}",
             title = "Menu Details",
             showTabBar = false
         )

@@ -1,5 +1,8 @@
 package com.example.progetto_kt.view.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,13 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.dialog
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.progetto_kt.view.components.screens.HomeScreen
+import com.example.progetto_kt.view.components.screens.MenuDetailsScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @Composable
@@ -37,7 +40,7 @@ fun RootNavHost(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             if (showTabBar) {
-                //MyTabBar()
+                MyTabBar(navController)
             }
         }
     ){ paddingValues ->
@@ -51,28 +54,34 @@ fun RootNavHost(
             ) {
 
                 composable(
-                    route = AppScreen.Home.params.route
+                    route = AppScreen.Home.params.route,
                 ) {
                     HomeScreen(
                         viewModel = viewModel,
-                        onMenuClick = {
-                            navController.navigate(AppScreen.MenuDetails.params.route)
+                        onMenuClick = { menuId ->
+                            navController.navigate(AppScreen.MenuDetails.params.route.replace("{menuId}", menuId.toString()))
                         }
                     )
                 }
 
-                /*dialog(
-                    route = AppScreen.MenuDetails.params.route
-                ) {
+                composable(
+                    route = AppScreen.MenuDetails.params.route,
+                    enterTransition = {
+                        slideIn(tween(700)) { IntOffset(it.width, 0) }
+                    },
+                    exitTransition = {
+                        slideOut(tween(700)) { IntOffset(it.width, 0) }
+                    }
+                ) { backStackEntry ->
+                    val menuId = backStackEntry.arguments?.getString("menuId")
                     MenuDetailsScreen(
-                        onConfirmOrderClick = {
-                            navController.navigate(AppScreen.ConfirmOrder.params.route)
-                        },
+                        viewModel = viewModel,
+                        menuId = menuId!!.toInt(),
                         onBackClick = {
                             navController.navigateUp()
                         }
                     )
-                }*/
+                }
 
             }
         }

@@ -2,8 +2,9 @@ package com.example.progetto_kt.model.datasources
 
 import android.net.Uri
 import android.util.Log
-import com.example.progetto_kt.model.dataclasses.menu.Menu
-import com.example.progetto_kt.model.dataclasses.user.UserSession
+import com.example.progetto_kt.model.dataclasses.Menu
+import com.example.progetto_kt.model.dataclasses.MenuDetails
+import com.example.progetto_kt.model.dataclasses.UserSession
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -104,4 +105,27 @@ object APIController {
             else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
         }
     }
+
+
+
+    suspend fun getMenuDetails(sid : String, latitude : Double, longitude : Double, menuId : Int) : MenuDetails {
+        Log.d(TAG, "Getting Nearby Menus")
+
+        val httpResponse = genericRequest(
+            endpoint = "menu/$menuId",
+            method = HttpMethod.GET,
+            queryParams = mapOf(
+                "sid" to sid,
+                "lat" to latitude,
+                "lng" to longitude
+            )
+        )
+
+        when (httpResponse.status.value) {
+            200 -> return httpResponse.body() as MenuDetails
+            401 -> throw Exception("Unauthorized")
+            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+        }
+    }
+
 }
