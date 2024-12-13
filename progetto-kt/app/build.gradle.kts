@@ -5,6 +5,9 @@ plugins {
 
     // Ktor
     id("kotlinx-serialization")
+
+    // Room DB
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -77,5 +80,9 @@ dependencies {
 
     // DataStore for Preferences
     implementation(libs.androidx.datastore.preferences)
+
+    // Room DB
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
 
 }

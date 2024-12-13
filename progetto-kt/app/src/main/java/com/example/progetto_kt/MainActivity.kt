@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
+import com.example.progetto_kt.model.datasources.DBController
 import com.example.progetto_kt.view.navigation.RootNavHost
 import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
@@ -31,8 +32,8 @@ class MainActivity : ComponentActivity() {
 
     private val Context.dataStore by preferencesDataStore(name = "appStatus")
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        DBController.initDB(this)
         super.onCreate(savedInstanceState)
 
         val viewModel = MainViewModel(dataStore)

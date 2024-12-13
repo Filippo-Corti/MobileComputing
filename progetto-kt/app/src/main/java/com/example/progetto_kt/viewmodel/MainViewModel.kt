@@ -94,6 +94,7 @@ class MainViewModel(
             Log.d(TAG, "User not logged in, couldn't get nearby menus")
             return
         }
+
         Log.d(TAG, "Fetching menu details for menuId $menuId")
 
         viewModelScope.launch {
