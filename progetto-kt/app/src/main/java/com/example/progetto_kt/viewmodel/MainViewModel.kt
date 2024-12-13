@@ -8,14 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.api_storage.model.PreferencesController
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
+import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.UserSession
 import com.example.progetto_kt.model.datasources.APIController
+import com.example.progetto_kt.model.datasources.DBController
 import com.example.progetto_kt.model.repositories.MenuRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.Thread.State
 
 class MainViewModel(
@@ -28,13 +31,13 @@ class MainViewModel(
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
-    private val _menuDetails = MutableStateFlow<MenuDetails?>(null)
+    private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
 
     val uid : StateFlow<Int?> = _uid
     val sid : StateFlow<String?> = _sid
     val menus: StateFlow<List<Menu>> = _menus
     val isLoading: StateFlow<Boolean> = _isLoading
-    val menuDetails : StateFlow<MenuDetails?> = _menuDetails
+    val menuDetails : StateFlow<MenuDetailsWithImage?> = _menuDetails
 
     init {
         viewModelScope.launch {
@@ -85,7 +88,7 @@ class MainViewModel(
 
     fun fetchMenuDetails(menuId : Int) {
 
-        if (_menuDetails.value?.id == menuId) {
+        if (_menuDetails.value?.menuDetails?.id == menuId) {
             Log.d(TAG, "Menu details already fetched")
             return
         }
@@ -105,7 +108,12 @@ class MainViewModel(
                     longitude = 9.18,
                     menuId = menuId
                 )
-                _menuDetails.value = menuDetails
+                val image = MenuRepository.getMenuImage(
+                    sid = _sid.value!!,
+                    menuId = menuId,
+                    imageVersion = menuDetails.imageVersion
+                )
+                _menuDetails.value = MenuDetailsWithImage(menuDetails, image)
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching menus: ${e.message}")
             }

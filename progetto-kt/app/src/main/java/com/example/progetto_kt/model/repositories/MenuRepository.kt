@@ -29,8 +29,8 @@ object MenuRepository {
         }
 
         val menuImageFromServer = APIController.getMenuImage(sid, menuId)
-        if (!menuImageFromServer.image.startsWith("data:image/jpeg;base64,")) {
-            menuImageFromServer.image = "data:image/jpeg;base64," + menuImageFromServer.image
+        if (menuImageFromServer.image.startsWith("data:image/jpeg;base64,")) {
+            menuImageFromServer.image = menuImageFromServer.image.substring(23)
         }
 
         DBController.dao.insertMenuImage(

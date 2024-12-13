@@ -12,20 +12,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.lifecycleScope
 import com.example.progetto_kt.model.datasources.DBController
 import com.example.progetto_kt.view.navigation.RootNavHost
 import com.example.progetto_kt.viewmodel.MainViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +35,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val viewModel = MainViewModel(dataStore)
+
 
         enableEdgeToEdge()
         setContent {

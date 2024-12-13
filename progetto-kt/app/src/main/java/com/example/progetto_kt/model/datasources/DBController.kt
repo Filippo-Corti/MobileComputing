@@ -11,6 +11,7 @@ import androidx.room.RoomDatabase
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuImage
 import com.example.progetto_kt.model.dataclasses.MenuImageWithVersion
+import kotlinx.coroutines.coroutineScope
 
 
 @Dao
@@ -42,6 +43,7 @@ object DBController {
         ).build()
 
         dao = database.menuImageDao()
+
     }
 
 }

@@ -16,6 +16,7 @@ ktorClientContentNegotiation = "2.0.0"
 ktorClientLogging = "3.0.2"
 ktorSerializationKotlinxJsonVersion = "3.0.2"
 roomCompiler = "2.6.1"
+roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 
 [libraries]
@@ -23,6 +24,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
