@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuImage
+import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserSession
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -83,6 +84,23 @@ object APIController {
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as UserSession
+            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+        }
+    }
+
+    suspend fun getUserDetails(sid : String, userId : Int) : User {
+        Log.d(TAG, "Getting User Details")
+
+        val httpResponse = genericRequest(
+            endpoint = "user/$userId",
+            method = HttpMethod.GET,
+            queryParams = mapOf("sid" to sid)
+        )
+
+        when (httpResponse.status.value) {
+            200 -> return httpResponse.body() as User
+            401 -> throw Exception("Unauthorized")
+            404 -> throw Exception("User not found")
             else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
         }
     }

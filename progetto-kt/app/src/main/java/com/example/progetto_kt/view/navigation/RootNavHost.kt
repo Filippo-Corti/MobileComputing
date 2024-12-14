@@ -18,8 +18,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.progetto_kt.view.components.screens.AccountScreen
+import com.example.progetto_kt.view.components.screens.AddEditAccountScreen
 import com.example.progetto_kt.view.components.screens.HomeScreen
 import com.example.progetto_kt.view.components.screens.MenuDetailsScreen
+import com.example.progetto_kt.viewmodel.AccountFormViewModel
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @Composable
@@ -34,6 +37,7 @@ fun RootNavHost(
 
     val currentRoute = navBackStackEntry?.destination?.route
     showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
+
 
 
     Scaffold (
@@ -77,6 +81,48 @@ fun RootNavHost(
                     MenuDetailsScreen(
                         viewModel = viewModel,
                         menuId = menuId!!.toInt(),
+                        onBackClick = {
+                            navController.navigateUp()
+                        }
+                    )
+                }
+
+
+                composable(
+                    route = AppScreen.Account.params.route,
+                ) {
+
+
+                    AccountScreen(
+                        viewModel = viewModel,
+                        onEditAccountClick = { newAccount ->
+                            navController.navigate(AppScreen.AddEditAccount.params.route.replace("{newAccount}", newAccount.toString()))
+                        }
+                    )
+                }
+
+                composable(
+                    route = AppScreen.AddEditAccount.params.route,
+                    enterTransition = {
+                        slideIn(tween(700)) { IntOffset(it.width, 0) }
+                    },
+                    exitTransition = {
+                        slideOut(tween(700)) { IntOffset(it.width, 0) }
+                    }
+                ) { backStackEntry ->
+                    val newAccount = backStackEntry.arguments?.getString("newAccount")
+
+                    val formViewModel = remember {
+                        AccountFormViewModel(
+                            viewModel,
+                            viewModel.user.value
+                        )
+                    }
+
+                    AddEditAccountScreen(
+                        viewModel = viewModel,
+                        formViewModel = formViewModel,
+                        newAccount = newAccount!!.toBoolean(),
                         onBackClick = {
                             navController.navigateUp()
                         }

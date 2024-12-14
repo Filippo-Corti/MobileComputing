@@ -9,10 +9,12 @@ import com.example.api_storage.model.PreferencesController
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
+import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserSession
 import com.example.progetto_kt.model.datasources.APIController
 import com.example.progetto_kt.model.datasources.DBController
 import com.example.progetto_kt.model.repositories.MenuRepository
+import com.example.progetto_kt.model.repositories.UserRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,22 +29,24 @@ class MainViewModel(
 
     private val TAG = MainViewModel::class.simpleName
 
-    private val _isLoading = MutableStateFlow(true)
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
+
+    private val _isLoading = MutableStateFlow(true)
+    private val _user = MutableStateFlow<User?>(null)
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
     private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
 
-    val uid : StateFlow<Int?> = _uid
-    val sid : StateFlow<String?> = _sid
+    val user: StateFlow<User?> = _user
     val menus: StateFlow<List<Menu>> = _menus
     val isLoading: StateFlow<Boolean> = _isLoading
     val menuDetails : StateFlow<MenuDetailsWithImage?> = _menuDetails
 
     init {
         viewModelScope.launch {
-            delay(3000) //TODO: Remove this delay
             fetchLaunchInformation()
+            if (UserRepository.isRegistered(dataStore))
+                fetchUserData()
             fetchNearbyMenus()
             Log.d(TAG, "Fetched launch information and menus")
             _isLoading.value = false
@@ -53,7 +57,7 @@ class MainViewModel(
         val firstLaunch = PreferencesController.isFirstLaunch(dataStore)
         if (firstLaunch) {
             Log.d(TAG, "First Launch")
-            val us : UserSession = APIController.createNewUserSession()
+            val us : UserSession = UserRepository.createUserSession()
             PreferencesController.memorizeSessionKeys(dataStore, us.sid, us.uid)
             _sid.value = us.sid
             _uid.value = us.uid
@@ -62,7 +66,23 @@ class MainViewModel(
             _sid.value = PreferencesController.get(dataStore, PreferencesController.KEYS_SID)
             _uid.value = PreferencesController.get(dataStore, PreferencesController.KEYS_UID)
         }
-        Log.d(TAG, "SID is ${sid.value} and UID is ${uid.value}")
+        Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
+    }
+
+    fun fetchUserData() {
+        if (_sid.value == null || _uid.value == null) {
+            Log.d(TAG, "User not logged in, couldn't get user data")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val user = UserRepository.getUserDetails(_sid.value!!, _uid.value!!)
+                _user.value = user
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching user data: ${e.message}")
+            }
+        }
     }
 
     fun fetchNearbyMenus() {

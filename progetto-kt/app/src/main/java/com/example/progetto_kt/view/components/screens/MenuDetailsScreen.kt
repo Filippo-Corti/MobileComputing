@@ -34,7 +34,6 @@ fun MenuDetailsScreen(
 
     val menuDetails by viewModel.menuDetails.collectAsState()
 
-
     LaunchedEffect(menuId) {
         viewModel.fetchMenuDetails(menuId)
     }
@@ -56,7 +55,6 @@ fun MenuDetailsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.White)
                 .padding(16.dp)
         ) {
             Text(
