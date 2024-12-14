@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.progetto_kt.viewmodel.AccountFormViewModel
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @Composable
@@ -73,6 +72,14 @@ fun AccountScreen(
         Text(
             text = "${user!!.firstName} ${user!!.lastName}",
         )
+
+        Button(
+            onClick = { onEditAccountClick(false) }
+        ) {
+            Text(
+                text = "Edit Account"
+            )
+        }
 
     }
 

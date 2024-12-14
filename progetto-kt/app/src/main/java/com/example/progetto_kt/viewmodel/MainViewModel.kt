@@ -7,21 +7,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.api_storage.model.PreferencesController
 import com.example.progetto_kt.model.dataclasses.Menu
-import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserSession
-import com.example.progetto_kt.model.datasources.APIController
-import com.example.progetto_kt.model.datasources.DBController
+import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.lang.Thread.State
 
 class MainViewModel(
     private val dataStore : DataStore<Preferences>
@@ -37,6 +31,7 @@ class MainViewModel(
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
     private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
 
+    val sid : StateFlow<String?> = _sid
     val user: StateFlow<User?> = _user
     val menus: StateFlow<List<Menu>> = _menus
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -83,6 +78,28 @@ class MainViewModel(
                 Log.e(TAG, "Error fetching user data: ${e.message}")
             }
         }
+    }
+
+    fun updateUserData(newData : UserUpdateParams) {
+        if (_sid.value == null || _uid.value == null) {
+            Log.d(TAG, "User not logged in, couldn't update user data")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                UserRepository.updateUserDetails(
+                    dataStore = dataStore,
+                    sid = _sid.value!!,
+                    uid = _uid.value!!,
+                    user = newData
+                )
+                fetchUserData()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating user data: ${e.message}")
+            }
+        }
+
     }
 
     fun fetchNearbyMenus() {

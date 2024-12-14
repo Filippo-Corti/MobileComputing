@@ -18,11 +18,12 @@ class AccountFormViewModel(
         UserUpdateParams(
             firstName = initValues?.firstName ?: "",
             lastName = initValues?.lastName ?: "",
-            cardFullName = initValues?.creditCard?.fullName ?: "",
-            cardNumber = initValues?.creditCard?.number ?: "",
-            cardExpireMonth = initValues?.creditCard?.expireMonth ?: 1,
-            cardExpireYear = initValues?.creditCard?.expireYear ?: 2025,
-            cardCVV = initValues?.creditCard?.cvv ?: ""
+            cardFullName = initValues?.cardFullName ?: "",
+            cardNumber = initValues?.cardNumber ?: "",
+            cardExpireMonth = initValues?.cardExpireMonth ?: 1,
+            cardExpireYear = initValues?.cardExpireYear ?: 2025,
+            cardCVV = initValues?.cardCVV ?: "",
+            sid = mainViewModel.sid.value ?: ""
         )
     )
 
@@ -53,7 +54,7 @@ class AccountFormViewModel(
         Log.d(TAG, "Card Number Changed: $value")
         _formParams.value = _formParams.value.copy(cardNumber = value)
 
-        return (value.length == 16 && value.toIntOrNull() != null)
+        return (value.length == 16 && value.toLongOrNull() != null)
     }
 
     fun onCardExpireMonthChange(value : Int) : Boolean {
@@ -78,8 +79,17 @@ class AccountFormViewModel(
     }
 
 
-    fun submit() {
-        Log.d(TAG, "Submitted with values: ${_formParams.value}")
+    fun submit() : Boolean{
+        Log.d(TAG, "Submitting with values: ${_formParams.value}")
+        if (_formParams.value.firstName.isEmpty() || _formParams.value.lastName.isEmpty() ||
+            _formParams.value.cardFullName.isEmpty() || _formParams.value.cardNumber.isEmpty() ||
+            _formParams.value.cardCVV.isEmpty()) {
+            Log.d(TAG, "Invalid Form Data")
+            return false
+        }
+
+        mainViewModel.updateUserData(_formParams.value)
+        return true
     }
 
 }

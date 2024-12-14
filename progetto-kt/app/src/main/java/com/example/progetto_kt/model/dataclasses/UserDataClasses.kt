@@ -16,23 +16,17 @@ data class UserSession(
 )
 
 @Serializable
-data class CreditCard(
-    @SerialName("cardFullName") val fullName : String,
-    @SerialName("cardNumber") val number : String,
-    @SerialName("cardExpireMonth") val expireMonth : Int,
-    @SerialName("cardExpireYear") val expireYear : Int,
-    @SerialName("cardCVV") val cvv : String
-)
-
-@Serializable
 data class User(
     @SerialName("uid") val id : Int,
     @SerialName("firstName") val firstName : String,
     @SerialName("lastName") val lastName : String,
-    @SerialName("lastOid") val lastOrderId : Int,
-    @SerialName("orderStatus") val orderStatus: OrderStatus,
-    @Transient val creditCard : CreditCard = CreditCard("", "", 0, 0, "")
-)
+    @SerialName("lastOid") val lastOrderId : Int?,
+    @SerialName("orderStatus") val orderStatus: OrderStatus?,
+    @SerialName("cardFullName") val cardFullName : String,
+    @SerialName("cardNumber") val cardNumber : String,
+    @SerialName("cardExpireMonth") val cardExpireMonth : Int,
+    @SerialName("cardExpireYear") val cardExpireYear : Int,
+    @SerialName("cardCVV") val cardCVV : String)
 
 @Serializable
 data class UserUpdateParams(
@@ -42,5 +36,6 @@ data class UserUpdateParams(
     @SerialName("cardNumber") var cardNumber : String,
     @SerialName("cardExpireMonth") var cardExpireMonth : Int,
     @SerialName("cardExpireYear") var cardExpireYear : Int,
-    @SerialName("cardCVV") var cardCVV : String
+    @SerialName("cardCVV") var cardCVV : String,
+    @SerialName("sid") val sid : String
 )

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.progetto_kt.view.components.common.forms.FormField
+import com.example.progetto_kt.view.components.common.forms.SelectNumber
 import com.example.progetto_kt.viewmodel.AccountFormViewModel
 import com.example.progetto_kt.viewmodel.MainViewModel
 
@@ -23,8 +24,6 @@ fun AddEditAccountScreen(
     newAccount : Boolean = false,
     onBackClick : () -> Unit
 ) {
-
-    val user by viewModel.user.collectAsState()
 
     val formParams by formViewModel.formParams.collectAsState()
 
@@ -78,24 +77,20 @@ fun AddEditAccountScreen(
             )
         )
 
-        FormField(
-            label = "Card Expire Month",
+        SelectNumber(
+            min = 1,
+            max = 12,
             value = formParams.cardExpireMonth.toString(),
+            label = "Card Expire Month",
             onValueChange = { formViewModel.onCardExpireMonthChange(it.toInt()) },
-            errorMessage = "Card Expire Month should be between 1 and 12",
-            keyBoardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
         )
 
-        FormField(
-            label = "Card Expire Year",
+        SelectNumber(
+            min = 2025,
+            max = 2034,
             value = formParams.cardExpireYear.toString(),
+            label = "Card Expire Year",
             onValueChange = { formViewModel.onCardExpireYearChange(it.toInt()) },
-            errorMessage = "Card Expire Year should be > 0",
-            keyBoardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
         )
 
         FormField(
@@ -109,7 +104,12 @@ fun AddEditAccountScreen(
         )
 
         Button(
-            onClick = { formViewModel.submit() }
+            onClick = {
+                val ok = formViewModel.submit()
+                if (ok) {
+                    onBackClick()
+                }
+            }
         ) {
             Text(text = "Submit")
         }
