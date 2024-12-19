@@ -24,10 +24,20 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-object APIController {
+class APIController(
 
-    private val BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425/"
-    private val TAG = APIController::class.simpleName
+) {
+    companion object {
+        private val BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425/"
+        private val TAG = APIController::class.simpleName
+
+        enum class HttpMethod {
+            GET,
+            POST,
+            DELETE,
+            PUT
+        }
+    }
 
     private val client = HttpClient(Android) {
         install(ContentNegotiation) {
@@ -37,12 +47,6 @@ object APIController {
         }
     }
 
-    enum class HttpMethod {
-        GET,
-        POST,
-        DELETE,
-        PUT
-    }
 
     private suspend fun genericRequest(
         endpoint: String,

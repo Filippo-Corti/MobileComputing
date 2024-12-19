@@ -30,20 +30,16 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun menuImageDao() : MenuImageDao
 }
 
-object DBController {
+class DBController(
+    context : Context
+) {
 
-    lateinit var database : AppDatabase
-    lateinit var dao : MenuImageDao
+    private val database = Room.databaseBuilder(
+        context,
+        AppDatabase::class.java,
+        "images-database"
+    ).build()
 
-    fun initDB(context : Context) {
-        database = Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "images-database"
-        ).build()
-
-        dao = database.menuImageDao()
-
-    }
+    val dao = database.menuImageDao()
 
 }

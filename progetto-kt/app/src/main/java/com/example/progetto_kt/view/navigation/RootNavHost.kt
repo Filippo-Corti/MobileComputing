@@ -129,6 +129,19 @@ fun RootNavHost(
                     )
                 }
 
+                composable(
+                    route = AppScreen.AddEditAccount.params.route,
+                    enterTransition = {
+                        slideIn(tween(700)) { IntOffset(it.width, 0) }
+                    },
+                    exitTransition = {
+                        slideOut(tween(700)) { IntOffset(it.width, 0) }
+                    }
+                ) { backStackEntry ->
+
+
+                }
+
             }
         }
     }

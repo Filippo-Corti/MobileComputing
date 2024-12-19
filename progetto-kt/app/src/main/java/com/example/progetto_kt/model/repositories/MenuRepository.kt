@@ -1,39 +1,45 @@
 package com.example.progetto_kt.model.repositories
 
 import android.util.Log
+import com.example.progetto_kt.model.datasources.PreferencesController
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuImage
 import com.example.progetto_kt.model.dataclasses.MenuImageWithVersion
 import com.example.progetto_kt.model.datasources.APIController
 import com.example.progetto_kt.model.datasources.DBController
-import com.example.progetto_kt.viewmodel.MainViewModel
 
-object MenuRepository {
+class MenuRepository(
+    private val apiController: APIController,
+    private val dbController: DBController,
+    private val preferencesController: PreferencesController
+) {
 
-    private val TAG = MenuRepository::class.simpleName
+    companion object {
+        private val TAG = MenuRepository::class.simpleName
+    }
 
     suspend fun getNearbyMenus(sid : String, latitude : Double, longitude : Double) : List<Menu>{
-        return APIController.getNearbyMenus(sid, latitude, longitude)
+        return apiController.getNearbyMenus(sid, latitude, longitude)
     }
 
     suspend fun getMenuDetails(sid : String, latitude : Double, longitude : Double, menuId : Int) : MenuDetails {
-        return APIController.getMenuDetails(sid, latitude, longitude, menuId)
+        return apiController.getMenuDetails(sid, latitude, longitude, menuId)
     }
 
     suspend fun getMenuImage(sid : String, menuId : Int, imageVersion : Int) : MenuImage {
-        val menuImageInStorage = DBController.dao.getMenuImageByVersion(menuId, imageVersion)
+        val menuImageInStorage = dbController.dao.getMenuImageByVersion(menuId, imageVersion)
         if (menuImageInStorage != null) {
             Log.d(TAG, "Menu Image Found in Storage")
             return MenuImage(menuImageInStorage.image)
         }
 
-        val menuImageFromServer = APIController.getMenuImage(sid, menuId)
+        val menuImageFromServer = apiController.getMenuImage(sid, menuId)
         if (menuImageFromServer.image.startsWith("data:image/jpeg;base64,")) {
             menuImageFromServer.image = menuImageFromServer.image.substring(23)
         }
 
-        DBController.dao.insertMenuImage(
+        dbController.dao.insertMenuImage(
             MenuImageWithVersion(menuId, imageVersion, menuImageFromServer.image)
         )
 

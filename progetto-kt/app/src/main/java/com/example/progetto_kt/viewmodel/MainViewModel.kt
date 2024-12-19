@@ -1,15 +1,11 @@
 package com.example.progetto_kt.viewmodel
 
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.api_storage.model.PreferencesController
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.User
-import com.example.progetto_kt.model.dataclasses.UserSession
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
@@ -18,7 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val dataStore : DataStore<Preferences>
+    private val userRepository: UserRepository,
+    private val menuRepository: MenuRepository
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
@@ -40,7 +37,7 @@ class MainViewModel(
     init {
         viewModelScope.launch {
             fetchLaunchInformation()
-            if (UserRepository.isRegistered(dataStore))
+            if (userRepository.isRegistered())
                 fetchUserData()
             fetchNearbyMenus()
             Log.d(TAG, "Fetched launch information and menus")
@@ -48,20 +45,13 @@ class MainViewModel(
         }
     }
 
-    suspend fun fetchLaunchInformation() {
-        val firstLaunch = PreferencesController.isFirstLaunch(dataStore)
-        if (firstLaunch) {
-            Log.d(TAG, "First Launch")
-            val us : UserSession = UserRepository.createUserSession()
-            PreferencesController.memorizeSessionKeys(dataStore, us.sid, us.uid)
+    fun fetchLaunchInformation() {
+        viewModelScope.launch {
+            val us = userRepository.getUserSession()
             _sid.value = us.sid
             _uid.value = us.uid
-        } else {
-            Log.d(TAG, "Not First Launch")
-            _sid.value = PreferencesController.get(dataStore, PreferencesController.KEYS_SID)
-            _uid.value = PreferencesController.get(dataStore, PreferencesController.KEYS_UID)
+            Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
         }
-        Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
     }
 
     fun fetchUserData() {
@@ -72,7 +62,7 @@ class MainViewModel(
 
         viewModelScope.launch {
             try {
-                val user = UserRepository.getUserDetails(_sid.value!!, _uid.value!!)
+                val user = userRepository.getUserDetails(_sid.value!!, _uid.value!!)
                 _user.value = user
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching user data: ${e.message}")
@@ -88,8 +78,7 @@ class MainViewModel(
 
         viewModelScope.launch {
             try {
-                UserRepository.updateUserDetails(
-                    dataStore = dataStore,
+                userRepository.updateUserDetails(
                     sid = _sid.value!!,
                     uid = _uid.value!!,
                     user = newData
@@ -111,7 +100,7 @@ class MainViewModel(
 
         viewModelScope.launch {
             try {
-                val menus = MenuRepository.getNearbyMenus(
+                val menus = menuRepository.getNearbyMenus(
                     sid = _sid.value!!,
                     latitude = 45.46,
                     longitude = 9.18
@@ -139,13 +128,13 @@ class MainViewModel(
 
         viewModelScope.launch {
             try {
-                val menuDetails = MenuRepository.getMenuDetails(
+                val menuDetails = menuRepository.getMenuDetails(
                     sid = _sid.value!!,
                     latitude = 45.46,
                     longitude = 9.18,
                     menuId = menuId
                 )
-                val image = MenuRepository.getMenuImage(
+                val image = menuRepository.getMenuImage(
                     sid = _sid.value!!,
                     menuId = menuId,
                     imageVersion = menuDetails.imageVersion
