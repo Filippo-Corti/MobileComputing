@@ -76,14 +76,12 @@ fun RootNavHost(
                         slideIn(tween(700)) { IntOffset(it.width, 0) }
                     },
                     exitTransition = {
-                        slideOut(tween(700)) { IntOffset(it.width, 0) }
+                        null
                     },
                     popEnterTransition = {
-                        // When going back to MenuDetails, apply the slideIn transition
                         slideIn(tween(700)) { IntOffset(-it.width, 0) }
                     },
                     popExitTransition = {
-                        // Apply slideOut only when navigating back
                         slideOut(tween(700)) { IntOffset(it.width, 0) }
                     }
                 ) { backStackEntry ->
@@ -107,7 +105,7 @@ fun RootNavHost(
                         slideIn(tween(700)) { IntOffset(it.width, 0) }
                     },
                     exitTransition = {
-                        slideOut(tween(700)) { IntOffset(it.width, 0) }
+                        null
                     },
                     popEnterTransition = {
                         // When going back to MenuDetails, apply the slideIn transition
