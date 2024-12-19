@@ -34,7 +34,7 @@ sealed class AppScreen(
 
     data object ConfirmOrder : AppScreen(
         ScreenParams(
-            route = "confirm_order",
+            route = "confirm_order/{menuId}",
             title = "Confirm Order",
             showTabBar = false
         )
@@ -55,6 +55,7 @@ sealed class AppScreen(
             showTabBar = false
         )
     )
+
 
     companion object {
         fun values(): List<AppScreen> = listOf(

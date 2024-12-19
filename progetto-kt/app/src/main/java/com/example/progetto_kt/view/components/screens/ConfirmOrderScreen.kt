@@ -24,19 +24,18 @@ import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-@OptIn(ExperimentalEncodingApi::class)
 @Composable
-fun MenuDetailsScreen(
+fun ConfirmOrderScreen(
     viewModel: MainViewModel,
     menuId : Int,
-    onOrderClick : (Int) -> Unit,
     onBackClick : () -> Unit
 ) {
 
     val menuDetails by viewModel.menuDetails.collectAsState()
 
     LaunchedEffect(menuId) {
-        viewModel.fetchMenuDetails(menuId)
+        if (menuDetails == null)
+            viewModel.fetchMenuDetails(menuId)
     }
 
     if (menuDetails == null) {
@@ -50,8 +49,6 @@ fun MenuDetailsScreen(
             CircularProgressIndicator()
         }
     } else {
-        val byteArray = Base64.decode(menuDetails!!.image.image)
-        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 
         Column(
             modifier = Modifier
@@ -67,18 +64,10 @@ fun MenuDetailsScreen(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = menuDetails!!.menuDetails.name,
-                modifier = Modifier.padding(top = 16.dp)
+            Text(
+                text = "Confirm the Order",
+                fontSize = 28.sp,
             )
-
-            Button(
-                onClick = { onOrderClick(menuId) },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(text = "Order")
-            }
 
             Button(
                 onClick = onBackClick,
