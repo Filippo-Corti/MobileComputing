@@ -1,5 +1,6 @@
 package com.example.progetto_kt.view.navigation
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
@@ -92,7 +93,6 @@ fun RootNavHost(
                     route = AppScreen.Account.params.route,
                 ) {
 
-
                     AccountScreen(
                         viewModel = viewModel,
                         onEditAccountClick = { newAccount ->
@@ -112,16 +112,8 @@ fun RootNavHost(
                 ) { backStackEntry ->
                     val newAccount = backStackEntry.arguments?.getString("newAccount")
 
-                    val formViewModel = remember {
-                        AccountFormViewModel(
-                            viewModel,
-                            viewModel.user.value
-                        )
-                    }
-
                     AddEditAccountScreen(
                         viewModel = viewModel,
-                        formViewModel = formViewModel,
                         newAccount = newAccount!!.toBoolean(),
                         onBackClick = {
                             navController.navigateUp()
@@ -129,18 +121,6 @@ fun RootNavHost(
                     )
                 }
 
-                composable(
-                    route = AppScreen.AddEditAccount.params.route,
-                    enterTransition = {
-                        slideIn(tween(700)) { IntOffset(it.width, 0) }
-                    },
-                    exitTransition = {
-                        slideOut(tween(700)) { IntOffset(it.width, 0) }
-                    }
-                ) { backStackEntry ->
-
-
-                }
 
             }
         }

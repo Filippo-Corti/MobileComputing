@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.User
-import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +13,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val userRepository: UserRepository,
-    private val menuRepository: MenuRepository
+    val userRepository: UserRepository,
+    val menuRepository: MenuRepository
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
@@ -28,7 +27,6 @@ class MainViewModel(
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
     private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
 
-    val sid : StateFlow<String?> = _sid
     val user: StateFlow<User?> = _user
     val menus: StateFlow<List<Menu>> = _menus
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -36,7 +34,11 @@ class MainViewModel(
 
     init {
         viewModelScope.launch {
-            fetchLaunchInformation()
+            val us = userRepository.getUserSession()
+            _sid.value = us.sid
+            _uid.value = us.uid
+            Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
+
             if (userRepository.isRegistered())
                 fetchUserData()
             fetchNearbyMenus()
@@ -45,14 +47,6 @@ class MainViewModel(
         }
     }
 
-    fun fetchLaunchInformation() {
-        viewModelScope.launch {
-            val us = userRepository.getUserSession()
-            _sid.value = us.sid
-            _uid.value = us.uid
-            Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
-        }
-    }
 
     fun fetchUserData() {
         if (_sid.value == null || _uid.value == null) {
@@ -68,27 +62,6 @@ class MainViewModel(
                 Log.e(TAG, "Error fetching user data: ${e.message}")
             }
         }
-    }
-
-    fun updateUserData(newData : UserUpdateParams) {
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't update user data")
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                userRepository.updateUserDetails(
-                    sid = _sid.value!!,
-                    uid = _uid.value!!,
-                    user = newData
-                )
-                fetchUserData()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error updating user data: ${e.message}")
-            }
-        }
-
     }
 
     fun fetchNearbyMenus() {

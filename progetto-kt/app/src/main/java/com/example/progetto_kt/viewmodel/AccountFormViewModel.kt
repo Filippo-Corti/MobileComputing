@@ -2,17 +2,22 @@ package com.example.progetto_kt.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
+import com.example.progetto_kt.model.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class AccountFormViewModel(
-    private val mainViewModel: MainViewModel,
-    private val initValues : User? = null,
+    private val userRepository: UserRepository,
+    initValues : User? = null,
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
+    private val _sid = MutableStateFlow<String?>(null)
+    private val _uid = MutableStateFlow<Int?>(null)
 
     private val _formParams = MutableStateFlow<UserUpdateParams>(
         UserUpdateParams(
@@ -23,11 +28,26 @@ class AccountFormViewModel(
             cardExpireMonth = initValues?.cardExpireMonth ?: 1,
             cardExpireYear = initValues?.cardExpireYear ?: 2025,
             cardCVV = initValues?.cardCVV ?: "",
-            sid = mainViewModel.sid.value ?: ""
+            sid = ""
         )
     )
 
     val formParams : StateFlow<UserUpdateParams> = _formParams
+
+    init {
+        viewModelScope.launch {
+            fetchSessionData()
+        }
+    }
+
+    fun fetchSessionData() {
+        viewModelScope.launch {
+            val us = userRepository.getUserSession()
+            _sid.value = us.sid
+            _uid.value = us.uid
+            Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
+        }
+    }
 
     fun onFirstNameChange(value : String) : Boolean {
         Log.d(TAG, "First Name Changed: $value")
@@ -79,7 +99,7 @@ class AccountFormViewModel(
     }
 
 
-    fun submit() : Boolean{
+    fun submit() : Boolean {
         Log.d(TAG, "Submitting with values: ${_formParams.value}")
         if (_formParams.value.firstName.isEmpty() || _formParams.value.lastName.isEmpty() ||
             _formParams.value.cardFullName.isEmpty() || _formParams.value.cardNumber.isEmpty() ||
@@ -88,8 +108,32 @@ class AccountFormViewModel(
             return false
         }
 
-        mainViewModel.updateUserData(_formParams.value)
+        this.updateUserData(_formParams.value)
         return true
+    }
+
+
+
+    fun updateUserData(newData : UserUpdateParams) {
+        if (_sid.value == null || _uid.value == null) {
+            Log.d(TAG, "User not logged in, couldn't update user data")
+            return
+        }
+
+        newData.sid = _sid.value!!
+
+        viewModelScope.launch {
+            try {
+                userRepository.updateUserDetails(
+                    sid = _sid.value!!,
+                    uid = _uid.value!!,
+                    user = newData
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating user data: ${e.message}")
+            }
+        }
+
     }
 
 }

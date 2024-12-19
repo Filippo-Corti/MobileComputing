@@ -37,5 +37,5 @@ data class UserUpdateParams(
     @SerialName("cardExpireMonth") var cardExpireMonth : Int,
     @SerialName("cardExpireYear") var cardExpireYear : Int,
     @SerialName("cardCVV") var cardCVV : String,
-    @SerialName("sid") val sid : String
+    @SerialName("sid") var sid : String
 )

@@ -1,5 +1,7 @@
 package com.example.progetto_kt.view.components.screens
 
+import android.util.Log
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,9 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.progetto_kt.view.components.common.forms.FormField
 import com.example.progetto_kt.view.components.common.forms.SelectNumber
 import com.example.progetto_kt.viewmodel.AccountFormViewModel
@@ -20,10 +26,22 @@ import com.example.progetto_kt.viewmodel.MainViewModel
 @Composable
 fun AddEditAccountScreen(
     viewModel: MainViewModel,
-    formViewModel: AccountFormViewModel,
     newAccount : Boolean = false,
     onBackClick : () -> Unit
 ) {
+
+    val viewModelFactory = viewModelFactory {
+        initializer {
+            AccountFormViewModel(
+                viewModel.userRepository,
+                viewModel.user.value
+            )
+        }
+    }
+
+    val formViewModel: AccountFormViewModel = viewModel(
+        factory = viewModelFactory
+    )
 
     val formParams by formViewModel.formParams.collectAsState()
 
@@ -107,6 +125,7 @@ fun AddEditAccountScreen(
             onClick = {
                 val ok = formViewModel.submit()
                 if (ok) {
+                    viewModel.fetchUserData()
                     onBackClick()
                 }
             }

@@ -18,7 +18,6 @@ class UserRepository(
 
     private val TAG = UserRepository::class.simpleName
 
-
     suspend fun isRegistered() : Boolean {
         return preferencesController.get(PreferencesController.KEYS_IS_REGISTERED) ?: false
     }
@@ -30,6 +29,7 @@ class UserRepository(
             Log.d(TAG, "Not First Launch")
             val sid = preferencesController.get(PreferencesController.KEYS_SID)
             val uid = preferencesController.get(PreferencesController.KEYS_UID)
+            Log.d(TAG, "Fetched SID and UID $sid")
             if (sid != null && uid != null) {
                 return UserSession(sid, uid)
             }
