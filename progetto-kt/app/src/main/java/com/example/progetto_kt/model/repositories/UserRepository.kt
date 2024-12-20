@@ -16,7 +16,9 @@ class UserRepository(
     private val preferencesController: PreferencesController
 ) {
 
-    private val TAG = UserRepository::class.simpleName
+    companion object {
+        private val TAG = UserRepository::class.simpleName
+    }
 
     suspend fun isRegistered() : Boolean {
         return preferencesController.get(PreferencesController.KEYS_IS_REGISTERED) ?: false

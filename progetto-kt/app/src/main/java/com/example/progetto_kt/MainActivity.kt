@@ -28,6 +28,7 @@ import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.progetto_kt.view.navigation.RootNavHost
 import com.example.progetto_kt.viewmodel.MainViewModel
+import com.example.rprogetto_kt.model.repositories.OrderRepository
 
 class MainActivity : ComponentActivity() {
 
@@ -50,13 +51,20 @@ class MainActivity : ComponentActivity() {
             preferencesController = preferencesController
         )
 
+        val orderRepository = OrderRepository(
+            apiController = apiController,
+            dbController = dbController,
+            preferencesController = preferencesController
+        )
+
         super.onCreate(savedInstanceState)
 
         val viewModelFactory = viewModelFactory {
             initializer {
                 MainViewModel(
                     userRepository,
-                    menuRepository
+                    menuRepository,
+                    orderRepository,
                 )
             }
         }

@@ -1,6 +1,5 @@
 package com.example.progetto_kt.view.navigation
 
-import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
@@ -24,7 +23,6 @@ import com.example.progetto_kt.view.components.screens.AddEditAccountScreen
 import com.example.progetto_kt.view.components.screens.ConfirmOrderScreen
 import com.example.progetto_kt.view.components.screens.HomeScreen
 import com.example.progetto_kt.view.components.screens.MenuDetailsScreen
-import com.example.progetto_kt.viewmodel.AccountFormViewModel
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @Composable
@@ -39,7 +37,6 @@ fun RootNavHost(
 
     val currentRoute = navBackStackEntry?.destination?.route
     showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
-
 
 
     Scaffold (
@@ -75,12 +72,8 @@ fun RootNavHost(
                     enterTransition = {
                         slideIn(tween(700)) { IntOffset(it.width, 0) }
                     },
-                    exitTransition = {
-                        null
-                    },
-                    popEnterTransition = {
-                        slideIn(tween(700)) { IntOffset(-it.width, 0) }
-                    },
+                    exitTransition = { null },
+                    popEnterTransition = { null },
                     popExitTransition = {
                         slideOut(tween(700)) { IntOffset(it.width, 0) }
                     }
@@ -89,9 +82,8 @@ fun RootNavHost(
                     MenuDetailsScreen(
                         viewModel = viewModel,
                         menuId = menuId!!.toInt(),
-                        onOrderClick = { menuId ->
+                        onForwardClick = { menuId ->
                             navController.navigate(AppScreen.ConfirmOrder.params.route.replace("{menuId}", menuId.toString()))
-
                         },
                         onBackClick = {
                             navController.navigateUp()
@@ -104,28 +96,27 @@ fun RootNavHost(
                     enterTransition = {
                         slideIn(tween(700)) { IntOffset(it.width, 0) }
                     },
-                    exitTransition = {
-                        null
-                    },
-                    popEnterTransition = {
-                        // When going back to MenuDetails, apply the slideIn transition
-                        slideIn(tween(700)) { IntOffset(-it.width, 0) }
-                    },
+                    exitTransition = { null },
+                    popEnterTransition = { null },
                     popExitTransition = {
-                        // Apply slideOut only when navigating back
                         slideOut(tween(700)) { IntOffset(it.width, 0) }
                     }
                 ) { backStackEntry ->
                     val menuId = backStackEntry.arguments?.getString("menuId")
+                    val menuIdInt = menuId!!.toInt()
                     ConfirmOrderScreen(
                         viewModel = viewModel,
-                        menuId = menuId!!.toInt(),
+                        menuId = menuIdInt,
+                        onOrderClick = {
+                            viewModel.buyMenu(menuIdInt)
+                            navController.navigate(AppScreen.Home.params.route)
+                            true to "Ok"
+                        },
                         onBackClick = {
                             navController.navigateUp()
                         }
                     )
                 }
-
 
                 composable(
                     route = AppScreen.Account.params.route,
@@ -144,7 +135,9 @@ fun RootNavHost(
                     enterTransition = {
                         slideIn(tween(700)) { IntOffset(it.width, 0) }
                     },
-                    exitTransition = {
+                    exitTransition = { null },
+                    popEnterTransition = { null },
+                    popExitTransition = {
                         slideOut(tween(700)) { IntOffset(it.width, 0) }
                     }
                 ) { backStackEntry ->

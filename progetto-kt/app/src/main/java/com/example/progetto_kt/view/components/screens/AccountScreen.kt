@@ -73,6 +73,10 @@ fun AccountScreen(
             text = "${user!!.firstName} ${user!!.lastName}",
         )
 
+        Text(
+            text = "Last Ordered ${user!!.lastOrderId} ",
+        )
+
         Button(
             onClick = { onEditAccountClick(false) }
         ) {

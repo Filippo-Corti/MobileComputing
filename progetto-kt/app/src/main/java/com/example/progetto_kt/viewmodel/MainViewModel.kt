@@ -3,18 +3,22 @@ package com.example.progetto_kt.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.progetto_kt.model.dataclasses.Location
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
+import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
+import com.example.rprogetto_kt.model.repositories.OrderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainViewModel(
     val userRepository: UserRepository,
-    val menuRepository: MenuRepository
+    val menuRepository: MenuRepository,
+    val orderRepository: OrderRepository
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
@@ -24,6 +28,7 @@ class MainViewModel(
 
     private val _isLoading = MutableStateFlow(true)
     private val _user = MutableStateFlow<User?>(null)
+    private val _lastOrder = MutableStateFlow<Order?>(null)
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
     private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
 
@@ -40,7 +45,7 @@ class MainViewModel(
             Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
 
             if (userRepository.isRegistered())
-                fetchUserData()
+                fetchUserDetails()
             fetchNearbyMenus()
             Log.d(TAG, "Fetched launch information and menus")
             _isLoading.value = false
@@ -48,7 +53,7 @@ class MainViewModel(
     }
 
 
-    fun fetchUserData() {
+    fun fetchUserDetails() {
         if (_sid.value == null || _uid.value == null) {
             Log.d(TAG, "User not logged in, couldn't get user data")
             return
@@ -64,8 +69,55 @@ class MainViewModel(
         }
     }
 
-    fun fetchNearbyMenus() {
+    fun fetchOrderDetails(orderId : Int) {
+        if (_menuDetails.value?.menuDetails?.id == orderId) {
+            Log.d(TAG, "Order details already fetched")
+            return
+        }
 
+        if (_sid.value == null || _uid.value == null) {
+            Log.d(TAG, "User not logged in, couldn't get nearby menus")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val order = orderRepository.getOrderDetails(
+                    sid = _sid.value!!,
+                    orderId = orderId,
+                )
+                _lastOrder.value = order
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching order data: ${e.message}")
+            }
+        }
+    }
+
+    fun buyMenu(menuId : Int) {
+        if (_sid.value == null || _uid.value == null) {
+            Log.d(TAG, "User not logged in, couldn't get nearby menus")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val order = orderRepository.buyMenu(
+                    sid = _sid.value!!,
+                    menuId = menuId,
+                    deliveryLocation = Location(
+                        45.4642,
+                        9.19
+                    )
+                )
+                _lastOrder.value = order
+            } catch (e: Exception) {
+                Log.e(TAG, "Error buying menu: ${e.message}")
+            }
+        }
+    }
+
+
+    fun fetchNearbyMenus() {
         if (_sid.value == null || _uid.value == null) {
             Log.d(TAG, "User not logged in, couldn't get nearby menus")
             return
@@ -86,7 +138,6 @@ class MainViewModel(
     }
 
     fun fetchMenuDetails(menuId : Int) {
-
         if (_menuDetails.value?.menuDetails?.id == menuId) {
             Log.d(TAG, "Menu details already fetched")
             return

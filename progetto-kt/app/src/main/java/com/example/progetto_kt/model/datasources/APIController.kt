@@ -2,12 +2,16 @@ package com.example.progetto_kt.model.datasources
 
 import android.net.Uri
 import android.util.Log
+import com.example.progetto_kt.model.dataclasses.BuyOrderRequest
+import com.example.progetto_kt.model.dataclasses.Location
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuImage
+import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserSession
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
+import com.example.progetto_kt.model.dataclasses.Error
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -22,6 +26,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class APIController(
@@ -128,6 +133,42 @@ class APIController(
         }
     }
 
+    suspend fun getOrderDetails(sid : String, orderId : Int) : Order {
+        Log.d(TAG, "Getting Order Details for order $orderId")
+
+        val httpResponse = genericRequest(
+            endpoint = "order/${orderId}",
+            method = HttpMethod.GET,
+            queryParams = mapOf("sid" to sid)
+        )
+
+        when (httpResponse.status.value) {
+            200 -> return httpResponse.body() as Order
+            401 -> throw Exception("Unauthorized")
+            404 -> throw Exception("Order not found")
+            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+        }
+    }
+
+    suspend fun buyMenu(sid : String, menuId : Int, deliveryLocation : Location) : Order {
+        Log.d(TAG, "Creating a new Order for menu $menuId")
+
+        val httpResponse = genericRequest(
+            endpoint = "menu/${menuId}/buy",
+            method = HttpMethod.POST,
+            bodyParams = BuyOrderRequest(sid, deliveryLocation)
+        )
+
+        when (httpResponse.status.value) {
+            200 -> return httpResponse.body() as Order
+            401 -> throw Exception("Unauthorized")
+            403 -> throw Exception("Invalid Card")
+            404 -> throw Exception("Menu not found")
+            409 -> throw Exception("User already has an active order")
+            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API. Message: ${(httpResponse.body() as Error).message}")
+        }
+    }
+
     suspend fun getNearbyMenus(sid : String, latitude : Double, longitude : Double) : List<Menu> {
         Log.d(TAG, "Getting Nearby Menus")
 
@@ -150,7 +191,7 @@ class APIController(
 
 
     suspend fun getMenuDetails(sid : String, latitude : Double, longitude : Double, menuId : Int) : MenuDetails {
-        Log.d(TAG, "Getting Nearby Menus")
+        Log.d(TAG, "Getting Menu Details for menu $menuId")
 
         val httpResponse = genericRequest(
             endpoint = "menu/$menuId",

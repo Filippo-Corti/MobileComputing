@@ -1,6 +1,7 @@
 package com.example.progetto_kt.view.components.screens
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -28,8 +30,11 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 fun ConfirmOrderScreen(
     viewModel: MainViewModel,
     menuId : Int,
+    onOrderClick : () -> Pair<Boolean, String>,
     onBackClick : () -> Unit
 ) {
+
+    val TAG = MenuRepository::class.simpleName
 
     val menuDetails by viewModel.menuDetails.collectAsState()
 
@@ -68,6 +73,16 @@ fun ConfirmOrderScreen(
                 text = "Confirm the Order",
                 fontSize = 28.sp,
             )
+
+            Button(
+                onClick = {
+                    val (ok, msg) = onOrderClick()
+                    Log.d(TAG, "Order Result: $ok - $msg")
+                },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text(text = "Order")
+            }
 
             Button(
                 onClick = onBackClick,
