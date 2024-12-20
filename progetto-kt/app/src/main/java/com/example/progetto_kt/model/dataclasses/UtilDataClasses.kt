@@ -38,3 +38,7 @@ data class Location (
 
 )
 
+data class UserWithOrder (
+    var user : User? = null,
+    var lastOrder : Order? = null
+)

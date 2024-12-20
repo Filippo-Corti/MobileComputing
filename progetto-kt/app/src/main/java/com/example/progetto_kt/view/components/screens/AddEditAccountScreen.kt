@@ -31,7 +31,7 @@ fun AddEditAccountScreen(
         initializer {
             AccountFormViewModel(
                 viewModel.userRepository,
-                viewModel.user.value
+                viewModel.userWithOrder.value.user
             )
         }
     }

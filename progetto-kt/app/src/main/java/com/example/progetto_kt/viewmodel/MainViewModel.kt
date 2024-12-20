@@ -8,9 +8,11 @@ import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
+import com.example.progetto_kt.model.dataclasses.UserWithOrder
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.rprogetto_kt.model.repositories.OrderRepository
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,31 +29,41 @@ class MainViewModel(
     private val _uid = MutableStateFlow<Int?>(null)
 
     private val _isLoading = MutableStateFlow(true)
-    private val _user = MutableStateFlow<User?>(null)
-    private val _lastOrder = MutableStateFlow<Order?>(null)
+    private val _userWithOrder = MutableStateFlow<UserWithOrder>(UserWithOrder())
     private val _menus = MutableStateFlow<List<Menu>>(emptyList())
     private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
 
-    val user: StateFlow<User?> = _user
+    val userWithOrder: StateFlow<UserWithOrder> = _userWithOrder
     val menus: StateFlow<List<Menu>> = _menus
     val isLoading: StateFlow<Boolean> = _isLoading
     val menuDetails : StateFlow<MenuDetailsWithImage?> = _menuDetails
 
     init {
         viewModelScope.launch {
+            _isLoading.value = true
+            coroutineScope {
+                fetchUserSession()
+                Log.d(TAG, "Fetch Session ended (in theory)")
+                fetchUserDetails()
+                if (_userWithOrder.value.user != null && _userWithOrder.value.user?.lastOrderId != null) {
+                    Log.d(TAG, "Fetching Order Details")
+                    fetchOrderDetails(_userWithOrder.value.user?.lastOrderId!!)
+                }
+                fetchNearbyMenus()
+                Log.d(TAG, "Fetched launch information and menus")
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchUserSession() {
+        viewModelScope.launch {
             val us = userRepository.getUserSession()
             _sid.value = us.sid
             _uid.value = us.uid
             Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
-
-            if (userRepository.isRegistered())
-                fetchUserDetails()
-            fetchNearbyMenus()
-            Log.d(TAG, "Fetched launch information and menus")
-            _isLoading.value = false
         }
     }
-
 
     fun fetchUserDetails() {
         if (_sid.value == null || _uid.value == null) {
@@ -60,9 +72,13 @@ class MainViewModel(
         }
 
         viewModelScope.launch {
+
+            if (!userRepository.isRegistered())
+                return@launch
+
             try {
                 val user = userRepository.getUserDetails(_sid.value!!, _uid.value!!)
-                _user.value = user
+                _userWithOrder.value = _userWithOrder.value.copy(user = user)
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching user data: ${e.message}")
             }
@@ -86,7 +102,7 @@ class MainViewModel(
                     sid = _sid.value!!,
                     orderId = orderId,
                 )
-                _lastOrder.value = order
+                _userWithOrder.value = _userWithOrder.value.copy(lastOrder = order)
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching order data: ${e.message}")
             }
@@ -109,7 +125,7 @@ class MainViewModel(
                         9.19
                     )
                 )
-                _lastOrder.value = order
+                _userWithOrder.value = _userWithOrder.value.copy(lastOrder = order)
             } catch (e: Exception) {
                 Log.e(TAG, "Error buying menu: ${e.message}")
             }

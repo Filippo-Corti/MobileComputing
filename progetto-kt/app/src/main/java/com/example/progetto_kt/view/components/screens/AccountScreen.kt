@@ -26,7 +26,7 @@ fun AccountScreen(
     onEditAccountClick : (Boolean) -> Unit
 ) {
 
-    val user by viewModel.user.collectAsState()
+    val user by viewModel.userWithOrder.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
 
@@ -42,7 +42,7 @@ fun AccountScreen(
         }
     }
 
-    if (user == null) {
+    if (user.user == null) {
         return Column {
             Text(
                 text = "Not Registered",
@@ -70,12 +70,18 @@ fun AccountScreen(
         )
 
         Text(
-            text = "${user!!.firstName} ${user!!.lastName}",
+            text = "${user.user?.firstName} ${user.user?.lastName}",
         )
 
         Text(
-            text = "Last Ordered ${user!!.lastOrderId} ",
+            text = "Last Ordered ${user.user?.lastOrderId} - ${user.user?.orderStatus}",
         )
+
+        if (user.lastOrder != null) {
+            Text(
+                text = "Last Order was a ${user.lastOrder?.menuId}",
+            )
+        }
 
         Button(
             onClick = { onEditAccountClick(false) }
