@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -26,11 +27,13 @@ fun AccountScreen(
     onEditAccountClick : (Boolean) -> Unit
 ) {
 
-    val user by viewModel.userWithOrder.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.fetchLastOrderDetails()
+    }
 
-    if (isLoading) {
+    if (state.isLoading) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -42,7 +45,10 @@ fun AccountScreen(
         }
     }
 
-    if (user.user == null) {
+    val user = state.user
+    val lastOrderMenu = state.lastOrderMenu
+
+    if (user == null) {
         return Column {
             Text(
                 text = "Not Registered",
@@ -70,16 +76,16 @@ fun AccountScreen(
         )
 
         Text(
-            text = "${user.user?.firstName} ${user.user?.lastName}",
+            text = "${user.firstName} ${user.lastName}",
         )
 
         Text(
-            text = "Last Ordered ${user.user?.lastOrderId} - ${user.user?.orderStatus}",
+            text = "Last Ordered ${user.lastOrderId} - ${user.orderStatus}",
         )
 
-        if (user.lastOrder != null) {
+        if (lastOrderMenu != null) {
             Text(
-                text = "Last Order was a ${user.lastOrder?.menuId}",
+                text = "Last Order was a ${lastOrderMenu.name}",
             )
         }
 

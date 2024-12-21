@@ -5,17 +5,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.progetto_kt.model.dataclasses.Location
 import com.example.progetto_kt.model.dataclasses.Menu
+import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
-import com.example.progetto_kt.model.dataclasses.UserWithOrder
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.rprogetto_kt.model.repositories.OrderRepository
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
+data class UIState(
+    val user: User? = null,
+    val lastOrder: Order? = null,
+    val lastOrderMenu: MenuDetails? = null,
+    val nearbyMenus: List<Menu> = emptyList(),
+    val selectedMenu: MenuDetailsWithImage? = null,
+
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
+)
 
 class MainViewModel(
     val userRepository: UserRepository,
@@ -28,36 +38,46 @@ class MainViewModel(
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
 
-    private val _isLoading = MutableStateFlow(true)
-    private val _userWithOrder = MutableStateFlow<UserWithOrder>(UserWithOrder())
-    private val _menus = MutableStateFlow<List<Menu>>(emptyList())
-    private val _menuDetails = MutableStateFlow<MenuDetailsWithImage?>(null)
-
-    val userWithOrder: StateFlow<UserWithOrder> = _userWithOrder
-    val menus: StateFlow<List<Menu>> = _menus
-    val isLoading: StateFlow<Boolean> = _isLoading
-    val menuDetails : StateFlow<MenuDetailsWithImage?> = _menuDetails
+    private val _uiState = MutableStateFlow(UIState())
+    val uiState: StateFlow<UIState> = _uiState
 
     init {
         viewModelScope.launch {
-            _isLoading.value = true
-            coroutineScope {
-                fetchUserSession()
-                Log.d(TAG, "Fetch Session ended (in theory)")
-                fetchUserDetails()
-                if (_userWithOrder.value.user != null && _userWithOrder.value.user?.lastOrderId != null) {
-                    Log.d(TAG, "Fetching Order Details")
-                    fetchOrderDetails(_userWithOrder.value.user?.lastOrderId!!)
-                }
-                fetchNearbyMenus()
-                Log.d(TAG, "Fetched launch information and menus")
-                _isLoading.value = false
-            }
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            fetchUserSession()
+            fetchAllUserData()
+            fetchNearbyMenus()
+            Log.d(TAG, "Fetched launch information and menus")
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 
-    fun fetchUserSession() {
-        viewModelScope.launch {
+    private suspend fun fetchAllUserData() {
+        fetchUserDetails()
+        fetchLastOrderDetails()
+        fetchOrderedMenu()
+    }
+
+    private suspend fun runWithErrorHandling(
+        checkSid: Boolean = true,
+        block: suspend () -> Unit,
+    ) {
+        if (checkSid && (_sid.value == null || _uid.value == null)) {
+            Log.d(TAG, "User not logged in, couldn't make the API call")
+            _uiState.value = _uiState.value.copy(errorMessage = "Authentication Error")
+            return
+        }
+
+        try {
+            block()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error: ${e.message}")
+            _uiState.value = _uiState.value.copy(errorMessage = e.message)
+        }
+    }
+
+    suspend fun fetchUserSession() {
+        runWithErrorHandling(checkSid = false) {
             val us = userRepository.getUserSession()
             _sid.value = us.sid
             _uid.value = us.uid
@@ -65,124 +85,102 @@ class MainViewModel(
         }
     }
 
-    fun fetchUserDetails() {
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't get user data")
+    suspend fun fetchUserDetails() {
+        if (!userRepository.isRegistered())
             return
-        }
 
-        viewModelScope.launch {
-
-            if (!userRepository.isRegistered())
-                return@launch
-
-            try {
-                val user = userRepository.getUserDetails(_sid.value!!, _uid.value!!)
-                _userWithOrder.value = _userWithOrder.value.copy(user = user)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching user data: ${e.message}")
-            }
+        runWithErrorHandling {
+            val user = userRepository.getUserDetails(
+                sid = _sid.value!!,
+                uid = _uid.value!!
+            )
+            _uiState.value = _uiState.value.copy(user = user)
         }
     }
 
-    fun fetchOrderDetails(orderId : Int) {
-        if (_menuDetails.value?.menuDetails?.id == orderId) {
-            Log.d(TAG, "Order details already fetched")
+    suspend fun fetchLastOrderDetails() {
+        if (_uiState.value.user?.lastOrderId == null)
             return
+
+        runWithErrorHandling {
+            val order = orderRepository.getOrderDetails(
+                sid = _sid.value!!,
+                orderId = _uiState.value.user!!.lastOrderId!!,
+            )
+            _uiState.value = _uiState.value.copy(lastOrder = order)
         }
 
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't get nearby menus")
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val order = orderRepository.getOrderDetails(
-                    sid = _sid.value!!,
-                    orderId = orderId,
-                )
-                _userWithOrder.value = _userWithOrder.value.copy(lastOrder = order)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching order data: ${e.message}")
-            }
+        val success = _uiState.value.errorMessage == null
+        if (success) {
+            fetchOrderedMenu()
         }
     }
 
-    fun buyMenu(menuId : Int) {
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't get nearby menus")
-            return
+    suspend fun orderMenu(menuId: Int): Boolean {
+        runWithErrorHandling {
+            val order = orderRepository.buyMenu(
+                sid = _sid.value!!,
+                menuId = menuId,
+                deliveryLocation = Location(
+                    45.4642,
+                    9.19
+                )
+            )
+            _uiState.value = _uiState.value.copy(lastOrder = order)
         }
 
-        viewModelScope.launch {
-            try {
-                val order = orderRepository.buyMenu(
-                    sid = _sid.value!!,
-                    menuId = menuId,
-                    deliveryLocation = Location(
-                        45.4642,
-                        9.19
-                    )
-                )
-                _userWithOrder.value = _userWithOrder.value.copy(lastOrder = order)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error buying menu: ${e.message}")
-            }
+        val success = _uiState.value.errorMessage == null
+        if (success) {
+            fetchUserDetails()
+            fetchOrderedMenu()
+        }
+        return success
+    }
+
+    suspend fun fetchOrderedMenu() {
+        if (_uiState.value.lastOrder?.menuId == null)
+            return
+
+        runWithErrorHandling {
+            val menu = menuRepository.getMenuDetails(
+                sid = _sid.value!!,
+                latitude = 45.46,
+                longitude = 9.18,
+                menuId = _uiState.value.lastOrder?.menuId!!
+            )
+            _uiState.value = _uiState.value.copy(lastOrderMenu = menu)
         }
     }
 
-
-    fun fetchNearbyMenus() {
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't get nearby menus")
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val menus = menuRepository.getNearbyMenus(
-                    sid = _sid.value!!,
-                    latitude = 45.46,
-                    longitude = 9.18
-                )
-                _menus.value = menus
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching menus: ${e.message}")
-            }
+    suspend fun fetchNearbyMenus() {
+        runWithErrorHandling {
+            val menus = menuRepository.getNearbyMenus(
+                sid = _sid.value!!,
+                latitude = 45.46,
+                longitude = 9.18
+            )
+            _uiState.value = _uiState.value.copy(nearbyMenus = menus)
         }
     }
 
-    fun fetchMenuDetails(menuId : Int) {
-        if (_menuDetails.value?.menuDetails?.id == menuId) {
-            Log.d(TAG, "Menu details already fetched")
+    suspend fun fetchMenuDetails(menuId: Int) {
+        if (_uiState.value.selectedMenu?.menuDetails?.id == menuId)
             return
-        }
 
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't get nearby menus")
-            return
-        }
-
-        Log.d(TAG, "Fetching menu details for menuId $menuId")
-
-        viewModelScope.launch {
-            try {
-                val menuDetails = menuRepository.getMenuDetails(
-                    sid = _sid.value!!,
-                    latitude = 45.46,
-                    longitude = 9.18,
-                    menuId = menuId
-                )
-                val image = menuRepository.getMenuImage(
-                    sid = _sid.value!!,
-                    menuId = menuId,
-                    imageVersion = menuDetails.imageVersion
-                )
-                _menuDetails.value = MenuDetailsWithImage(menuDetails, image)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching menus: ${e.message}")
-            }
+        runWithErrorHandling {
+            val menuDetails = menuRepository.getMenuDetails(
+                sid = _sid.value!!,
+                latitude = 45.46,
+                longitude = 9.18,
+                menuId = menuId
+            )
+            val image = menuRepository.getMenuImage(
+                sid = _sid.value!!,
+                menuId = menuId,
+                imageVersion = menuDetails.imageVersion
+            )
+            _uiState.value =
+                _uiState.value.copy(selectedMenu = MenuDetailsWithImage(menuDetails, image))
         }
     }
 

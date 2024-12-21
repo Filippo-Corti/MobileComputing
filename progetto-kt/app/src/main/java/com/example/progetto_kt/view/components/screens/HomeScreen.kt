@@ -29,11 +29,21 @@ fun HomeScreen(
     onMenuClick: (Int) -> Unit
 ) {
 
-    val menus by viewModel.menus.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+
+    if (state.isLoading) {
+        return Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 
     Column {
-
         Text(
             text = "Menus around you",
             modifier = Modifier
@@ -43,33 +53,20 @@ fun HomeScreen(
             fontWeight = FontWeight(700),
             textAlign = TextAlign.Center,
         )
-
-        if (isLoading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(menus) { menu ->
-                    Row (
-                      modifier = Modifier
-                          .fillMaxWidth()
-                          .padding(16.dp)
-                          .clickable { onMenuClick(menu.id) },
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = menu.name)
-                        Text(text = "${menu.price.toString()} €")
-                    }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(state.nearbyMenus) { menu ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clickable { onMenuClick(menu.id) },
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = menu.name)
+                    Text(text = "${menu.price.toString()} €")
                 }
             }
         }

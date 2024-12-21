@@ -31,14 +31,14 @@ fun MenuDetailsScreen(
     onBackClick : () -> Unit
 ) {
 
-    val menuDetails by viewModel.menuDetails.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(menuId) {
         viewModel.fetchMenuDetails(menuId)
     }
 
-    if (menuDetails == null) {
-        Column(
+    if (state.isLoading || state.selectedMenu == null) {
+        return Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
@@ -47,43 +47,44 @@ fun MenuDetailsScreen(
         ) {
             CircularProgressIndicator()
         }
-    } else {
-        val byteArray = Base64.decode(menuDetails!!.image.image)
-        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+    val menuDetails = state.selectedMenu!!.menuDetails
+    val byteArray = Base64.decode(state.selectedMenu!!.image.image)
+    val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = menuDetails.name,
+            fontSize = 24.sp,
+        )
+        Text(
+            text = menuDetails.longDescription,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = menuDetails.name,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+
+        Button(
+            onClick = { onForwardClick(menuId) },
+            modifier = Modifier.padding(top = 16.dp)
         ) {
-            Text(
-                text = menuDetails!!.menuDetails.name,
-                fontSize = 24.sp,
-            )
-            Text(
-                text = menuDetails!!.menuDetails.longDescription,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Text(text = "Order")
+        }
 
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = menuDetails!!.menuDetails.name,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-
-            Button(
-                onClick = { onForwardClick(menuId) },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(text = "Order")
-            }
-
-            Button(
-                onClick = onBackClick,
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text(text = "Back")
-            }
+        Button(
+            onClick = onBackClick,
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text(text = "Back")
         }
     }
 

@@ -19,6 +19,9 @@ import com.example.progetto_kt.view.components.common.forms.FormField
 import com.example.progetto_kt.view.components.common.forms.SelectNumber
 import com.example.progetto_kt.viewmodel.AccountFormViewModel
 import com.example.progetto_kt.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditAccountScreen(
@@ -31,7 +34,7 @@ fun AddEditAccountScreen(
         initializer {
             AccountFormViewModel(
                 viewModel.userRepository,
-                viewModel.userWithOrder.value.user
+                viewModel.uiState.value.user
             )
         }
     }
@@ -122,7 +125,9 @@ fun AddEditAccountScreen(
             onClick = {
                 val ok = formViewModel.submit()
                 if (ok) {
-                    viewModel.fetchUserDetails()
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.fetchUserDetails()
+                    }
                     onBackClick()
                 }
             }

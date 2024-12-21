@@ -82,9 +82,9 @@ class MainActivity : ComponentActivity() {
 fun MangiaEBasta(
     viewModel: MainViewModel
 ) {
-    val isLoading by viewModel.isLoading.collectAsState()
+    val state by viewModel.uiState.collectAsState()
 
-    if (isLoading) {
+    if (state.isLoading) {
         Log.d("MainActivity", "Loading...")
         Column(
             modifier = Modifier

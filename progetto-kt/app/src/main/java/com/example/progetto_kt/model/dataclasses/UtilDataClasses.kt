@@ -37,8 +37,3 @@ data class Location (
     val longitude : Double
 
 )
-
-data class UserWithOrder (
-    var user : User? = null,
-    var lastOrder : Order? = null
-)
