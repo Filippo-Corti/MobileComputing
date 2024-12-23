@@ -23,7 +23,10 @@ fun LastOrderScreen(
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.fetchLastOrderDetails()
+        while(true) {
+            viewModel.fetchLastOrderDetails()
+            kotlinx.coroutines.delay(5000)
+        }
     }
 
     if (state.isLoading) {
@@ -72,6 +75,10 @@ fun LastOrderScreen(
 
         Text(
             text = "The Order was a : ${lastOrderedMenu.name}",
+        )
+
+        Text(
+            text = "Current Location: ${lastOrder.currentLocation}",
         )
 
         Text(
