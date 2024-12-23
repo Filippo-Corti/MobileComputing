@@ -1,5 +1,6 @@
 package com.example.progetto_kt.model.datasources
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -18,11 +19,13 @@ class PreferencesController(
         val KEYS_UID = intPreferencesKey("uid")
         val KEYS_HAS_ALREADY_RUN = booleanPreferencesKey("hasAlreadyRun")
         val KEYS_IS_REGISTERED = booleanPreferencesKey("isRegistered")
+        val KEYS_LAST_SCREEN = stringPreferencesKey("lastScreen")
     }
 
     suspend fun <T> get(prefKey : Preferences.Key<T>) : T? {
         val prefs = dataStore.data.first()
         val result = prefs[prefKey]
+        Log.d(TAG, "Getting $prefKey: $result")
 
         return result
     }
@@ -30,6 +33,13 @@ class PreferencesController(
     suspend fun <T> set(prefKey : Preferences.Key<T>, value : T) {
         dataStore.edit { prefs ->
             prefs[prefKey] = value
+        }
+        Log.d(TAG, "Setting $prefKey to $value")
+    }
+
+    suspend fun <T> clear(prefKey : Preferences.Key<T>) {
+        dataStore.edit { prefs ->
+            prefs.remove(prefKey)
         }
     }
 

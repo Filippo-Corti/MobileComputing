@@ -10,7 +10,8 @@ data class ScreenParams(
     val route : String,
     val icon : ImageVector? = null,
     val title : String,
-    val showTabBar : Boolean = true
+    val showTabBar : Boolean = true,
+    val stackName : String,
 )
 
 sealed class AppScreen(
@@ -21,7 +22,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "home_stack",
             title = "Home",
-            showTabBar = false
+            showTabBar = false,
+            stackName = "home_stack"
         )
     )
 
@@ -29,7 +31,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "home",
             icon = Icons.Rounded.Home,
-            title = "Home"
+            title = "Home",
+            stackName = "home_stack"
         )
     )
 
@@ -37,7 +40,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "menu_details/{menuId}",
             title = "Menu Details",
-            showTabBar = false
+            showTabBar = false,
+            stackName = "home_stack"
         )
     )
 
@@ -45,7 +49,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "confirm_order/{menuId}",
             title = "Confirm Order",
-            showTabBar = false
+            showTabBar = false,
+            stackName = "home_stack"
         )
     )
 
@@ -53,7 +58,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "account_stack",
             title = "Account",
-            showTabBar = false
+            showTabBar = false,
+            stackName = "account_stack"
         )
     )
 
@@ -61,7 +67,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "account",
             icon = Icons.Rounded.AccountCircle,
-            title = "Account"
+            title = "Account",
+            stackName = "account_stack"
         )
     )
 
@@ -69,7 +76,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "add_edit_account/{newAccount}",
             title = "Add/Edit Account",
-            showTabBar = false
+            showTabBar = false,
+            stackName = "account_stack"
         )
     )
 
@@ -77,7 +85,8 @@ sealed class AppScreen(
         ScreenParams(
             route = "last_order_stack",
             title = "Last Order",
-            showTabBar = false
+            showTabBar = false,
+            stackName = "last_order_stack"
         )
     )
 
@@ -86,6 +95,7 @@ sealed class AppScreen(
             route = "last_order",
             icon = Icons.Rounded.ShoppingCart,
             title = "Last Order",
+            stackName = "last_order_stack"
         )
     )
 
@@ -101,6 +111,16 @@ sealed class AppScreen(
             ConfirmOrder,
             AddEditAccount,
         )
+
+        fun isValidRoute(route: String): Boolean {
+            val routeWithoutParams = route.split("/").first()
+            return values().any { it.params.route.startsWith(routeWithoutParams) }
+        }
+
+        fun getStack(route: String): String? {
+            val routeWithoutParams = route.split("/").first()
+            return values().firstOrNull { it.params.route.startsWith(routeWithoutParams) }?.params?.stackName
+        }
     }
 
 }

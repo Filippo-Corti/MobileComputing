@@ -57,6 +57,18 @@ class MainViewModel(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
+    suspend fun saveLastScreen(screen : String) {
+        userRepository.saveLastScreen(screen)
+    }
+
+    suspend fun getLastScreen() : String? {
+        return userRepository.getLastScreen()
+    }
+
+    suspend fun clearLastScreenSave() {
+        userRepository.clearLastScreen()
+    }
+
     private suspend fun fetchAllUserData() {
         fetchUserDetails()
         fetchLastOrderDetails()

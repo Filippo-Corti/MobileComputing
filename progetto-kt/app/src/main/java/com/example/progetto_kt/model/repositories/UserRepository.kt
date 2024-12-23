@@ -24,6 +24,17 @@ class UserRepository(
         return preferencesController.get(PreferencesController.KEYS_IS_REGISTERED) ?: false
     }
 
+    suspend fun saveLastScreen(screen : String) {
+        preferencesController.set(PreferencesController.KEYS_LAST_SCREEN, screen)
+    }
+
+    suspend fun getLastScreen() : String? {
+        return preferencesController.get(PreferencesController.KEYS_LAST_SCREEN)
+    }
+
+    suspend fun clearLastScreen() {
+        preferencesController.clear(PreferencesController.KEYS_LAST_SCREEN)
+    }
 
     suspend fun getUserSession() : UserSession {
         val firstLaunch = preferencesController.isFirstLaunch()

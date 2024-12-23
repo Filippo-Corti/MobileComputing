@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +18,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,15 +45,64 @@ fun RootNavHost(
     val TAG = "RootNavHost"
 
     var showTabBar by remember { mutableStateOf(true) }
+    var currentStack by remember { mutableStateOf<String?>(null) }
+    var currentRoute by remember { mutableStateOf<String?>(null) }
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    val currentRoute = navBackStackEntry?.destination?.route
-    Log.d(TAG, "currentRoute: $currentRoute")
-    showTabBar =
-        AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar
-            ?: true
+    currentRoute = navBackStackEntry?.destination?.route
+    if (currentRoute != null)
+        currentStack = AppScreen.getStack(currentRoute!!)
+
+    showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(Unit) {
+        val lastScreen = viewModel.getLastScreen()
+
+        Log.d(TAG, "Restoring last screen $lastScreen")
+
+        if (lastScreen != null && AppScreen.isValidRoute(lastScreen)) {
+            currentStack = AppScreen.getStack(lastScreen)
+        }
+
+        currentStack?.let { navController.navigate(it) }
+        lastScreen?.let { navController.navigate(it) }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                var routeToSave = currentRoute
+
+                // Extract parameters from the latest navBackStackEntry
+                for (param in navBackStackEntry?.arguments?.keySet() ?: emptySet()) {
+                    if (routeToSave?.contains("{$param}") == true) {
+                        val value = navBackStackEntry?.arguments?.getString(param)
+                        routeToSave = routeToSave.replace("{$param}", value ?: "")
+                    }
+                }
+
+                Log.d(TAG, "Lifecycle stopped, last screen was $routeToSave")
+                if (routeToSave != null) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        viewModel.saveLastScreen(routeToSave)
+                        Log.d(TAG, "Saved last screen $routeToSave")
+                    }
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    Log.d(TAG, "Current route: $currentStack - $currentRoute")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -64,7 +118,7 @@ fun RootNavHost(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = AppScreen.HomeStack.params.route
+                startDestination = currentStack ?: AppScreen.HomeStack.params.route
             ) {
 
                 homeNavHost(

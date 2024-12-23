@@ -1,5 +1,6 @@
 package com.example.progetto_kt.view.components.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,12 +8,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @Composable
@@ -22,10 +28,14 @@ fun LastOrderScreen(
 
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        while(true) {
-            viewModel.fetchLastOrderDetails()
-            kotlinx.coroutines.delay(5000)
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (true) {
+                viewModel.fetchLastOrderDetails()
+                kotlinx.coroutines.delay(5000)
+            }
         }
     }
 
