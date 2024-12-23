@@ -31,17 +31,13 @@ class PreferencesController(
     }
 
     suspend fun <T> set(prefKey : Preferences.Key<T>, value : T) {
+        Log.d(TAG, "Setting $prefKey to $ (1)")
         dataStore.edit { prefs ->
             prefs[prefKey] = value
         }
-        Log.d(TAG, "Setting $prefKey to $value")
+        Log.d(TAG, "Setting $prefKey to $value (2)")
     }
 
-    suspend fun <T> clear(prefKey : Preferences.Key<T>) {
-        dataStore.edit { prefs ->
-            prefs.remove(prefKey)
-        }
-    }
 
     suspend fun memorizeSessionKeys(sid : String, uid : Int) {
         set(KEYS_SID, sid)

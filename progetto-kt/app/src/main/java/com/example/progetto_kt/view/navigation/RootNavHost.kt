@@ -1,5 +1,7 @@
 package com.example.progetto_kt.view.navigation
 
+import android.annotation.SuppressLint
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
@@ -37,6 +39,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+fun saveLastScreen(screen: String, params : Bundle?, functionCb : suspend (String) -> Unit) {
+    var routeToSave = screen
+
+    // Extract parameters from the latest navBackStackEntry
+    for (param in params?.keySet() ?: emptySet()) {
+        if (routeToSave.contains("{$param}")) {
+            val value = params?.getString(param)
+            routeToSave = routeToSave.replace("{$param}", value ?: "")
+        }
+    }
+
+    CoroutineScope(Dispatchers.IO).launch {
+       functionCb(routeToSave)
+    }
+}
+
+@SuppressLint("RestrictedApi")
 @Composable
 fun RootNavHost(
     viewModel: MainViewModel,
@@ -45,15 +64,17 @@ fun RootNavHost(
     val TAG = "RootNavHost"
 
     var showTabBar by remember { mutableStateOf(true) }
-    var currentStack by remember { mutableStateOf<String?>(null) }
     var currentRoute by remember { mutableStateOf<String?>(null) }
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    navController.addOnDestinationChangedListener() { controller, destination, arguments ->
+        Log.d(TAG, "Destination changed to ${destination.route}")
+        Log.d(TAG, "The stack is ${controller.currentBackStack.value}")
+    }
+
     currentRoute = navBackStackEntry?.destination?.route
-    if (currentRoute != null)
-        currentStack = AppScreen.getStack(currentRoute!!)
 
     showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
 
@@ -62,34 +83,17 @@ fun RootNavHost(
     LaunchedEffect(Unit) {
         val lastScreen = viewModel.getLastScreen()
 
-        Log.d(TAG, "Restoring last screen $lastScreen")
-
-        if (lastScreen != null && AppScreen.isValidRoute(lastScreen)) {
-            currentStack = AppScreen.getStack(lastScreen)
-        }
-
-        currentStack?.let { navController.navigate(it) }
-        lastScreen?.let { navController.navigate(it) }
+        Log.d(TAG, "Last screen was $lastScreen")
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
-                var routeToSave = currentRoute
-
-                // Extract parameters from the latest navBackStackEntry
-                for (param in navBackStackEntry?.arguments?.keySet() ?: emptySet()) {
-                    if (routeToSave?.contains("{$param}") == true) {
-                        val value = navBackStackEntry?.arguments?.getString(param)
-                        routeToSave = routeToSave.replace("{$param}", value ?: "")
-                    }
-                }
-
-                Log.d(TAG, "Lifecycle stopped, last screen was $routeToSave")
-                if (routeToSave != null) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.saveLastScreen(routeToSave)
-                        Log.d(TAG, "Saved last screen $routeToSave")
+                currentRoute?.let {
+                    Log.d(TAG, "Lifecycle stopped, last screen was $currentRoute")
+                    Log.d(TAG, "The stack is ${navController.currentBackStack.value}")
+                    saveLastScreen(it, navBackStackEntry?.arguments) { screen ->
+                        viewModel.saveLastScreen(screen)
                     }
                 }
             }
@@ -102,7 +106,7 @@ fun RootNavHost(
         }
     }
 
-    Log.d(TAG, "Current route: $currentStack - $currentRoute")
+    Log.d(TAG, "Current route: $currentRoute")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -118,7 +122,7 @@ fun RootNavHost(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = currentStack ?: AppScreen.HomeStack.params.route
+                startDestination = AppScreen.HomeStack.params.route
             ) {
 
                 homeNavHost(
@@ -128,13 +132,11 @@ fun RootNavHost(
 
                 lastOrderNavHost(
                     navController = navController,
-                    viewModel = viewModel
-                )
+                    viewModel = viewModel)
 
                 accountNavHost(
                     navController = navController,
-                    viewModel = viewModel
-                )
+                    viewModel = viewModel)
 
             }
         }

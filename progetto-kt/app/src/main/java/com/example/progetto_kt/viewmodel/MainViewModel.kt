@@ -65,10 +65,6 @@ class MainViewModel(
         return userRepository.getLastScreen()
     }
 
-    suspend fun clearLastScreenSave() {
-        userRepository.clearLastScreen()
-    }
-
     private suspend fun fetchAllUserData() {
         fetchUserDetails()
         fetchLastOrderDetails()

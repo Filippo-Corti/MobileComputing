@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.homeNavHost(
     navController: NavController,
-    viewModel: MainViewModel,
+    viewModel: MainViewModel
 ) {
 
     navigation(

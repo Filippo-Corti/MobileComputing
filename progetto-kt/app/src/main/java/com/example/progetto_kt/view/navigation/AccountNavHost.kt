@@ -1,5 +1,6 @@
 package com.example.progetto_kt.view.navigation
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOut
@@ -14,7 +15,7 @@ import com.example.progetto_kt.viewmodel.MainViewModel
 
 fun NavGraphBuilder.accountNavHost(
     navController: NavController,
-    viewModel: MainViewModel,
+    viewModel: MainViewModel
 ) {
 
     navigation(

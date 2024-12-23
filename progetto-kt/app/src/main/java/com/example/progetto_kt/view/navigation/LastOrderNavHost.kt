@@ -15,7 +15,7 @@ import com.example.progetto_kt.viewmodel.MainViewModel
 
 fun NavGraphBuilder.lastOrderNavHost(
     navController: NavController,
-    viewModel: MainViewModel,
+    viewModel: MainViewModel
 ) {
 
     navigation(
