@@ -25,17 +25,16 @@ class PreferencesController(
     suspend fun <T> get(prefKey : Preferences.Key<T>) : T? {
         val prefs = dataStore.data.first()
         val result = prefs[prefKey]
-        Log.d(TAG, "Getting $prefKey: $result")
+        Log.d(TAG, "Got $prefKey: $result")
 
         return result
     }
 
     suspend fun <T> set(prefKey : Preferences.Key<T>, value : T) {
-        Log.d(TAG, "Setting $prefKey to $ (1)")
         dataStore.edit { prefs ->
             prefs[prefKey] = value
         }
-        Log.d(TAG, "Setting $prefKey to $value (2)")
+        Log.d(TAG, "Set $prefKey: $value")
     }
 
 

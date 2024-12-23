@@ -42,7 +42,6 @@ import kotlinx.coroutines.launch
 fun saveLastScreen(screen: String, params : Bundle?, functionCb : suspend (String) -> Unit) {
     var routeToSave = screen
 
-    // Extract parameters from the latest navBackStackEntry
     for (param in params?.keySet() ?: emptySet()) {
         if (routeToSave.contains("{$param}")) {
             val value = params?.getString(param)
@@ -50,12 +49,13 @@ fun saveLastScreen(screen: String, params : Bundle?, functionCb : suspend (Strin
         }
     }
 
+    Log.d("RootNavHost", "Saving last screen: $routeToSave")
+
     CoroutineScope(Dispatchers.IO).launch {
        functionCb(routeToSave)
     }
 }
 
-@SuppressLint("RestrictedApi")
 @Composable
 fun RootNavHost(
     viewModel: MainViewModel,
@@ -69,11 +69,6 @@ fun RootNavHost(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    navController.addOnDestinationChangedListener() { controller, destination, arguments ->
-        Log.d(TAG, "Destination changed to ${destination.route}")
-        Log.d(TAG, "The stack is ${controller.currentBackStack.value}")
-    }
-
     currentRoute = navBackStackEntry?.destination?.route
 
     showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
@@ -84,6 +79,12 @@ fun RootNavHost(
         val lastScreen = viewModel.getLastScreen()
 
         Log.d(TAG, "Last screen was $lastScreen")
+        lastScreen?.let {
+            // The issue now is what happens when we go back after going to the last screen
+            // The logical solution is to navigate all steps of the stack
+            // Is there a way to interact with the NavGraph as a "graph"??...
+            navController.navigate(it)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -91,7 +92,6 @@ fun RootNavHost(
             if (event == Lifecycle.Event.ON_STOP) {
                 currentRoute?.let {
                     Log.d(TAG, "Lifecycle stopped, last screen was $currentRoute")
-                    Log.d(TAG, "The stack is ${navController.currentBackStack.value}")
                     saveLastScreen(it, navBackStackEntry?.arguments) { screen ->
                         viewModel.saveLastScreen(screen)
                     }
