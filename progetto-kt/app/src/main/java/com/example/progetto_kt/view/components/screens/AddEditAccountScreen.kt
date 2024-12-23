@@ -123,12 +123,10 @@ fun AddEditAccountScreen(
 
         Button(
             onClick = {
-                val ok = formViewModel.submit()
-                if (ok) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        viewModel.fetchUserDetails()
-                    }
-                    onBackClick()
+                CoroutineScope(Dispatchers.Main).launch {
+                    val ok = formViewModel.submit(viewModel::updateUserData)
+                    if (ok)
+                        onBackClick()
                 }
             }
         ) {

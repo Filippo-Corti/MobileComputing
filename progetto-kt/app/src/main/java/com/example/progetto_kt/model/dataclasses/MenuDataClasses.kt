@@ -30,7 +30,7 @@ data class MenuDetails (
 
 @Serializable
 data class MenuImage (
-    @SerialName("base64") var image : String
+    @SerialName("base64") var raw : String
 )
 
 data class MenuWithImage (

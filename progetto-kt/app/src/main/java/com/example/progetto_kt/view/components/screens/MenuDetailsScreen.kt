@@ -37,7 +37,7 @@ fun MenuDetailsScreen(
         viewModel.fetchMenuDetails(menuId)
     }
 
-    if (state.isLoading || state.selectedMenu == null) {
+    if (state.isLoading || state.selectedMenu == null || state.selectedMenu?.menuDetails?.id != menuId) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -50,7 +50,7 @@ fun MenuDetailsScreen(
     }
 
     val menuDetails = state.selectedMenu!!.menuDetails
-    val byteArray = Base64.decode(state.selectedMenu!!.image.image)
+    val byteArray = Base64.decode(state.selectedMenu!!.image.raw)
     val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 
     Column(

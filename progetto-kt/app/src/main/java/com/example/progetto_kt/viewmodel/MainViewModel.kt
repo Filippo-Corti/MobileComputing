@@ -7,8 +7,10 @@ import com.example.progetto_kt.model.dataclasses.Location
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
+import com.example.progetto_kt.model.dataclasses.MenuWithImage
 import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
+import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.rprogetto_kt.model.repositories.OrderRepository
@@ -20,7 +22,7 @@ data class UIState(
     val user: User? = null,
     val lastOrder: Order? = null,
     val lastOrderMenu: MenuDetails? = null,
-    val nearbyMenus: List<Menu> = emptyList(),
+    val nearbyMenus: List<MenuWithImage> = emptyList(),
     val selectedMenu: MenuDetailsWithImage? = null,
 
     val isLoading: Boolean = true,
@@ -34,7 +36,6 @@ class MainViewModel(
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
-
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
 
@@ -50,6 +51,10 @@ class MainViewModel(
             Log.d(TAG, "Fetched launch information and menus")
             _uiState.value = _uiState.value.copy(isLoading = false)
         }
+    }
+
+    fun resetErrorMessage() {
+        _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
     private suspend fun fetchAllUserData() {
@@ -96,6 +101,24 @@ class MainViewModel(
             )
             _uiState.value = _uiState.value.copy(user = user)
         }
+    }
+
+    suspend fun updateUserData(newData : UserUpdateParams) : Boolean {
+        val newUserData = newData.copy(sid = _sid.value!!)
+
+        runWithErrorHandling {
+            userRepository.updateUserDetails(
+                sid = _sid.value!!,
+                uid = _uid.value!!,
+                user = newUserData
+            )
+        }
+
+        val success = _uiState.value.errorMessage == null
+        if (success) {
+            fetchUserDetails()
+        }
+        return success
     }
 
     suspend fun fetchLastOrderDetails() {
@@ -159,7 +182,15 @@ class MainViewModel(
                 latitude = 45.46,
                 longitude = 9.18
             )
-            _uiState.value = _uiState.value.copy(nearbyMenus = menus)
+            val menusWithImages = menus.map { menu ->
+                val image = menuRepository.getMenuImage(
+                    sid = _sid.value!!,
+                    menuId = menu.id,
+                    imageVersion = menu.imageVersion
+                )
+                MenuWithImage(menu, image)
+            }
+            _uiState.value = _uiState.value.copy(nearbyMenus = menusWithImages)
         }
     }
 

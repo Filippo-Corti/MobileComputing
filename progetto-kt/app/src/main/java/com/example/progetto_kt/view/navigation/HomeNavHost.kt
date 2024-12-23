@@ -23,82 +23,88 @@ fun NavGraphBuilder.homeNavHost(
     viewModel: MainViewModel,
 ) {
 
-    composable(
-        route = AppScreen.Home.params.route,
+    navigation(
+        startDestination = AppScreen.Home.params.route,
+        route = AppScreen.HomeStack.params.route
     ) {
-        HomeScreen(
-            viewModel = viewModel,
-            onMenuClick = { menuId ->
-                navController.navigate(
-                    AppScreen.MenuDetails.params.route.replace(
-                        "{menuId}",
-                        menuId.toString()
+
+        composable(
+            route = AppScreen.Home.params.route,
+        ) {
+            HomeScreen(
+                viewModel = viewModel,
+                onMenuClick = { menuId ->
+                    navController.navigate(
+                        AppScreen.MenuDetails.params.route.replace(
+                            "{menuId}",
+                            menuId.toString()
+                        )
                     )
-                )
-            }
-        )
-    }
-
-    composable(
-        route = AppScreen.MenuDetails.params.route,
-        enterTransition = {
-            slideIn(tween(700)) { IntOffset(it.width, 0) }
-        },
-        exitTransition = { null },
-        popEnterTransition = { null },
-        popExitTransition = {
-            slideOut(tween(700)) { IntOffset(it.width, 0) }
-        }
-    ) { backStackEntry ->
-        val menuId = backStackEntry.arguments?.getString("menuId")
-
-        MenuDetailsScreen(
-            viewModel = viewModel,
-            menuId = menuId!!.toInt(),
-            onForwardClick = {
-                navController.navigate(
-                    AppScreen.ConfirmOrder.params.route.replace(
-                        "{menuId}",
-                        menuId.toString()
-                    )
-                )
-            },
-            onBackClick = {
-                navController.navigateUp()
-            }
-        )
-    }
-
-    composable(
-        route = AppScreen.ConfirmOrder.params.route,
-        enterTransition = {
-            slideIn(tween(700)) { IntOffset(it.width, 0) }
-        },
-        exitTransition = { null },
-        popEnterTransition = { null },
-        popExitTransition = {
-            slideOut(tween(700)) { IntOffset(it.width, 0) }
-        }
-    ) { backStackEntry ->
-        val menuId = backStackEntry.arguments?.getString("menuId")
-
-        ConfirmOrderScreen(
-            viewModel = viewModel,
-            menuId = menuId!!.toInt(),
-            onOrderClick = {
-                CoroutineScope(Dispatchers.Main).launch {
-                    val success = viewModel.orderMenu(menuId.toInt())
-                    if (success) {
-                        Log.d("TAG", "Order placed successfully")
-                        navController.navigate(AppScreen.Home.params.route)
-                    } else {
-                        Log.d("TAG", "Error placing order")
-                    }
                 }
+            )
+        }
+
+        composable(
+            route = AppScreen.MenuDetails.params.route,
+            enterTransition = {
+                slideIn(tween(400)) { IntOffset(it.width, 0) }
             },
-            onBackClick = {
-                navController.navigateUp()
+            exitTransition = { null },
+            popEnterTransition = { null },
+            popExitTransition = {
+                slideOut(tween(400)) { IntOffset(it.width, 0) }
             }
-        )
+        ) { backStackEntry ->
+            val menuId = backStackEntry.arguments?.getString("menuId")
+
+            MenuDetailsScreen(
+                viewModel = viewModel,
+                menuId = menuId!!.toInt(),
+                onForwardClick = {
+                    navController.navigate(
+                        AppScreen.ConfirmOrder.params.route.replace(
+                            "{menuId}",
+                            menuId.toString()
+                        )
+                    )
+                },
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
+        }
+
+        composable(
+            route = AppScreen.ConfirmOrder.params.route,
+            enterTransition = {
+                slideIn(tween(400)) { IntOffset(it.width, 0) }
+            },
+            exitTransition = { null },
+            popEnterTransition = { null },
+            popExitTransition = {
+                slideOut(tween(400)) { IntOffset(it.width, 0) }
+            }
+        ) { backStackEntry ->
+            val menuId = backStackEntry.arguments?.getString("menuId")
+
+            ConfirmOrderScreen(
+                viewModel = viewModel,
+                menuId = menuId!!.toInt(),
+                onOrderClick = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val success = viewModel.orderMenu(menuId.toInt())
+                        if (success) {
+                            Log.d("TAG", "Order placed successfully")
+                            navController.navigate(AppScreen.LastOrder.params.route)
+                        } else {
+                            Log.d("TAG", "Error placing order")
+                        }
+                    }
+                },
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
+        }
     }
 }

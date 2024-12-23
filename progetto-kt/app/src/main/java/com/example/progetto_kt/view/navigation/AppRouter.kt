@@ -3,6 +3,7 @@ package com.example.progetto_kt.view.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class ScreenParams(
@@ -15,6 +16,14 @@ data class ScreenParams(
 sealed class AppScreen(
     val params: ScreenParams
 ) {
+
+    data object HomeStack : AppScreen(
+        ScreenParams(
+            route = "home_stack",
+            title = "Home",
+            showTabBar = false
+        )
+    )
 
     data object Home : AppScreen(
         ScreenParams(
@@ -40,6 +49,14 @@ sealed class AppScreen(
         )
     )
 
+    data object AccountStack : AppScreen(
+        ScreenParams(
+            route = "account_stack",
+            title = "Account",
+            showTabBar = false
+        )
+    )
+
     data object Account : AppScreen(
         ScreenParams(
             route = "account",
@@ -56,10 +73,29 @@ sealed class AppScreen(
         )
     )
 
+    data object LastOrderStack : AppScreen(
+        ScreenParams(
+            route = "last_order_stack",
+            title = "Last Order",
+            showTabBar = false
+        )
+    )
+
+    data object LastOrder : AppScreen(
+        ScreenParams(
+            route = "last_order",
+            icon = Icons.Rounded.ShoppingCart,
+            title = "Last Order",
+        )
+    )
 
     companion object {
         fun values(): List<AppScreen> = listOf(
+            HomeStack,
+            AccountStack,
+            LastOrderStack,
             Home,
+            LastOrder,
             Account,
             MenuDetails,
             ConfirmOrder,

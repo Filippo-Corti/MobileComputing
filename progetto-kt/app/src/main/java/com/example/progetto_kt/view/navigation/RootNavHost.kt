@@ -25,6 +25,7 @@ import com.example.progetto_kt.view.components.screens.AccountScreen
 import com.example.progetto_kt.view.components.screens.AddEditAccountScreen
 import com.example.progetto_kt.view.components.screens.ConfirmOrderScreen
 import com.example.progetto_kt.view.components.screens.HomeScreen
+import com.example.progetto_kt.view.components.screens.LastOrderScreen
 import com.example.progetto_kt.view.components.screens.MenuDetailsScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -36,12 +37,15 @@ fun RootNavHost(
     viewModel: MainViewModel,
 ) {
 
+    val TAG = "RootNavHost"
+
     var showTabBar by remember { mutableStateOf(true) }
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     val currentRoute = navBackStackEntry?.destination?.route
+    Log.d(TAG, "currentRoute: $currentRoute")
     showTabBar =
         AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar
             ?: true
@@ -60,10 +64,15 @@ fun RootNavHost(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = AppScreen.Home.params.route
+                startDestination = AppScreen.HomeStack.params.route
             ) {
 
                 homeNavHost(
+                    navController = navController,
+                    viewModel = viewModel
+                )
+
+                lastOrderNavHost(
                     navController = navController,
                     viewModel = viewModel
                 )

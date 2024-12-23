@@ -19,12 +19,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.progetto_kt.model.dataclasses.OrderStatus
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @Composable
 fun AccountScreen(
     viewModel : MainViewModel,
-    onEditAccountClick : (Boolean) -> Unit
+    onEditAccountClick : (Boolean) -> Unit,
+    onOrderAgainClick : (Int) -> Unit,
+    onCheckLastOrderClick : () -> Unit,
 ) {
 
     val state by viewModel.uiState.collectAsState()
@@ -87,6 +90,25 @@ fun AccountScreen(
             Text(
                 text = "Last Order was a ${lastOrderMenu.name}",
             )
+
+            if (user.orderStatus == OrderStatus.ON_DELIVERY) {
+                Button(
+                    onClick = onCheckLastOrderClick
+                ) {
+                    Text(
+                        text = "Check Last Order"
+                    )
+                }
+            } else {
+                Button(
+                    onClick = { onOrderAgainClick(lastOrderMenu.id) }
+                ) {
+                    Text(
+                        text = "order Again"
+                    )
+                }
+            }
+
         }
 
         Button(

@@ -3,6 +3,10 @@ package com.example.progetto_kt.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.progetto_kt.model.dataclasses.Menu
+import com.example.progetto_kt.model.dataclasses.MenuDetails
+import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
+import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.repositories.UserRepository
@@ -39,6 +43,7 @@ class AccountFormViewModel(
             fetchSessionData()
         }
     }
+
 
     fun fetchSessionData() {
         viewModelScope.launch {
@@ -98,8 +103,7 @@ class AccountFormViewModel(
         return (value.length == 3 && value.toIntOrNull() != null)
     }
 
-
-    fun submit() : Boolean {
+    suspend fun submit(submitCb : suspend (UserUpdateParams) -> Boolean) : Boolean {
         Log.d(TAG, "Submitting with values: ${_formParams.value}")
         if (_formParams.value.firstName.isEmpty() || _formParams.value.lastName.isEmpty() ||
             _formParams.value.cardFullName.isEmpty() || _formParams.value.cardNumber.isEmpty() ||
@@ -108,32 +112,8 @@ class AccountFormViewModel(
             return false
         }
 
-        this.updateUserData(_formParams.value)
-        return true
+        return submitCb(_formParams.value)
     }
 
-
-
-    fun updateUserData(newData : UserUpdateParams) {
-        if (_sid.value == null || _uid.value == null) {
-            Log.d(TAG, "User not logged in, couldn't update user data")
-            return
-        }
-
-        newData.sid = _sid.value!!
-
-        viewModelScope.launch {
-            try {
-                userRepository.updateUserDetails(
-                    sid = _sid.value!!,
-                    uid = _uid.value!!,
-                    user = newData
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Error updating user data: ${e.message}")
-            }
-        }
-
-    }
 
 }
