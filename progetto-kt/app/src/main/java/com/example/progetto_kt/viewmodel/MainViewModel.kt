@@ -57,12 +57,12 @@ class MainViewModel(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
-    suspend fun saveLastScreen(screen : String) {
-        userRepository.saveLastScreen(screen)
+    suspend fun saveNavigationStack(screen : String) {
+        userRepository.saveNavigationStack(screen)
     }
 
-    suspend fun getLastScreen() : String? {
-        return userRepository.getLastScreen()
+    suspend fun getLastNavigationStack() : String? {
+        return userRepository.getLastNavigationStack()
     }
 
     private suspend fun fetchAllUserData() {

@@ -19,7 +19,7 @@ class PreferencesController(
         val KEYS_UID = intPreferencesKey("uid")
         val KEYS_HAS_ALREADY_RUN = booleanPreferencesKey("hasAlreadyRun")
         val KEYS_IS_REGISTERED = booleanPreferencesKey("isRegistered")
-        val KEYS_LAST_SCREEN = stringPreferencesKey("lastScreen")
+        val KEYS_NAV_STACK = stringPreferencesKey("navStack")
     }
 
     suspend fun <T> get(prefKey : Preferences.Key<T>) : T? {

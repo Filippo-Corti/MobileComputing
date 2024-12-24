@@ -24,12 +24,12 @@ class UserRepository(
         return preferencesController.get(PreferencesController.KEYS_IS_REGISTERED) ?: false
     }
 
-    suspend fun saveLastScreen(screen : String) {
-        preferencesController.set(PreferencesController.KEYS_LAST_SCREEN, screen)
+    suspend fun saveNavigationStack(screen : String) {
+        preferencesController.set(PreferencesController.KEYS_NAV_STACK, screen)
     }
 
-    suspend fun getLastScreen() : String? {
-        return preferencesController.get(PreferencesController.KEYS_LAST_SCREEN)
+    suspend fun getLastNavigationStack() : String? {
+        return preferencesController.get(PreferencesController.KEYS_NAV_STACK)
     }
 
     suspend fun getUserSession() : UserSession {

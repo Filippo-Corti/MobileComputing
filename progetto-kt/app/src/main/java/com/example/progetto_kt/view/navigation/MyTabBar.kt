@@ -52,7 +52,7 @@ fun MyTabBar(
 
                     if (currentRoute != targetRoute) {
 
-                        // Iterate over the back stack and pop until we reach the target route
+                        // Manually implement popUpTo as the default behavior doesn't seem to work as intended
                         for (entry in navController.currentBackStack.value) {
                             Log.d("MyTabBar", "Checking entry: ${entry.destination.route}")
                             if (entry.destination.route == targetRoute) {

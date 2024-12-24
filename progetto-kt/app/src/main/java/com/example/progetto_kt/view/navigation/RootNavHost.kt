@@ -38,22 +38,28 @@ import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
-fun saveLastScreen(screen: String, params : Bundle?, functionCb : suspend (String) -> Unit) {
-    var routeToSave = screen
+@SuppressLint("RestrictedAPI")
+fun buildNavigationStackString(controller : NavController) : String {
+    val stack = controller.currentBackStack.value.filter { it.destination.route != null }
 
-    for (param in params?.keySet() ?: emptySet()) {
-        if (routeToSave.contains("{$param}")) {
-            val value = params?.getString(param)
-            routeToSave = routeToSave.replace("{$param}", value ?: "")
+    val stackAsString = stack.map {
+        var route = it.destination.route
+        val params = it.arguments
+
+        for (param in params?.keySet() ?: emptySet()) {
+            if (route?.contains("{$param}") == true) {
+                val value = params?.getString(param)
+                route = route.replace("{$param}", value ?: "")
+            }
         }
-    }
+        route
+    }.joinToString(";")
 
-    Log.d("RootNavHost", "Saving last screen: $routeToSave")
+    Log.d("RootNavHost", "Saving current Stack as: $stackAsString")
 
-    CoroutineScope(Dispatchers.IO).launch {
-       functionCb(routeToSave)
-    }
+    return stackAsString
 }
 
 @Composable
@@ -76,25 +82,23 @@ fun RootNavHost(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) {
-        val lastScreen = viewModel.getLastScreen()
+        val lastStack= viewModel.getLastNavigationStack()
 
-        Log.d(TAG, "Last screen was $lastScreen")
-        lastScreen?.let {
-            // The issue now is what happens when we go back after going to the last screen
-            // The logical solution is to navigate all steps of the stack
-            // Is there a way to interact with the NavGraph as a "graph"??...
-            navController.navigate(it)
+        Log.d(TAG, "Last screen was $lastStack")
+        lastStack?.let {
+            it.split(";").forEach { route ->
+                navController.navigate(route)
+            }
         }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
-                currentRoute?.let {
-                    Log.d(TAG, "Lifecycle stopped, last screen was $currentRoute")
-                    saveLastScreen(it, navBackStackEntry?.arguments) { screen ->
-                        viewModel.saveLastScreen(screen)
-                    }
+                Log.d(TAG, "Lifecycle stopped, last screen was $currentRoute")
+                val stack = buildNavigationStackString(navController)
+                runBlocking {
+                    viewModel.saveNavigationStack(stack)
                 }
             }
         }
