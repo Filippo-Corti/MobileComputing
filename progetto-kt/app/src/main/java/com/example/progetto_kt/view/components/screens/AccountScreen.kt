@@ -104,7 +104,7 @@ fun AccountScreen(
                     onClick = { onOrderAgainClick(lastOrderMenu.id) }
                 ) {
                     Text(
-                        text = "order Again"
+                        text = "Order Again"
                     )
                 }
             }

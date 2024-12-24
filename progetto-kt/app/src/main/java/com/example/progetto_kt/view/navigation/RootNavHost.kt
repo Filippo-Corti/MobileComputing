@@ -110,8 +110,6 @@ fun RootNavHost(
         }
     }
 
-    Log.d(TAG, "Current route: $currentRoute")
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {

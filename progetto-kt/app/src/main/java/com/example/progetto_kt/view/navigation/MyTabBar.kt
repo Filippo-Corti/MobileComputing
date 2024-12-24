@@ -1,7 +1,6 @@
 package com.example.progetto_kt.view.navigation
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -9,7 +8,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @SuppressLint("RestrictedAPI")
@@ -44,27 +42,17 @@ fun MyTabBar(
 
                 onClick = {
                     val targetRoute = item.params.route
+                    if (currentRoute == targetRoute) return@NavigationBarItem
 
-                    Log.d("MyTabBar", "Current Route: $currentRoute")
-                    Log.d("MyTabBar", "Target Route: $targetRoute")
-                    Log.d("MyTabBar", "Stack currently is: ${navController.currentBackStack.value}")
-                    Log.d("MyTabBar", "Start Destination Id: ${navController.graph.startDestinationId}")
-
-                    if (currentRoute != targetRoute) {
-
-                        // Manually implement popUpTo as the default behavior doesn't seem to work as intended
-                        for (entry in navController.currentBackStack.value) {
-                            Log.d("MyTabBar", "Checking entry: ${entry.destination.route}")
-                            if (entry.destination.route == targetRoute) {
-                                break
-                            }
-                            // Remove the entry from the stack
-                            navController.popBackStack()
+                    // Manually implement popUpTo as the default behavior doesn't seem to work as intended
+                    for (entry in navController.currentBackStack.value) {
+                        if (entry.destination.route == targetRoute) {
+                            break
                         }
-
-                        navController.navigate(item.params.route) {
-                            launchSingleTop = true
-                        }
+                        navController.popBackStack()
+                    }
+                    navController.navigate(item.params.route) {
+                        launchSingleTop = true
                     }
                 },
             )

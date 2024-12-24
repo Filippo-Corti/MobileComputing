@@ -1,5 +1,6 @@
 package com.example.progetto_kt.view.components.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -125,6 +126,7 @@ fun AddEditAccountScreen(
             onClick = {
                 CoroutineScope(Dispatchers.Main).launch {
                     val ok = formViewModel.submit(viewModel::updateUserData)
+                    Log.d("AddEditAccountScreen", "Submit result is $ok")
                     if (ok)
                         onBackClick()
                 }
