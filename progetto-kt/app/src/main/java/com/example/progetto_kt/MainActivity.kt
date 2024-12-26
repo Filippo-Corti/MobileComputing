@@ -94,9 +94,10 @@ fun MangiaEBasta(
     viewModel: MainViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
+    val error = state.error
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(true) }
+    var showBottomSheet = error != null
 
     if (state.isLoading) {
         Log.d("MainActivity", "Loading...")
@@ -115,20 +116,45 @@ fun MangiaEBasta(
             viewModel = viewModel,
         )
         if (showBottomSheet) {
+            Log.d("MainActivity", "With Error!")
             ModalBottomSheet(
                 onDismissRequest = {
-                    showBottomSheet = false
+                    viewModel.resetError()
                     Log.d("MainActivity", "Bottom Sheet Dismissed")
                 },
                 sheetState = sheetState
             ) {
                 Column {
                     Text(
-                        text = "Bottom Sheet",
+                        text = "Title: ${error!!.title}",
                     )
+
+                    Text(
+                        text = "Message: ${error.message}",
+                    )
+
+                    if (error.actionText != null) {
+                        Button(
+                            onClick = {
+                                scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    viewModel.resetError()
+                                    if (!sheetState.isVisible) {
+                                        showBottomSheet = false
+                                    }
+                                }
+                                // Differentiate between different error.types
+                            }
+                        ) {
+                            Text(
+                                text = error.actionText,
+                            )
+                        }
+                    }
+
                     Button(
                         onClick = {
                             scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                viewModel.resetError()
                                 if (!sheetState.isVisible) {
                                     showBottomSheet = false
                                 }
@@ -136,7 +162,7 @@ fun MangiaEBasta(
                         }
                     ) {
                         Text(
-                            text = "Close",
+                            text = error.dismissText,
                         )
                     }
                 }

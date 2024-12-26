@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.progetto_kt.model.dataclasses.Location
-import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.MenuWithImage
@@ -164,6 +163,17 @@ class MainViewModel(
     }
 
     suspend fun orderMenu(menuId: Int): Boolean {
+        if(!userRepository.isRegistered()) {
+            _uiState.value = _uiState.value.copy(
+                error = Error(
+                    type = ErrorType.ACCOUNT_DETAILS,
+                    title = "Please Register",
+                    message = "You need to register before you can order a menu."
+                )
+            )
+            return false
+        }
+
         runWithErrorHandling {
             val order = orderRepository.buyMenu(
                 sid = _sid.value!!,
