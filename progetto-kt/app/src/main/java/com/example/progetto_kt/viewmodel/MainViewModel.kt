@@ -10,6 +10,8 @@ import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.MenuWithImage
 import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
+import com.example.progetto_kt.model.dataclasses.Error
+import com.example.progetto_kt.model.dataclasses.ErrorType
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
@@ -17,6 +19,7 @@ import com.example.rprogetto_kt.model.repositories.OrderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
 
 data class UIState(
     val user: User? = null,
@@ -26,7 +29,7 @@ data class UIState(
     val selectedMenu: MenuDetailsWithImage? = null,
 
     val isLoading: Boolean = true,
-    val errorMessage: String? = null
+    val error : Error? = null
 )
 
 class MainViewModel(
@@ -53,8 +56,8 @@ class MainViewModel(
         }
     }
 
-    fun resetErrorMessage() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
+    fun resetError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 
     suspend fun saveNavigationStack(screen : String) {
@@ -77,15 +80,28 @@ class MainViewModel(
     ) {
         if (checkSid && (_sid.value == null || _uid.value == null)) {
             Log.d(TAG, "User not logged in, couldn't make the API call")
-            _uiState.value = _uiState.value.copy(errorMessage = "Authentication Error")
+            _uiState.value = _uiState.value.copy(
+                error = Error(
+                    type = ErrorType.NETWORK,
+                    title = "Authentication Error",
+                    message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+                )
+            )
             return
         }
 
         try {
             block()
-        } catch (e: Exception) {
+        } catch (e: Error) {
             Log.e(TAG, "Error: ${e.message}")
-            _uiState.value = _uiState.value.copy(errorMessage = e.message)
+            _uiState.value = _uiState.value.copy(error = e)
+        } catch (e : Exception) {
+            Log.e(TAG, "Error: ${e.message}")
+            _uiState.value = _uiState.value.copy(error = Error(
+                type = ErrorType.INVALID_ACTION,
+                title = "Unexpected Error",
+                message = "We encountered an unexpected error, please try closing and re-opening the app. \nIf the problem persists, please contact support."
+            ))
         }
     }
 
@@ -122,7 +138,7 @@ class MainViewModel(
             )
         }
 
-        val success = _uiState.value.errorMessage == null
+        val success = _uiState.value.error == null
         if (success) {
             fetchUserDetails()
         }
@@ -141,7 +157,7 @@ class MainViewModel(
             _uiState.value = _uiState.value.copy(lastOrder = order)
         }
 
-        val success = _uiState.value.errorMessage == null
+        val success = _uiState.value.error == null
         if (success) {
             fetchOrderedMenu()
         }
@@ -160,7 +176,7 @@ class MainViewModel(
             _uiState.value = _uiState.value.copy(lastOrder = order)
         }
 
-        val success = _uiState.value.errorMessage == null
+        val success = _uiState.value.error == null
         if (success) {
             fetchUserDetails()
             fetchOrderedMenu()

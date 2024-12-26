@@ -2,7 +2,10 @@ package com.example.progetto_kt.model.datasources
 
 import android.net.Uri
 import android.util.Log
+import com.example.progetto_kt.model.dataclasses.APIError
 import com.example.progetto_kt.model.dataclasses.BuyOrderRequest
+import com.example.progetto_kt.model.dataclasses.Error
+import com.example.progetto_kt.model.dataclasses.ErrorType
 import com.example.progetto_kt.model.dataclasses.Location
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
@@ -11,7 +14,6 @@ import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.UserSession
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
-import com.example.progetto_kt.model.dataclasses.Error
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -26,7 +28,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class APIController(
@@ -94,7 +95,11 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as UserSession
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
@@ -109,9 +114,21 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as User
-            401 -> throw Exception("Unauthorized")
-            404 -> throw Exception("User not found")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            404 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "This User doesn't Exist",
+                message = "We couldn't find the user you're looking for. Please consider un-installing and re-installing the app."
+            )
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
@@ -127,9 +144,21 @@ class APIController(
 
         when (httpResponse.status.value) {
             204 -> return
-            401 -> throw Exception("Unauthorized")
-            404 -> throw Exception("User not found")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            404 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "This User doesn't Exist",
+                message = "We couldn't find the user you're looking for. Please consider un-installing and re-installing the app."
+            )
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
@@ -144,13 +173,25 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as Order
-            401 -> throw Exception("Unauthorized")
-            404 -> throw Exception("Order not found")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            404 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "This Order doesn't Exist",
+                message = "We couldn't find the order you're looking for. Please consider closing and re-opening the app."
+            )
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
-    suspend fun buyMenu(sid : String, menuId : Int, deliveryLocation : Location) : Order {
+    suspend fun orderMenu(sid : String, menuId : Int, deliveryLocation : Location) : Order {
         Log.d(TAG, "Creating a new Order for menu $menuId")
 
         val httpResponse = genericRequest(
@@ -161,11 +202,32 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as Order
-            401 -> throw Exception("Unauthorized")
-            403 -> throw Exception("Invalid Card")
-            404 -> throw Exception("Menu not found")
-            409 -> throw Exception("User already has an active order")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API. Message: ${(httpResponse.body() as Error).message}")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            403 -> throw Error(
+                type = ErrorType.ACCOUNT_DETAILS,
+                title = "Your Credit Card is invalid",
+                message = "We couldn't validate the credit card you provided. Please check the details and try again.",
+                actionText = "Check Card Details"
+            )
+            404 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "This Menu doesn't Exist",
+                message = "We couldn't find the menu you're looking for. Please consider closing and re-opening the app or picking another menu."
+            )
+            409 -> throw Error(
+                type = ErrorType.INVALID_ACTION,
+                title = "An Order is already on its way",
+                message = "You already have an active order. Please wait for it to be delivered before ordering again."
+            )
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
@@ -184,8 +246,16 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as List<Menu>
-            401 -> throw Exception("Unauthorized")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
@@ -205,8 +275,21 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as MenuDetails
-            401 -> throw Exception("Unauthorized")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            404 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "This Menu doesn't Exist",
+                message = "We couldn't find the menu you're looking for. Please consider closing and re-opening the app or picking another menu."
+            )
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 
@@ -224,9 +307,17 @@ class APIController(
 
         when (httpResponse.status.value) {
             200 -> return httpResponse.body() as MenuImage
-            401 -> throw Exception("Unauthorized")
-            404 -> throw Exception("Image not found")
-            else -> throw Exception("Unexpected status code ${httpResponse.status.value} from the API")
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            404 -> return MenuImage("") // Graceful Degradation
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
         }
     }
 

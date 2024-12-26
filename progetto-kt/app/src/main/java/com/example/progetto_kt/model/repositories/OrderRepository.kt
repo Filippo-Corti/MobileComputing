@@ -21,7 +21,7 @@ class OrderRepository(
     }
 
     suspend fun buyMenu(sid : String, menuId : Int, deliveryLocation : Location) : Order {
-        return apiController.buyMenu(sid, menuId, deliveryLocation)
+        return apiController.orderMenu(sid, menuId, deliveryLocation)
     }
 
 

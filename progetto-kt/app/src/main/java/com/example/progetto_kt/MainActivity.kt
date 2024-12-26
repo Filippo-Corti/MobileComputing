@@ -11,10 +11,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,6 +38,7 @@ import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.progetto_kt.view.navigation.RootNavHost
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.rprogetto_kt.model.repositories.OrderRepository
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -78,11 +88,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MangiaEBasta(
     viewModel: MainViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(true) }
 
     if (state.isLoading) {
         Log.d("MainActivity", "Loading...")
@@ -100,5 +114,33 @@ fun MangiaEBasta(
         RootNavHost(
             viewModel = viewModel,
         )
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                    Log.d("MainActivity", "Bottom Sheet Dismissed")
+                },
+                sheetState = sheetState
+            ) {
+                Column {
+                    Text(
+                        text = "Bottom Sheet",
+                    )
+                    Button(
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Close",
+                        )
+                    }
+                }
+            }
+        }
     }
 }

@@ -7,6 +7,22 @@ import java.util.Locale
 
 typealias Timestamp = String
 
+@Serializable
+data class APIError (
+    @SerialName("message") val message : String,
+)
+
+@Serializable
+data class Location (
+
+    @SerialName("lat")
+    val latitude : Double,
+
+    @SerialName("lng")
+    val longitude : Double
+
+)
+
 object Timestamps {
 
     fun Timestamp.toMillis(): Long {
@@ -22,18 +38,17 @@ object Timestamps {
     }
 }
 
-@Serializable
-data class Error (
-    @SerialName("message") val message : String,
-)
+enum class ErrorType {
+    NETWORK,
+    ACCOUNT_DETAILS,
+    POSITION_UNALLOWED,
+    INVALID_ACTION,
+}
 
-@Serializable
-data class Location (
-
-    @SerialName("lat")
-    val latitude : Double,
-
-    @SerialName("lng")
-    val longitude : Double
-
-)
+data class Error(
+    val type : ErrorType,
+    val title : String = "An Unexpected Error Occurred",
+    override val message: String,
+    val actionText : String? = null,
+    val dismissText : String = "Dismiss"
+) : Exception(message)
