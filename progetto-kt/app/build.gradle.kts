@@ -67,6 +67,10 @@ dependencies {
     // Location
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // Mapbox
+    implementation(libs.android)
+    implementation(libs.maps.compose)
+
     // Compose Navigation
     implementation(libs.androidx.navigation.compose)
 
