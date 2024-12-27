@@ -19,10 +19,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.progetto_kt.R
+import com.example.progetto_kt.model.dataclasses.toPoint
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.CoordinateBounds
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -33,7 +33,6 @@ import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
 
 @Composable
 fun LastOrderScreen(
@@ -41,7 +40,7 @@ fun LastOrderScreen(
 ) {
 
     val state by viewModel.uiState.collectAsState()
-    val mapViewportState = rememberMapViewportState()
+    val showMap = state.lastKnownLocation != null
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -118,15 +117,18 @@ fun LastOrderScreen(
             text = "Arriving at: ${lastOrder.expectedDeliveryTimestamp}",
         )
 
-        if (state.lastKnownLocation != null) {
-            val location1 = Point.fromLngLat(
-                state.lastKnownLocation!!.longitude,
-                state.lastKnownLocation!!.latitude
-            )
-            val location2 = Point.fromLngLat(
-                lastOrder.currentLocation.longitude,
-                lastOrder.currentLocation.latitude
-            )
+        if (showMap) {
+            val userLocation = Point.fromLngLat(state.lastKnownLocation!!.longitude, state.lastKnownLocation!!.latitude)
+            val droneLocation = lastOrder.currentLocation.toPoint()
+            val deliveryLocation = lastOrder.deliveryLocation.toPoint()
+
+            val mapViewportState = rememberMapViewportState {
+                setCameraOptions {
+                    center(userLocation)
+                    zoom(17.0)
+                }
+            }
+
             MapboxMap(
                 modifier = Modifier.fillMaxSize(),
                 mapViewportState = mapViewportState
@@ -136,7 +138,11 @@ fun LastOrderScreen(
                     painter = painterResource(R.drawable.position_marker)
                 )
 
-                MapEffect(lastOrder) { mapView ->
+                PointAnnotation(point = droneLocation) { iconImage = marker }
+                PointAnnotation(point = deliveryLocation) { iconImage = marker }
+
+                MapEffect(Unit) { mapView ->
+                    // Show the user location
                     mapView.location.updateSettings {
                         locationPuck = createDefault2DPuck(withBearing = true)
                         puckBearingEnabled = true
@@ -144,34 +150,34 @@ fun LastOrderScreen(
                         enabled = true
                     }
 
-
-                    // Create a list of all locations
-                    val allLocations = listOf(location1, location2)
+                    Log.d("LastOrderScreen", "$userLocation $droneLocation $deliveryLocation")
 
                     // Calculate the camera options to include all locations
-                    val cameraOptions = mapView.mapboxMap.cameraForCoordinates(
-                        allLocations,
-                        EdgeInsets(50.0, 50.0, 50.0, 50.0),
-                        bearing = null,
-                        pitch = null
-                    )
+                    mapView.mapboxMap.cameraForCoordinates(
+                        coordinates = listOf(userLocation, droneLocation, deliveryLocation),
+                        camera = CameraOptions.Builder().build(),
+                        coordinatesPadding = EdgeInsets(100.0, 100.0, 100.0, 100.0),
+                        maxZoom = 20.0,
+                        offset = null,
+                    ) { cameraOptions ->
 
-                    // Center on location1 while keeping the calculated zoom
-                    val finalCameraOptions = cameraOptions.toBuilder()
-                        .center(location1)
-                        .build()
+                        Log.d("LastOrderScreen", "Camera options zoom: ${cameraOptions.zoom}")
 
-                    // Set the camera
-                    mapView.camera.easeTo(finalCameraOptions)
+                        // Set the camera
+                        mapView.camera.easeTo(cameraOptions
+                            .toBuilder()
+                            .zoom(
+                                if (cameraOptions.zoom != null)
+                                    cameraOptions.zoom!!.toInt().toDouble()
+                                else
+                                    16.0
+                            )
+                            .build()
+                        )
+                    }
 
                 }
 
-                Log.d("LastOrderScreen", "Location1: $location1")
-                Log.d("LastOrderScreen", "Location2: $location2")
-
-                PointAnnotation(point = location2) {
-                    iconImage = marker
-                }
             }
         }
 

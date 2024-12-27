@@ -1,5 +1,6 @@
 package com.example.progetto_kt.model.dataclasses
 
+import com.mapbox.geojson.Point
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.text.SimpleDateFormat
@@ -22,6 +23,10 @@ data class APILocation (
     val longitude : Double
 
 )
+
+fun APILocation.toPoint(): Point {
+    return Point.fromLngLat(this.longitude, this.latitude)
+}
 
 object Timestamps {
 
