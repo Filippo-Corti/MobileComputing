@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class BuyOrderRequest(
     @SerialName("sid") val sid : String,
-    @SerialName("deliveryLocation") val deliveryLocation: Location
+    @SerialName("deliveryLocation") val deliveryLocation: APILocation
 )
 
 @Serializable
@@ -18,6 +18,6 @@ data class Order(
     @SerialName("creationTimestamp") val creationTimestamp : Timestamp,
     @SerialName("deliveryTimestamp") val deliveryTimestamp : Timestamp? = null,
     @SerialName("expectedDeliveryTimestamp") val expectedDeliveryTimestamp : Timestamp? = null,
-    @SerialName("deliveryLocation") val deliveryLocation : Location,
-    @SerialName("currentPosition") val currentLocation : Location,
+    @SerialName("deliveryLocation") val deliveryLocation : APILocation,
+    @SerialName("currentPosition") val currentLocation : APILocation,
 )

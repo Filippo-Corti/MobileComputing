@@ -1,6 +1,6 @@
 package com.example.rprogetto_kt.model.repositories
 
-import com.example.progetto_kt.model.dataclasses.Location
+import com.example.progetto_kt.model.dataclasses.APILocation
 import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.datasources.APIController
 import com.example.progetto_kt.model.datasources.DBController
@@ -20,7 +20,7 @@ class OrderRepository(
         return apiController.getOrderDetails(sid, orderId)
     }
 
-    suspend fun buyMenu(sid : String, menuId : Int, deliveryLocation : Location) : Order {
+    suspend fun buyMenu(sid : String, menuId : Int, deliveryLocation : APILocation) : Order {
         return apiController.orderMenu(sid, menuId, deliveryLocation)
     }
 

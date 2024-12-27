@@ -6,7 +6,7 @@ import com.example.progetto_kt.model.dataclasses.APIError
 import com.example.progetto_kt.model.dataclasses.BuyOrderRequest
 import com.example.progetto_kt.model.dataclasses.Error
 import com.example.progetto_kt.model.dataclasses.ErrorType
-import com.example.progetto_kt.model.dataclasses.Location
+import com.example.progetto_kt.model.dataclasses.APILocation
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuImage
@@ -191,7 +191,7 @@ class APIController(
         }
     }
 
-    suspend fun orderMenu(sid : String, menuId : Int, deliveryLocation : Location) : Order {
+    suspend fun orderMenu(sid : String, menuId : Int, deliveryLocation : APILocation) : Order {
         Log.d(TAG, "Creating a new Order for menu $menuId")
 
         val httpResponse = genericRequest(

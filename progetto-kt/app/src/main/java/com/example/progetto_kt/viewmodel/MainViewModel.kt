@@ -1,9 +1,10 @@
 package com.example.progetto_kt.viewmodel
 
+import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.progetto_kt.model.dataclasses.Location
+import com.example.progetto_kt.model.dataclasses.APILocation
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.MenuWithImage
@@ -26,6 +27,10 @@ data class UIState(
     val lastOrderMenu: MenuDetails? = null,
     val nearbyMenus: List<MenuWithImage> = emptyList(),
     val selectedMenu: MenuDetailsWithImage? = null,
+    val lastKnownLocation: Location? = null,
+
+    val isUserRegistered: Boolean = false,
+    val isLocationAllowed : Boolean = false,
 
     val isLoading: Boolean = true,
     val error : Error? = null
@@ -44,6 +49,8 @@ class MainViewModel(
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
 
+    /*** Initialization & State Management ***/
+
     init {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -53,6 +60,10 @@ class MainViewModel(
             Log.d(TAG, "Fetched launch information and menus")
             _uiState.value = _uiState.value.copy(isLoading = false)
         }
+    }
+
+    fun setError(error : Error) {
+        _uiState.value = _uiState.value.copy(error = error)
     }
 
     fun resetError() {
@@ -73,13 +84,25 @@ class MainViewModel(
         fetchOrderedMenu()
     }
 
+    /*** Location Management ***/
+
+    fun setLocationAllowed(isAllowed : Boolean) {
+        _uiState.value = _uiState.value.copy(isLocationAllowed = isAllowed)
+    }
+
+    fun setLastKnownLocation(location: Location) {
+        _uiState.value = _uiState.value.copy(lastKnownLocation = location)
+    }
+
+    /*** Data Fetching and Updating ***/
+
     private suspend fun runWithErrorHandling(
         checkSid: Boolean = true,
         block: suspend () -> Unit,
     ) {
         if (checkSid && (_sid.value == null || _uid.value == null)) {
             Log.d(TAG, "User not logged in, couldn't make the API call")
-            _uiState.value = _uiState.value.copy(
+            setError(
                 error = Error(
                     type = ErrorType.NETWORK,
                     title = "Authentication Error",
@@ -97,12 +120,14 @@ class MainViewModel(
             _uiState.value = _uiState.value.copy(error = e)
         } catch (e : Exception) {
             Log.e(TAG, "Error: ${e.message}")
-            _uiState.value = _uiState.value.copy(error = Error(
-                type = ErrorType.NETWORK,
-                title = "Unexpected Error",
-                actionText = "Try Again",
-                message = "We encountered an unexpected error, please try closing and re-opening the app. \nIf the problem persists, please contact support."
-            ))
+            setError(
+                error = Error(
+                    type = ErrorType.NETWORK,
+                    title = "Unexpected Error",
+                    actionText = "Try Again",
+                    message = "We encountered an unexpected error, please try closing and re-opening the app. \nIf the problem persists, please contact support."
+                )
+            )
         }
     }
 
@@ -116,15 +141,20 @@ class MainViewModel(
     }
 
     suspend fun fetchUserDetails() {
-        if (!userRepository.isRegistered())
+        if (!userRepository.isRegistered()) {
+            _uiState.value = _uiState.value.copy(isUserRegistered = false)
             return
+        }
 
         runWithErrorHandling {
             val user = userRepository.getUserDetails(
                 sid = _sid.value!!,
                 uid = _uid.value!!
             )
-            _uiState.value = _uiState.value.copy(user = user)
+            _uiState.value = _uiState.value.copy(
+                user = user,
+                isUserRegistered = true
+            )
         }
     }
 
@@ -165,8 +195,8 @@ class MainViewModel(
     }
 
     suspend fun orderMenu(menuId: Int): Boolean {
-        if(!userRepository.isRegistered()) {
-            _uiState.value = _uiState.value.copy(
+        if(!_uiState.value.isUserRegistered) {
+            setError(
                 error = Error(
                     type = ErrorType.ACCOUNT_DETAILS,
                     title = "Please Register",
@@ -180,7 +210,7 @@ class MainViewModel(
             val order = orderRepository.buyMenu(
                 sid = _sid.value!!,
                 menuId = menuId,
-                deliveryLocation = Location(
+                deliveryLocation = APILocation(
                     45.4642,
                     9.19
                 )

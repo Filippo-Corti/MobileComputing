@@ -83,6 +83,10 @@ fun AccountScreen(
         )
 
         Text(
+            text = "Location Allowed: ${state.isLocationAllowed}",
+        )
+
+        Text(
             text = "Last Ordered ${user.lastOrderId} - ${user.orderStatus}",
         )
 

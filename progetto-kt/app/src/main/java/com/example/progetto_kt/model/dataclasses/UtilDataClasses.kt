@@ -13,7 +13,7 @@ data class APIError (
 )
 
 @Serializable
-data class Location (
+data class APILocation (
 
     @SerialName("lat")
     val latitude : Double,

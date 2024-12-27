@@ -76,6 +76,7 @@ fun buildNavigationStackString(controller : NavController) : String {
 @Composable
 fun RootNavHost(
     viewModel: MainViewModel,
+    onAskLocationPermission : () -> Unit
 ) {
 
     val TAG = "RootNavHost"
@@ -182,6 +183,7 @@ fun RootNavHost(
                         ErrorType.POSITION_UNALLOWED -> {
                             // Ask for Position
                             Log.d(TAG, "Position Error")
+                            onAskLocationPermission()
                         }
                         else -> {}
                     }

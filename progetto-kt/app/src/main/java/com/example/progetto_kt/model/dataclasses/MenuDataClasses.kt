@@ -10,7 +10,7 @@ data class Menu (
     @SerialName("mid") val id : Int,
     @SerialName("name") val name : String,
     @SerialName("price") val price : Float,
-    @SerialName("location") val location : Location,
+    @SerialName("location") val location : APILocation,
     @SerialName("imageVersion") val imageVersion : Int,
     @SerialName("shortDescription") val shortDescription : String,
     @SerialName("deliveryTime") val deliveryTime : Int
@@ -21,7 +21,7 @@ data class MenuDetails (
     @SerialName("mid") val id : Int,
     @SerialName("name") val name : String,
     @SerialName("price") val price : Float,
-    @SerialName("location") val location : Location,
+    @SerialName("location") val location : APILocation,
     @SerialName("imageVersion") val imageVersion : Int,
     @SerialName("shortDescription") val shortDescription : String,
     @SerialName("deliveryTime") val deliveryTime : Int,
