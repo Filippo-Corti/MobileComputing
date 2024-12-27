@@ -97,7 +97,6 @@ fun RootNavHost(
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
-
     LaunchedEffect(Unit) {
         val lastStack= viewModel.getLastNavigationStack()
 

@@ -49,6 +49,8 @@ import com.example.progetto_kt.view.navigation.RootNavHost
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.rprogetto_kt.model.repositories.OrderRepository
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -113,16 +115,24 @@ fun checkLocationPermission(context: Context) : Boolean {
 }
 
 @SuppressLint("MissingPermission")
-fun getCurrentLocation(fusedLocationClient : FusedLocationProviderClient, viewModel: MainViewModel) {
-    val locationTask = fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
-    try {
-        CoroutineScope(Dispatchers.Main).launch {
-            val location = locationTask.await()
-            viewModel.setLastKnownLocation(location)
-        }
-    } catch (e: Exception) {
-        Log.e("MainActivity", "Error getting location: $e")
-    }
+fun subscribeToLocationUpdates(
+    fusedLocationClient: FusedLocationProviderClient,
+    locationCallback: LocationCallback
+) {
+    val locationRequest = LocationRequest
+        .Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            10000L // Update interval in milliseconds
+        )
+        .setMinUpdateIntervalMillis(3000L) // Minimum interval between updates
+        .setMinUpdateDistanceMeters(10.0F) // Minimum distance between updates
+        .build()
+
+    fusedLocationClient.requestLocationUpdates(
+        locationRequest,
+        locationCallback,
+        null // Use default main thread
+    )
 }
 
 @Composable
@@ -134,13 +144,33 @@ fun MangiaEBasta(
 
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
+    val locationCallback = remember {
+        object : LocationCallback() {
+            override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
+                super.onLocationResult(locationResult)
+                val location = locationResult.lastLocation
+                if (location != null) {
+                    Log.d("MangiaEBasta", "Saved new Location $location")
+                    viewModel.setLastKnownLocation(location)
+                }
+            }
+
+            override fun onLocationAvailability(availability: com.google.android.gms.location.LocationAvailability) {
+                super.onLocationAvailability(availability)
+                if (!availability.isLocationAvailable) {
+                    Log.w("MangiaEBasta", "Location not available")
+                }
+            }
+        }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         viewModel.setLocationAllowed(isGranted)
         Log.d("MainActivity", "Location Permission: $isGranted!")
         if (isGranted) {
-            getCurrentLocation(fusedLocationClient, viewModel)
+            subscribeToLocationUpdates(fusedLocationClient, locationCallback)
         }
     }
 
@@ -149,7 +179,7 @@ fun MangiaEBasta(
         viewModel.setLocationAllowed(isGranted)
 
         if (isGranted) {
-            getCurrentLocation(fusedLocationClient, viewModel)
+            subscribeToLocationUpdates(fusedLocationClient, locationCallback)
         } else {
             viewModel.setError(
                 Error(

@@ -94,6 +94,17 @@ class MainViewModel(
         _uiState.value = _uiState.value.copy(lastKnownLocation = location)
     }
 
+    fun getCurrentLocation() : APILocation {
+        val location = _uiState.value.lastKnownLocation
+        if (location != null && !_uiState.value.isLocationAllowed) {
+            return APILocation(
+                latitude = location.latitude,
+                longitude = location.longitude
+            )
+        }
+        return APILocation(45.46, 9.18) // Default Location
+    }
+
     /*** Data Fetching and Updating ***/
 
     private suspend fun runWithErrorHandling(
@@ -200,7 +211,8 @@ class MainViewModel(
                 error = Error(
                     type = ErrorType.ACCOUNT_DETAILS,
                     title = "Please Register",
-                    message = "You need to register before you can order a menu."
+                    message = "You need to register before you can order a menu.",
+                    actionText = "Register"
                 )
             )
             return false
@@ -210,10 +222,7 @@ class MainViewModel(
             val order = orderRepository.buyMenu(
                 sid = _sid.value!!,
                 menuId = menuId,
-                deliveryLocation = APILocation(
-                    45.4642,
-                    9.19
-                )
+                deliveryLocation = getCurrentLocation()
             )
             _uiState.value = _uiState.value.copy(lastOrder = order)
         }
@@ -230,11 +239,12 @@ class MainViewModel(
         if (_uiState.value.lastOrder?.menuId == null)
             return
 
+        val location = getCurrentLocation()
         runWithErrorHandling {
             val menu = menuRepository.getMenuDetails(
                 sid = _sid.value!!,
-                latitude = 45.46,
-                longitude = 9.18,
+                latitude = location.latitude,
+                longitude = location.longitude,
                 menuId = _uiState.value.lastOrder?.menuId!!
             )
             _uiState.value = _uiState.value.copy(lastOrderMenu = menu)
@@ -242,11 +252,13 @@ class MainViewModel(
     }
 
     suspend fun fetchNearbyMenus() {
+        val location = getCurrentLocation()
+        Log.d(TAG, "Fetching Menus near ${location.latitude}, ${location.longitude}")
         runWithErrorHandling {
             val menus = menuRepository.getNearbyMenus(
                 sid = _sid.value!!,
-                latitude = 45.46,
-                longitude = 9.18
+                latitude = location.latitude,
+                longitude = location.longitude
             )
             val menusWithImages = menus.map { menu ->
                 val image = menuRepository.getMenuImage(
@@ -264,11 +276,12 @@ class MainViewModel(
         if (_uiState.value.selectedMenu?.menuDetails?.id == menuId)
             return
 
+        val location = getCurrentLocation()
         runWithErrorHandling {
             val menuDetails = menuRepository.getMenuDetails(
                 sid = _sid.value!!,
-                latitude = 45.46,
-                longitude = 9.18,
+                latitude = location.latitude,
+                longitude = location.longitude,
                 menuId = menuId
             )
             val image = menuRepository.getMenuImage(

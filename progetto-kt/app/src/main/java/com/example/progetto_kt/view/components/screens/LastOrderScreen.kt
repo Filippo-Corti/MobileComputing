@@ -141,7 +141,7 @@ fun LastOrderScreen(
                 PointAnnotation(point = droneLocation) { iconImage = marker }
                 PointAnnotation(point = deliveryLocation) { iconImage = marker }
 
-                MapEffect(Unit) { mapView ->
+                MapEffect(lastOrder) { mapView ->
                     // Show the user location
                     mapView.location.updateSettings {
                         locationPuck = createDefault2DPuck(withBearing = true)

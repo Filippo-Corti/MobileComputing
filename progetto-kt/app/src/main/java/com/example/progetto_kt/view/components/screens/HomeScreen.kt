@@ -59,6 +59,21 @@ fun HomeScreen(
             fontWeight = FontWeight(700),
             textAlign = TextAlign.Center,
         )
+        if (state.isLocationAllowed) {
+            Text(
+                text = "Location is allowed",
+                modifier = Modifier
+                    .padding(16.dp, 25.dp)
+                    .fillMaxWidth(),
+            )
+        } else {
+            Text(
+                text = "Location is not allowed - Showing menus around Milan",
+                modifier = Modifier
+                    .padding(16.dp, 25.dp)
+                    .fillMaxWidth(),
+            )
+        }
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -85,7 +100,7 @@ fun HomeScreen(
                         )
                         Text(text = menu.menu.name)
                     }
-                    Text(text = "${menu.menu.price.toString()} €")
+                    Text(text = "${menu.menu.price} €")
                 }
             }
         }
