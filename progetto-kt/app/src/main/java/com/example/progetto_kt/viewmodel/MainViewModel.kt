@@ -83,6 +83,7 @@ class MainViewModel(
                 error = Error(
                     type = ErrorType.NETWORK,
                     title = "Authentication Error",
+                    actionText = "Try Again",
                     message = "We couldn't authenticate you, please try un-installing and re-installing the app."
                 )
             )
@@ -97,8 +98,9 @@ class MainViewModel(
         } catch (e : Exception) {
             Log.e(TAG, "Error: ${e.message}")
             _uiState.value = _uiState.value.copy(error = Error(
-                type = ErrorType.INVALID_ACTION,
+                type = ErrorType.NETWORK,
                 title = "Unexpected Error",
+                actionText = "Try Again",
                 message = "We encountered an unexpected error, please try closing and re-opening the app. \nIf the problem persists, please contact support."
             ))
         }

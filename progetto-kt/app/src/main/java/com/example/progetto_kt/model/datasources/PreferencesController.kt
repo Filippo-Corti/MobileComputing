@@ -9,7 +9,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 
-class PreferencesController(
+class PreferencesController private constructor (
     private val dataStore: DataStore<Preferences>
 ) {
 
@@ -20,6 +20,14 @@ class PreferencesController(
         val KEYS_HAS_ALREADY_RUN = booleanPreferencesKey("hasAlreadyRun")
         val KEYS_IS_REGISTERED = booleanPreferencesKey("isRegistered")
         val KEYS_NAV_STACK = stringPreferencesKey("navStack")
+
+        private var INSTANCE: PreferencesController? = null
+
+        fun getInstance(dataStore: DataStore<Preferences>): PreferencesController {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: PreferencesController(dataStore).also { INSTANCE = it }
+            }
+        }
     }
 
     suspend fun <T> get(prefKey : Preferences.Key<T>) : T? {

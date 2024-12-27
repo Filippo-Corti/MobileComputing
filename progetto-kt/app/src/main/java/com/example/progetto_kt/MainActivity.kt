@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.progetto_kt.model.dataclasses.Error
+import com.example.progetto_kt.model.dataclasses.ErrorType
 import com.example.progetto_kt.model.datasources.PreferencesController
 import com.example.progetto_kt.model.datasources.APIController
 import com.example.progetto_kt.model.datasources.DBController
@@ -47,7 +49,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val apiController = APIController()
         val dbController = DBController(this)
-        val preferencesController = PreferencesController(dataStore)
+        val preferencesController = PreferencesController.getInstance(dataStore)
 
         val userRepository = UserRepository(
             apiController = apiController,
@@ -88,20 +90,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MangiaEBasta(
     viewModel: MainViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
-    val error = state.error
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    var showBottomSheet = error != null
 
     if (state.isLoading) {
         Log.d("MainActivity", "Loading...")
-        Column(
+        return Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
@@ -110,63 +107,13 @@ fun MangiaEBasta(
         ) {
             CircularProgressIndicator()
         }
-    } else {
-        Log.d("MainActivity", "Loaded!")
-        RootNavHost(
-            viewModel = viewModel,
-        )
-        if (showBottomSheet) {
-            Log.d("MainActivity", "With Error!")
-            ModalBottomSheet(
-                onDismissRequest = {
-                    viewModel.resetError()
-                    Log.d("MainActivity", "Bottom Sheet Dismissed")
-                },
-                sheetState = sheetState
-            ) {
-                Column {
-                    Text(
-                        text = "Title: ${error!!.title}",
-                    )
-
-                    Text(
-                        text = "Message: ${error.message}",
-                    )
-
-                    if (error.actionText != null) {
-                        Button(
-                            onClick = {
-                                scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                    viewModel.resetError()
-                                    if (!sheetState.isVisible) {
-                                        showBottomSheet = false
-                                    }
-                                }
-                                // Differentiate between different error.types
-                            }
-                        ) {
-                            Text(
-                                text = error.actionText,
-                            )
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                viewModel.resetError()
-                                if (!sheetState.isVisible) {
-                                    showBottomSheet = false
-                                }
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = error.dismissText,
-                        )
-                    }
-                }
-            }
-        }
     }
+
+    Log.d("MainActivity", "Loaded!")
+
+
+    RootNavHost(
+        viewModel = viewModel,
+    )
+
 }
