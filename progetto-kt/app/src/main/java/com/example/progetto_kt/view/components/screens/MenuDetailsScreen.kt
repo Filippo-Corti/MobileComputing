@@ -66,6 +66,10 @@ fun MenuDetailsScreen(
             text = menuDetails.longDescription,
             modifier = Modifier.padding(top = 8.dp)
         )
+        Text(
+            text = menuDetails.location.address ?: "",
+            modifier = Modifier.padding(top = 8.dp)
+        )
 
         Image(
             bitmap = bitmap.asImageBitmap(),

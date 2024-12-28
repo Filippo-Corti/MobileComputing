@@ -1,5 +1,6 @@
 package com.example.progetto_kt.viewmodel
 
+import android.location.Geocoder
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -13,12 +14,16 @@ import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.Error
 import com.example.progetto_kt.model.dataclasses.ErrorType
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
+import com.example.progetto_kt.model.dataclasses.toAPILocation
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.rprogetto_kt.model.repositories.OrderRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class UIState(
     val user: User? = null,
@@ -26,7 +31,7 @@ data class UIState(
     val lastOrderMenu: MenuDetails? = null,
     val nearbyMenus: List<MenuWithImage> = emptyList(),
     val selectedMenu: MenuDetailsWithImage? = null,
-    val lastKnownLocation: Location? = null,
+    val lastKnownLocation: APILocation? = null,
 
     val isUserRegistered: Boolean = false,
     val isLocationAllowed : Boolean = false,
@@ -38,12 +43,14 @@ data class UIState(
 class MainViewModel(
     val userRepository: UserRepository,
     val menuRepository: MenuRepository,
-    val orderRepository: OrderRepository
+    val orderRepository: OrderRepository,
+    val geocoder: Geocoder
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
+
 
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
@@ -91,7 +98,11 @@ class MainViewModel(
     }
 
     fun setLastKnownLocation(location: Location) {
-        _uiState.value = _uiState.value.copy(lastKnownLocation = location)
+        viewModelScope.launch {
+            val loc = location.toAPILocation()
+            loc.address = getAddressFromLocation(loc)
+            _uiState.value = _uiState.value.copy(lastKnownLocation = loc)
+        }
     }
 
     fun getCurrentLocation() : APILocation {
@@ -103,6 +114,26 @@ class MainViewModel(
             )
         }
         return APILocation(45.46, 9.18) // Default Location
+    }
+
+    suspend fun getAddressFromLocation(location: APILocation): String {
+        return getAddressFromCoordinates(location.latitude, location.longitude)
+    }
+
+    @Suppress("Deprecation")
+    suspend fun getAddressFromCoordinates(latitude: Double, longitude: Double): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    val address = addresses[0]
+                    "${address.thoroughfare ?: ""}, ${address.subThoroughfare ?: ""}, ${"(${address.postalCode})"} ${address.locality ?: ""}"
+                } else ""
+            } catch (e: Exception) {
+                Log.e(TAG, "Error: $e")
+                ""
+            }
+        }
     }
 
     /*** Data Fetching and Updating ***/
@@ -129,6 +160,8 @@ class MainViewModel(
         } catch (e: Error) {
             Log.e(TAG, "Error: ${e.message}")
             _uiState.value = _uiState.value.copy(error = e)
+        } catch (e : CancellationException) {
+            Log.w(TAG, "Error: $e")
         } catch (e : Exception) {
             Log.e(TAG, "Error: $e")
             setError(
@@ -196,6 +229,8 @@ class MainViewModel(
                 sid = _sid.value!!,
                 orderId = _uiState.value.user!!.lastOrderId!!,
             )
+            order.currentLocation.address = getAddressFromLocation(order.currentLocation)
+            order.deliveryLocation.address = getAddressFromLocation(order.deliveryLocation)
             _uiState.value = _uiState.value.copy(lastOrder = order)
         }
 
@@ -224,6 +259,8 @@ class MainViewModel(
                 menuId = menuId,
                 deliveryLocation = getCurrentLocation()
             )
+            order.currentLocation.address = getAddressFromLocation(order.currentLocation)
+            order.deliveryLocation.address = getAddressFromLocation(order.deliveryLocation)
             _uiState.value = _uiState.value.copy(lastOrder = order)
         }
 
@@ -247,6 +284,7 @@ class MainViewModel(
                 longitude = location.longitude,
                 menuId = _uiState.value.lastOrder?.menuId!!
             )
+            menu.location.address = getAddressFromLocation(menu.location)
             _uiState.value = _uiState.value.copy(lastOrderMenu = menu)
         }
     }
@@ -266,6 +304,7 @@ class MainViewModel(
                     menuId = menu.id,
                     imageVersion = menu.imageVersion
                 )
+                menu.location.address = getAddressFromLocation(menu.location)
                 MenuWithImage(menu, image)
             }
             _uiState.value = _uiState.value.copy(nearbyMenus = menusWithImages)
@@ -284,6 +323,7 @@ class MainViewModel(
                 longitude = location.longitude,
                 menuId = menuId
             )
+            menuDetails.location.address = getAddressFromLocation(menuDetails.location)
             val image = menuRepository.getMenuImage(
                 sid = _sid.value!!,
                 menuId = menuId,

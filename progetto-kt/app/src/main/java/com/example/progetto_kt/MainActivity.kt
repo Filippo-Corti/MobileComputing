@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.Manifest
 import android.annotation.SuppressLint
+import android.location.Geocoder
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -58,12 +59,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
 
     private val Context.dataStore by preferencesDataStore(name = "appStatus")
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         val apiController = APIController()
         val dbController = DBController(this)
         val preferencesController = PreferencesController.getInstance(dataStore)
@@ -86,7 +90,8 @@ class MainActivity : ComponentActivity() {
             preferencesController = preferencesController
         )
 
-        super.onCreate(savedInstanceState)
+
+        val geocoder = Geocoder(this, Locale.getDefault())
 
         val viewModelFactory = viewModelFactory {
             initializer {
@@ -94,6 +99,7 @@ class MainActivity : ComponentActivity() {
                     userRepository,
                     menuRepository,
                     orderRepository,
+                    geocoder
                 )
             }
         }

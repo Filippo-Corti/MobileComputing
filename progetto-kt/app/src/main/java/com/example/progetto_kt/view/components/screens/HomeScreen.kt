@@ -90,7 +90,7 @@ fun HomeScreen(
         )
         if (state.isLocationAllowed) {
             Text(
-                text = "Location is allowed",
+                text = "Location is allowed - Showing menus in ${state.lastKnownLocation?.address}",
                 modifier = Modifier
                     .padding(16.dp, 25.dp)
                     .fillMaxWidth(),
