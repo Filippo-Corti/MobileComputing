@@ -62,8 +62,8 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        if (state.nearbyMenus.isEmpty() && !state.isLoading) {
+    LaunchedEffect(state.reloadMenus) {
+        if (state.nearbyMenus.isEmpty() && !state.isLoading || state.reloadMenus) {
             isRefreshing = true
             viewModel.fetchNearbyMenus()
             isRefreshing = false

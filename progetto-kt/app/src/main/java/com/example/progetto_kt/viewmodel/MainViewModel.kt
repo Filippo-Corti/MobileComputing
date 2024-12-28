@@ -36,6 +36,7 @@ data class UIState(
     val isUserRegistered: Boolean = false,
     val isLocationAllowed : Boolean = false,
     val hasCheckedPermissions : Boolean = false,
+    val reloadMenus : Boolean = false,
 
     val isLoading: Boolean = true,
     val isFirstLaunch : Boolean = true,
@@ -52,6 +53,7 @@ class MainViewModel(
     private val TAG = MainViewModel::class.simpleName
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
+
 
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
@@ -107,10 +109,10 @@ class MainViewModel(
     fun allowLocation(location : Location) {
         setLastKnownLocation(location)
         if (_uiState.value.isLocationAllowed) return
-        _uiState.value = _uiState.value.copy(isLocationAllowed = true)
-        viewModelScope.launch {
-            fetchNearbyMenus()
-        }
+        _uiState.value = _uiState.value.copy(
+            isLocationAllowed = true,
+            reloadMenus = true
+        )
     }
 
     private fun setLastKnownLocation(location: Location) {
@@ -336,7 +338,10 @@ class MainViewModel(
                 menu.location.address = getAddressFromLocation(menu.location)
                 MenuWithImage(menu, image)
             }
-            _uiState.value = _uiState.value.copy(nearbyMenus = menusWithImages)
+            _uiState.value = _uiState.value.copy(
+                nearbyMenus = menusWithImages,
+                reloadMenus = false
+            )
         }
     }
 
