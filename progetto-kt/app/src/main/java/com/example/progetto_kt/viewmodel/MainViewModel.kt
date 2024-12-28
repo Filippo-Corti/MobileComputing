@@ -35,6 +35,7 @@ data class UIState(
 
     val isUserRegistered: Boolean = false,
     val isLocationAllowed : Boolean = false,
+    val hasCheckedPermissions : Boolean = false,
 
     val isLoading: Boolean = true,
     val isFirstLaunch : Boolean = true,
@@ -51,7 +52,6 @@ class MainViewModel(
     private val TAG = MainViewModel::class.simpleName
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
-
 
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
@@ -70,6 +70,10 @@ class MainViewModel(
 
     fun setLoading(isLoading : Boolean) {
         _uiState.value = _uiState.value.copy(isLoading = isLoading)
+    }
+
+    fun setCheckedPermissions(hasCheckedPermissions : Boolean) {
+        _uiState.value = _uiState.value.copy(hasCheckedPermissions = hasCheckedPermissions)
     }
 
     fun setError(error : Error) {
@@ -96,13 +100,23 @@ class MainViewModel(
 
     /*** Location Management ***/
 
-    fun setLocationAllowed(isAllowed : Boolean) {
-        _uiState.value = _uiState.value.copy(isLocationAllowed = isAllowed)
+    fun disallowLocation() {
+        _uiState.value = _uiState.value.copy(isLocationAllowed = false)
     }
 
-    fun setLastKnownLocation(location: Location) {
+    fun allowLocation(location : Location) {
+        setLastKnownLocation(location)
+        if (_uiState.value.isLocationAllowed) return
+        _uiState.value = _uiState.value.copy(isLocationAllowed = true)
         viewModelScope.launch {
-            val loc = location.toAPILocation()
+            fetchNearbyMenus()
+        }
+    }
+
+    private fun setLastKnownLocation(location: Location) {
+        val loc = location.toAPILocation()
+        _uiState.value = _uiState.value.copy(lastKnownLocation = loc)
+        viewModelScope.launch {
             loc.address = getAddressFromLocation(loc)
             _uiState.value = _uiState.value.copy(lastKnownLocation = loc)
         }

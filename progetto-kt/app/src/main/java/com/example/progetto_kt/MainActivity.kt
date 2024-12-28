@@ -105,11 +105,24 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun checkLocationPermission(context: Context) : Boolean {
+fun checkLocationPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
     ) == PackageManager.PERMISSION_GRANTED;
+}
+
+@SuppressLint("MissingPermission")
+fun getCurrentLocation(fusedLocationClient : FusedLocationProviderClient, viewModel: MainViewModel) {
+    val locationTask = fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+    try {
+        CoroutineScope(Dispatchers.Main).launch {
+            val location = locationTask.await()
+            viewModel.allowLocation(location)
+        }
+    } catch (e: Exception) {
+        Log.e("MainActivity", "Error getting location: $e")
+    }
 }
 
 @SuppressLint("MissingPermission")
@@ -162,7 +175,7 @@ fun MangiaEBasta(
                 val location = locationResult.lastLocation
                 if (location != null) {
                     Log.d("MangiaEBasta", "Saved new Location $location")
-                    viewModel.setLastKnownLocation(location)
+                    viewModel.allowLocation(location)
                 }
                 viewModel.setLoading(false)
             }
@@ -180,30 +193,37 @@ fun MangiaEBasta(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        viewModel.setLocationAllowed(isGranted)
         Log.d("MainActivity", "Location Permission: $isGranted!")
         if (isGranted) {
+            getCurrentLocation(fusedLocationClient, viewModel)
             subscribeToLocationUpdates(fusedLocationClient, locationCallback)
+        } else {
+            viewModel.disallowLocation()
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.setLoading(true)
-        val isGranted = checkLocationPermission(context)
-        viewModel.setLocationAllowed(isGranted)
 
-        if (isGranted) {
-            subscribeToLocationUpdates(fusedLocationClient, locationCallback)
-        } else {
-            viewModel.setError(
-                Error(
-                    type = ErrorType.POSITION_UNALLOWED,
-                    title = "We need your Location",
-                    message = "This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
-                    actionText = "I'll do it"
+    LaunchedEffect(state.hasCheckedPermissions) {
+        if (!state.hasCheckedPermissions) {
+            viewModel.setLoading(true)
+            val isGranted = checkLocationPermission(context)
+
+            if (isGranted) {
+                getCurrentLocation(fusedLocationClient, viewModel)
+                subscribeToLocationUpdates(fusedLocationClient, locationCallback)
+            } else {
+                viewModel.setError(
+                    Error(
+                        type = ErrorType.POSITION_UNALLOWED,
+                        title = "We need your Location",
+                        message = "This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
+                        actionText = "I'll do it"
+                    )
                 )
-            )
-            viewModel.setLoading(false)
+                viewModel.setLoading(false)
+                viewModel.disallowLocation()
+            }
+            viewModel.setCheckedPermissions(true)
         }
     }
 

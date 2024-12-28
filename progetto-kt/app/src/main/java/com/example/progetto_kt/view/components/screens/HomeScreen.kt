@@ -1,6 +1,7 @@
 package com.example.progetto_kt.view.components.screens
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.progetto_kt.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
@@ -46,6 +49,7 @@ fun HomeScreen(
 ) {
 
     val state by viewModel.uiState.collectAsState()
+
     var isRefreshing by remember { mutableStateOf(false) }
 
     val refreshState = rememberPullToRefreshState()

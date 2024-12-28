@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @SuppressLint("RestrictedAPI")
@@ -44,15 +45,12 @@ fun MyTabBar(
                     val targetRoute = item.params.route
                     if (currentRoute == targetRoute) return@NavigationBarItem
 
-                    // Manually implement popUpTo as the default behavior doesn't seem to work as intended
-                    for (entry in navController.currentBackStack.value) {
-                        if (entry.destination.route == targetRoute) {
-                            break
-                        }
-                        navController.popBackStack()
-                    }
                     navController.navigate(item.params.route) {
+                        popUpTo(0) {
+                            saveState = true
+                        }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 },
             )
