@@ -37,6 +37,7 @@ data class UIState(
     val isLocationAllowed : Boolean = false,
 
     val isLoading: Boolean = true,
+    val isFirstLaunch : Boolean = true,
     val error : Error? = null
 )
 
@@ -63,6 +64,7 @@ class MainViewModel(
             fetchUserSession()
             fetchAllUserData()
             Log.d(TAG, "Fetched launch information")
+            _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
 
@@ -71,6 +73,7 @@ class MainViewModel(
     }
 
     fun setError(error : Error) {
+        if (_uiState.value.error != null) return
         _uiState.value = _uiState.value.copy(error = error)
     }
 
@@ -248,6 +251,18 @@ class MainViewModel(
                     title = "Please Register",
                     message = "You need to register before you can order a menu.",
                     actionText = "Register"
+                )
+            )
+            return false
+        }
+
+        if (!_uiState.value.isLocationAllowed) {
+            setError(
+                error = Error(
+                    type = ErrorType.POSITION_UNALLOWED,
+                    title = "Location Not Allowed",
+                    message = "Please allow location access to place an order.",
+                    actionText = "Allow Location"
                 )
             )
             return false

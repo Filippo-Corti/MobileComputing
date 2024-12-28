@@ -49,6 +49,7 @@ fun AccountScreen(
     }
 
     val user = state.user
+    val lastOrder = state.lastOrder
     val lastOrderMenu = state.lastOrderMenu
 
     if (user == null) {
@@ -87,7 +88,7 @@ fun AccountScreen(
         )
 
         Text(
-            text = "Last Ordered ${user.lastOrderId} - ${user.orderStatus}",
+            text = "Last Ordered ${lastOrder?.id ?: user.lastOrderId} - ${lastOrder?.status ?: user.orderStatus}",
         )
 
         if (lastOrderMenu != null) {

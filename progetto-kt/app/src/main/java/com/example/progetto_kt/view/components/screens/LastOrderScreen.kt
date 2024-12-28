@@ -118,7 +118,7 @@ fun LastOrderScreen(
         )
 
         if (showMap) {
-            val userLocation = Point.fromLngLat(state.lastKnownLocation!!.longitude, state.lastKnownLocation!!.latitude)
+            val userLocation = state.lastKnownLocation!!.toPoint()
             val droneLocation = lastOrder.currentLocation.toPoint()
             val deliveryLocation = lastOrder.deliveryLocation.toPoint()
 

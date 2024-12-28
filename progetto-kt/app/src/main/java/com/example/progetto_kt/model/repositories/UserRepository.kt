@@ -20,6 +20,10 @@ class UserRepository(
         private val TAG = UserRepository::class.simpleName
     }
 
+    suspend fun isFirstLaunch() : Boolean {
+        return preferencesController.isFirstLaunch()
+    }
+
     suspend fun isRegistered() : Boolean {
         return preferencesController.get(PreferencesController.KEYS_IS_REGISTERED) ?: false
     }

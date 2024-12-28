@@ -70,11 +70,13 @@ fun ConfirmOrderScreen(
             fontSize = 28.sp,
         )
 
-        Button(
-            onClick = onOrderClick,
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text(text = "Order")
+        if (!(state.isLocationAllowed && state.lastKnownLocation == null)) { // Don't order if it's waiting for location
+            Button(
+                onClick = onOrderClick,
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text(text = "Order")
+            }
         }
 
         Button(

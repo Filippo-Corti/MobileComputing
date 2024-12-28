@@ -101,11 +101,11 @@ fun RootNavHost(
     LaunchedEffect(Unit) {
         val lastStack= viewModel.getLastNavigationStack()
 
-        navController.popBackStack(AppScreen.HomeStack.params.route, true)
-        Log.d(TAG, "Current stack is ${navController.currentBackStack.value}")
         Log.d(TAG, "Last screen was $lastStack")
-        lastStack?.let {
-            it.split(";").forEach { route ->
+        if (!lastStack.isNullOrEmpty()) {
+            navController.popBackStack(AppScreen.HomeStack.params.route, true)
+            Log.d(TAG, "Current stack is ${navController.currentBackStack.value}")
+            lastStack.split(";").forEach { route ->
                 navController.navigate(route) {
                     launchSingleTop = true
                 }
