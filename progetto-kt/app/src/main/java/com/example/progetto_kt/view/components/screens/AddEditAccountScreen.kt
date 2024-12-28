@@ -34,7 +34,7 @@ fun AddEditAccountScreen(
     val viewModelFactory = viewModelFactory {
         initializer {
             AccountFormViewModel(
-                viewModel.userRepository,
+                viewModel.getUserRepository(),
                 viewModel.uiState.value.user
             )
         }

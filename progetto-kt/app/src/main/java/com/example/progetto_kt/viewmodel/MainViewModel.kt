@@ -1,8 +1,13 @@
 package com.example.progetto_kt.viewmodel
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.progetto_kt.model.dataclasses.APILocation
@@ -18,11 +23,18 @@ import com.example.progetto_kt.model.dataclasses.toAPILocation
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.rprogetto_kt.model.repositories.OrderRepository
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 data class UIState(
@@ -44,16 +56,16 @@ data class UIState(
 )
 
 class MainViewModel(
-    val userRepository: UserRepository,
-    val menuRepository: MenuRepository,
-    val orderRepository: OrderRepository,
-    val geocoder: Geocoder
+    private val userRepository: UserRepository,
+    private val menuRepository: MenuRepository,
+    private val orderRepository: OrderRepository,
+    private val geocoder: Geocoder,
+    private val locationClient : FusedLocationProviderClient,
 ) : ViewModel() {
 
     private val TAG = MainViewModel::class.simpleName
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
-
 
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
@@ -85,6 +97,10 @@ class MainViewModel(
 
     fun resetError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun getUserRepository() : UserRepository {
+        return userRepository
     }
 
     suspend fun saveNavigationStack(screen : String) {
@@ -124,7 +140,7 @@ class MainViewModel(
         }
     }
 
-    fun getCurrentLocation() : APILocation {
+    private fun getCurrentAPILocation() : APILocation {
         val location = _uiState.value.lastKnownLocation
         if (location != null && _uiState.value.isLocationAllowed) {
             return APILocation(
@@ -154,6 +170,43 @@ class MainViewModel(
             }
         }
     }
+
+    fun checkLocationPermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getCurrentLocation() {
+        val locationTask = locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+        try {
+            viewModelScope.launch {
+                val location = locationTask.await()
+                allowLocation(location)
+                setLoading(false)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error getting location: $e")
+        }
+    }
+
+
+    @SuppressLint("MissingPermission")
+    fun subscribeToLocationUpdates(
+        locationCallback: LocationCallback
+    ) {
+        val locationRequest = LocationRequest
+            .Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L)
+            .setMinUpdateIntervalMillis(3000L) // Minimum interval between updates
+            .setMinUpdateDistanceMeters(10.0F) // Minimum distance between updates
+            .build()
+
+        locationClient.requestLocationUpdates(locationRequest, locationCallback, null )
+    }
+
+
 
     /*** Data Fetching and Updating ***/
 
@@ -288,7 +341,7 @@ class MainViewModel(
             val order = orderRepository.buyMenu(
                 sid = _sid.value!!,
                 menuId = menuId,
-                deliveryLocation = getCurrentLocation()
+                deliveryLocation = getCurrentAPILocation()
             )
             order.currentLocation.address = getAddressFromLocation(order.currentLocation)
             order.deliveryLocation.address = getAddressFromLocation(order.deliveryLocation)
@@ -307,7 +360,7 @@ class MainViewModel(
         if (_uiState.value.lastOrder?.menuId == null)
             return
 
-        val location = getCurrentLocation()
+        val location = getCurrentAPILocation()
         runWithErrorHandling {
             val menu = menuRepository.getMenuDetails(
                 sid = _sid.value!!,
@@ -321,7 +374,7 @@ class MainViewModel(
     }
 
     suspend fun fetchNearbyMenus() {
-        val location = getCurrentLocation()
+        val location = getCurrentAPILocation()
         Log.d(TAG, "Fetching Menus near ${location.latitude}, ${location.longitude}")
         runWithErrorHandling {
             val menus = menuRepository.getNearbyMenus(
@@ -349,7 +402,7 @@ class MainViewModel(
         if (_uiState.value.selectedMenu?.menuDetails?.id == menuId)
             return
 
-        val location = getCurrentLocation()
+        val location = getCurrentAPILocation()
         runWithErrorHandling {
             val menuDetails = menuRepository.getMenuDetails(
                 sid = _sid.value!!,

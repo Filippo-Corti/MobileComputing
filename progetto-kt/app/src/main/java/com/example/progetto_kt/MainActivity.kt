@@ -1,10 +1,8 @@
 package com.example.progetto_kt
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.Manifest
-import android.annotation.SuppressLint
 import android.location.Geocoder
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -27,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -41,16 +38,8 @@ import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.progetto_kt.view.navigation.RootNavHost
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.rprogetto_kt.model.repositories.OrderRepository
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
@@ -85,13 +74,16 @@ class MainActivity : ComponentActivity() {
 
         val geocoder = Geocoder(this, Locale.getDefault())
 
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         val viewModelFactory = viewModelFactory {
             initializer {
                 MainViewModel(
-                    userRepository,
-                    menuRepository,
-                    orderRepository,
-                    geocoder
+                    userRepository = userRepository,
+                    menuRepository = menuRepository,
+                    orderRepository = orderRepository,
+                    geocoder = geocoder,
+                    locationClient = fusedLocationClient
                 )
             }
         }
@@ -105,51 +97,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun checkLocationPermission(context: Context): Boolean {
-    return ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED;
-}
-
-@SuppressLint("MissingPermission")
-fun getCurrentLocation(fusedLocationClient : FusedLocationProviderClient, viewModel: MainViewModel) {
-    val locationTask = fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
-    try {
-        CoroutineScope(Dispatchers.Main).launch {
-            val location = locationTask.await()
-            viewModel.allowLocation(location)
-        }
-    } catch (e: Exception) {
-        Log.e("MainActivity", "Error getting location: $e")
-    }
-}
-
-@SuppressLint("MissingPermission")
-fun subscribeToLocationUpdates(
-    fusedLocationClient: FusedLocationProviderClient,
-    locationCallback: LocationCallback
-) {
-    val locationRequest = LocationRequest
-        .Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            10000L // Update interval in milliseconds
-        )
-        .setMinUpdateIntervalMillis(3000L) // Minimum interval between updates
-        .setMinUpdateDistanceMeters(10.0F) // Minimum distance between updates
-        .build()
-
-    fusedLocationClient.requestLocationUpdates(
-        locationRequest,
-        locationCallback,
-        null // Use default main thread
-    )
-}
 
 @Composable
 fun MangiaEBasta(
     viewModel: MainViewModel
 ) {
+
+    val TAG = "MangiaEBasta"
+
     val state by viewModel.uiState.collectAsState()
 
     if (state.isLoading) {
@@ -166,26 +121,22 @@ fun MangiaEBasta(
 
     val context = LocalContext.current
 
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-
     val locationCallback = remember {
         object : LocationCallback() {
             override fun onLocationResult(locationResult: com.google.android.gms.location.LocationResult) {
                 super.onLocationResult(locationResult)
                 val location = locationResult.lastLocation
                 if (location != null) {
-                    Log.d("MangiaEBasta", "Saved new Location $location")
+                    Log.d(TAG, "Saved new Location $location")
                     viewModel.allowLocation(location)
                 }
-                viewModel.setLoading(false)
             }
 
             override fun onLocationAvailability(availability: com.google.android.gms.location.LocationAvailability) {
                 super.onLocationAvailability(availability)
                 if (!availability.isLocationAvailable) {
-                    Log.w("MangiaEBasta", "Location not available")
+                    Log.w(TAG, "Location not available")
                 }
-                viewModel.setLoading(false)
             }
         }
     }
@@ -193,10 +144,10 @@ fun MangiaEBasta(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        Log.d("MainActivity", "Location Permission: $isGranted!")
+        Log.d(TAG, "Location Permission: $isGranted!")
         if (isGranted) {
-            getCurrentLocation(fusedLocationClient, viewModel)
-            subscribeToLocationUpdates(fusedLocationClient, locationCallback)
+            viewModel.getCurrentLocation() // Get first location immediately
+            viewModel.subscribeToLocationUpdates(locationCallback)
         } else {
             viewModel.disallowLocation()
         }
@@ -204,31 +155,29 @@ fun MangiaEBasta(
 
 
     LaunchedEffect(state.hasCheckedPermissions) {
-        if (!state.hasCheckedPermissions) {
-            viewModel.setLoading(true)
-            val isGranted = checkLocationPermission(context)
+        if (state.hasCheckedPermissions) return@LaunchedEffect
 
-            if (isGranted) {
-                getCurrentLocation(fusedLocationClient, viewModel)
-                subscribeToLocationUpdates(fusedLocationClient, locationCallback)
-            } else {
-                viewModel.setError(
-                    Error(
-                        type = ErrorType.POSITION_UNALLOWED,
-                        title = "We need your Location",
-                        message = "This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
-                        actionText = "I'll do it"
-                    )
+        viewModel.setLoading(true)
+        if (viewModel.checkLocationPermission(context)) {
+            viewModel.getCurrentLocation() // Get first location immediately
+            viewModel.subscribeToLocationUpdates(locationCallback)
+        } else {
+            viewModel.setError(
+                Error(
+                    type = ErrorType.POSITION_UNALLOWED,
+                    title = "We need your Location",
+                    message = "This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
+                    actionText = "I'll do it"
                 )
-                viewModel.setLoading(false)
-                viewModel.disallowLocation()
-            }
-            viewModel.setCheckedPermissions(true)
+            )
+            viewModel.setLoading(false)
+            viewModel.disallowLocation()
         }
+
+        viewModel.setCheckedPermissions(true)
     }
 
     Log.d("MainActivity", "Loaded!")
-
 
     RootNavHost(
         viewModel = viewModel,
