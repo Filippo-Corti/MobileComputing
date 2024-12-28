@@ -39,8 +39,11 @@ fun LastOrderScreen(
     viewModel: MainViewModel
 ) {
 
-    val state by viewModel.uiState.collectAsState()
-    val showMap = state.lastKnownLocation != null
+    val appState by viewModel.appState.collectAsState()
+    val userState by viewModel.userState.collectAsState()
+    val orderState by viewModel.lastOrderState.collectAsState()
+    val locationState by viewModel.locationState.collectAsState()
+    val showMap = locationState.lastKnownLocation != null
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -53,7 +56,7 @@ fun LastOrderScreen(
         }
     }
 
-    if (state.isLoading) {
+    if (appState.isLoading) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -65,7 +68,7 @@ fun LastOrderScreen(
         }
     }
 
-    if (state.user == null) {
+    if (!userState.isUserRegistered) {
         return Column {
             Text(
                 text = "Not Registered",
@@ -73,8 +76,8 @@ fun LastOrderScreen(
         }
     }
 
-    val lastOrder = state.lastOrder
-    val lastOrderedMenu = state.lastOrderMenu
+    val lastOrder = orderState.lastOrder
+    val lastOrderedMenu = orderState.lastOrderMenu
 
     if (lastOrder == null || lastOrderedMenu == null) {
         return Column {
@@ -83,10 +86,6 @@ fun LastOrderScreen(
             )
         }
     }
-
-
-    // Define your three locations
-
 
     return Column(
         modifier = Modifier
@@ -118,7 +117,7 @@ fun LastOrderScreen(
         )
 
         if (showMap) {
-            val userLocation = state.lastKnownLocation!!.toPoint()
+            val userLocation = locationState.lastKnownLocation!!.toPoint()
             val droneLocation = lastOrder.currentLocation.toPoint()
             val deliveryLocation = lastOrder.deliveryLocation.toPoint()
 

@@ -1,4 +1,4 @@
-package com.example.progetto_kt.view.navigation
+package com.example.progetto_kt.view.navigation.util
 
 import android.annotation.SuppressLint
 import androidx.compose.material3.Icon
@@ -8,8 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.progetto_kt.view.navigation.AppScreen
 
 @SuppressLint("RestrictedAPI")
 @Composable

@@ -20,6 +20,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.progetto_kt.view.components.common.other.ErrorModal
 import com.example.progetto_kt.view.components.common.other.handleErrorByType
+import com.example.progetto_kt.view.navigation.navhosts.accountNavHost
+import com.example.progetto_kt.view.navigation.navhosts.homeNavHost
+import com.example.progetto_kt.view.navigation.navhosts.lastOrderNavHost
+import com.example.progetto_kt.view.navigation.util.MyTabBar
+import com.example.progetto_kt.view.navigation.util.NavigationStackRestorer
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @SuppressLint("RestrictedAPI")
@@ -32,7 +37,7 @@ fun RootNavHost(
     val TAG = "RootNavHost"
     val context = LocalContext.current
 
-    val state by viewModel.uiState.collectAsState()
+    val appState by viewModel.appState.collectAsState()
     var showTabBar by remember { mutableStateOf(true) }
     var currentRoute by remember { mutableStateOf<String?>(null) }
 
@@ -84,7 +89,7 @@ fun RootNavHost(
             }
         }
 
-        val error = state.error
+        val error = appState.error
         if (error != null) {
             Log.d("MainActivity", "With Error!")
             ErrorModal(

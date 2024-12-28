@@ -30,13 +30,16 @@ fun AccountScreen(
     onCheckLastOrderClick : () -> Unit,
 ) {
 
-    val state by viewModel.uiState.collectAsState()
+    val appState by viewModel.appState.collectAsState()
+    val locationState by viewModel.locationState.collectAsState()
+    val userState by viewModel.userState.collectAsState()
+    val orderState by viewModel.lastOrderState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.fetchLastOrderDetails()
     }
 
-    if (state.isLoading) {
+    if (appState.isLoading) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -48,9 +51,9 @@ fun AccountScreen(
         }
     }
 
-    val user = state.user
-    val lastOrder = state.lastOrder
-    val lastOrderMenu = state.lastOrderMenu
+    val user = userState.user
+    val lastOrder = orderState.lastOrder
+    val lastOrderMenu = orderState.lastOrderMenu
 
     if (user == null) {
         return Column {
@@ -84,7 +87,7 @@ fun AccountScreen(
         )
 
         Text(
-            text = "Location Allowed: ${state.isLocationAllowed}",
+            text = "Location Allowed: ${locationState.isLocationAllowed}",
         )
 
         Text(

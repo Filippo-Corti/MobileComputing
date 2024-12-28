@@ -37,19 +37,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-data class UIState(
-    val user: User? = null,
-    val lastOrder: Order? = null,
-    val lastOrderMenu: MenuDetails? = null,
-    val nearbyMenus: List<MenuWithImage> = emptyList(),
-    val selectedMenu: MenuDetailsWithImage? = null,
-    val lastKnownLocation: APILocation? = null,
+data class UserState(
+    val user : User? = null,
+    val isUserRegistered : Boolean = false,
+)
 
-    val isUserRegistered: Boolean = false,
+data class LastOrderState(
+    val lastOrder : Order? = null,
+    val lastOrderMenu : MenuDetails? = null,
+)
+
+data class LocationState(
+    val lastKnownLocation : APILocation? = null,
     val isLocationAllowed : Boolean = false,
     val hasCheckedPermissions : Boolean = false,
-    val reloadMenus : Boolean = false,
+)
 
+data class MenusExplorationState(
+    val nearbyMenus : List<MenuWithImage> = emptyList(),
+    val selectedMenu : MenuDetailsWithImage? = null,
+    val reloadMenus : Boolean = false,
+)
+
+data class AppState(
     val isLoading: Boolean = true,
     val isFirstLaunch : Boolean = true,
     val error : Error? = null
@@ -67,40 +77,48 @@ class MainViewModel(
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
 
-    private val _uiState = MutableStateFlow(UIState())
-    val uiState: StateFlow<UIState> = _uiState
+    private val _userState = MutableStateFlow(UserState())
+    val userState: StateFlow<UserState> = _userState
+
+    private val _lastOrderState = MutableStateFlow(LastOrderState())
+    val lastOrderState: StateFlow<LastOrderState> = _lastOrderState
+
+    private val _locationState = MutableStateFlow(LocationState())
+    val locationState: StateFlow<LocationState> = _locationState
+
+    private val _menusExplorationState = MutableStateFlow(MenusExplorationState())
+    val menusExplorationState: StateFlow<MenusExplorationState> = _menusExplorationState
+
+    private val _appState = MutableStateFlow(AppState())
+    val appState: StateFlow<AppState> = _appState
 
     /*** Initialization & State Management ***/
 
     init {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            _appState.value = _appState.value.copy(isLoading = true)
             fetchUserSession()
-            fetchAllUserData()
+            fetchUserDetails()
             Log.d(TAG, "Fetched launch information")
-            _uiState.value = _uiState.value.copy(isLoading = false)
+            _appState.value = _appState.value.copy(isLoading = false)
         }
     }
 
     fun setLoading(isLoading : Boolean) {
-        _uiState.value = _uiState.value.copy(isLoading = isLoading)
+        _appState.value = _appState.value.copy(isLoading = isLoading)
     }
 
     fun setCheckedPermissions(hasCheckedPermissions : Boolean) {
-        _uiState.value = _uiState.value.copy(hasCheckedPermissions = hasCheckedPermissions)
+        _locationState.value = _locationState.value.copy(hasCheckedPermissions = hasCheckedPermissions)
     }
 
     fun setError(error : Error) {
-        if (_uiState.value.error != null) return
-        _uiState.value = _uiState.value.copy(error = error)
+        if (_appState.value.error != null) return
+        _appState.value = _appState.value.copy(error = error)
     }
 
     fun resetError() {
-        _uiState.value = _uiState.value.copy(error = null)
-    }
-
-    fun getUserRepository() : UserRepository {
-        return userRepository
+        _appState.value = _appState.value.copy(error = null)
     }
 
     suspend fun saveNavigationStack(screen : String) {
@@ -111,38 +129,39 @@ class MainViewModel(
         return userRepository.getLastNavigationStack()
     }
 
-    private suspend fun fetchAllUserData() {
-        fetchUserDetails()
-        fetchLastOrderDetails()
+    fun getUserRepository() : UserRepository {
+        return userRepository
     }
 
     /*** Location Management ***/
 
     fun disallowLocation() {
-        _uiState.value = _uiState.value.copy(isLocationAllowed = false)
+        _locationState.value = _locationState.value.copy(isLocationAllowed = false)
     }
 
     fun allowLocation(location : Location) {
         setLastKnownLocation(location)
-        if (_uiState.value.isLocationAllowed) return
-        _uiState.value = _uiState.value.copy(
+        if (_locationState.value.isLocationAllowed) return
+        _locationState.value = _locationState.value.copy(
             isLocationAllowed = true,
+        )
+        _menusExplorationState.value = _menusExplorationState.value.copy(
             reloadMenus = true
         )
     }
 
     private fun setLastKnownLocation(location: Location) {
         val loc = location.toAPILocation()
-        _uiState.value = _uiState.value.copy(lastKnownLocation = loc)
+        _locationState.value = _locationState.value.copy(lastKnownLocation = loc) // Quick update, synchronously
         viewModelScope.launch {
             loc.address = getAddressFromLocation(loc)
-            _uiState.value = _uiState.value.copy(lastKnownLocation = loc)
+            _locationState.value = _locationState.value.copy(lastKnownLocation = loc) // Slow update, asynchronously
         }
     }
 
     private fun getCurrentAPILocation() : APILocation {
-        val location = _uiState.value.lastKnownLocation
-        if (location != null && _uiState.value.isLocationAllowed) {
+        val location = _locationState.value.lastKnownLocation
+        if (location != null && _locationState.value.isLocationAllowed) {
             return APILocation(
                 latitude = location.latitude,
                 longitude = location.longitude
@@ -160,10 +179,16 @@ class MainViewModel(
         return withContext(Dispatchers.IO) {
             try {
                 val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-                if (!addresses.isNullOrEmpty()) {
-                    val address = addresses[0]
-                    "${address.thoroughfare ?: ""}, ${address.subThoroughfare ?: ""}, ${"(${address.postalCode})"} ${address.locality ?: ""}"
-                } else ""
+                if (addresses.isNullOrEmpty()) return@withContext "";
+
+                val address = addresses[0]
+                val thoroughfare = if (address.thoroughfare != null) "${address.thoroughfare}," else ""
+                val subThoroughfare = if (address.subThoroughfare != null) "${address.subThoroughfare}," else ""
+                val postalCode = if (address.postalCode != null) "(${address.postalCode})" else ""
+                val locality = address.locality ?: ""
+
+                "$subThoroughfare $thoroughfare $postalCode $locality"
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error: $e")
                 ""
@@ -192,7 +217,6 @@ class MainViewModel(
         }
     }
 
-
     @SuppressLint("MissingPermission")
     fun subscribeToLocationUpdates(
         locationCallback: LocationCallback
@@ -205,8 +229,6 @@ class MainViewModel(
 
         locationClient.requestLocationUpdates(locationRequest, locationCallback, null )
     }
-
-
 
     /*** Data Fetching and Updating ***/
 
@@ -231,7 +253,7 @@ class MainViewModel(
             block()
         } catch (e: Error) {
             Log.e(TAG, "Error: ${e.message}")
-            _uiState.value = _uiState.value.copy(error = e)
+            setError(e)
         } catch (e : CancellationException) {
             Log.w(TAG, "Error: $e")
         } catch (e : Exception) {
@@ -252,13 +274,12 @@ class MainViewModel(
             val us = userRepository.getUserSession()
             _sid.value = us.sid
             _uid.value = us.uid
-            Log.d(TAG, "SID is ${_sid.value} and UID is ${_uid.value}")
         }
     }
 
     suspend fun fetchUserDetails() {
         if (!userRepository.isRegistered()) {
-            _uiState.value = _uiState.value.copy(isUserRegistered = false)
+            _userState.value = _userState.value.copy(isUserRegistered = false)
             return
         }
 
@@ -267,7 +288,7 @@ class MainViewModel(
                 sid = _sid.value!!,
                 uid = _uid.value!!
             )
-            _uiState.value = _uiState.value.copy(
+            _userState.value = _userState.value.copy(
                 user = user,
                 isUserRegistered = true
             )
@@ -285,7 +306,7 @@ class MainViewModel(
             )
         }
 
-        val success = _uiState.value.error == null
+        val success = _appState.value.error == null
         if (success) {
             fetchUserDetails()
         }
@@ -293,27 +314,35 @@ class MainViewModel(
     }
 
     suspend fun fetchLastOrderDetails() {
-        if (_uiState.value.user?.lastOrderId == null)
+        if (_userState.value.user?.lastOrderId == null)
             return
 
         runWithErrorHandling {
             val order = orderRepository.getOrderDetails(
                 sid = _sid.value!!,
-                orderId = _uiState.value.user!!.lastOrderId!!,
+                orderId = _userState.value.user!!.lastOrderId!!,
             )
             order.currentLocation.address = getAddressFromLocation(order.currentLocation)
             order.deliveryLocation.address = getAddressFromLocation(order.deliveryLocation)
-            _uiState.value = _uiState.value.copy(lastOrder = order)
+            _lastOrderState.value = _lastOrderState.value.copy(
+                lastOrder = order
+            )
+            _userState.value = _userState.value.copy(
+                user = _userState.value.user?.copy(
+                    lastOrderId = order.id,
+                    orderStatus = order.status
+                )
+            )
         }
 
-        val success = _uiState.value.error == null
+        val success = _appState.value.error == null
         if (success) {
             fetchOrderedMenu()
         }
     }
 
     suspend fun orderMenu(menuId: Int): Boolean {
-        if(!_uiState.value.isUserRegistered) {
+        if(!_userState.value.isUserRegistered) {
             setError(
                 error = Error(
                     type = ErrorType.ACCOUNT_DETAILS,
@@ -325,7 +354,7 @@ class MainViewModel(
             return false
         }
 
-        if (!_uiState.value.isLocationAllowed) {
+        if (!_locationState.value.isLocationAllowed) {
             setError(
                 error = Error(
                     type = ErrorType.POSITION_UNALLOWED,
@@ -345,19 +374,26 @@ class MainViewModel(
             )
             order.currentLocation.address = getAddressFromLocation(order.currentLocation)
             order.deliveryLocation.address = getAddressFromLocation(order.deliveryLocation)
-            _uiState.value = _uiState.value.copy(lastOrder = order)
+            _lastOrderState.value = _lastOrderState.value.copy(
+                lastOrder = order
+            )
+            _userState.value = _userState.value.copy(
+                user = _userState.value.user?.copy(
+                    lastOrderId = order.id,
+                    orderStatus = order.status
+                )
+            )
         }
 
-        val success = _uiState.value.error == null
+        val success = _appState.value.error == null
         if (success) {
-            fetchUserDetails()
             fetchOrderedMenu()
         }
         return success
     }
 
     suspend fun fetchOrderedMenu() {
-        if (_uiState.value.lastOrder?.menuId == null)
+        if (_lastOrderState.value.lastOrder?.menuId == null)
             return
 
         val location = getCurrentAPILocation()
@@ -366,16 +402,15 @@ class MainViewModel(
                 sid = _sid.value!!,
                 latitude = location.latitude,
                 longitude = location.longitude,
-                menuId = _uiState.value.lastOrder?.menuId!!
+                menuId = _lastOrderState.value.lastOrder?.menuId!!
             )
             menu.location.address = getAddressFromLocation(menu.location)
-            _uiState.value = _uiState.value.copy(lastOrderMenu = menu)
+            _lastOrderState.value = _lastOrderState.value.copy(lastOrderMenu = menu)
         }
     }
 
     suspend fun fetchNearbyMenus() {
         val location = getCurrentAPILocation()
-        Log.d(TAG, "Fetching Menus near ${location.latitude}, ${location.longitude}")
         runWithErrorHandling {
             val menus = menuRepository.getNearbyMenus(
                 sid = _sid.value!!,
@@ -391,7 +426,7 @@ class MainViewModel(
                 menu.location.address = getAddressFromLocation(menu.location)
                 MenuWithImage(menu, image)
             }
-            _uiState.value = _uiState.value.copy(
+            _menusExplorationState.value = _menusExplorationState.value.copy(
                 nearbyMenus = menusWithImages,
                 reloadMenus = false
             )
@@ -399,7 +434,7 @@ class MainViewModel(
     }
 
     suspend fun fetchMenuDetails(menuId: Int) {
-        if (_uiState.value.selectedMenu?.menuDetails?.id == menuId)
+        if (_menusExplorationState.value.selectedMenu?.menuDetails?.id == menuId)
             return
 
         val location = getCurrentAPILocation()
@@ -416,8 +451,9 @@ class MainViewModel(
                 menuId = menuId,
                 imageVersion = menuDetails.imageVersion
             )
-            _uiState.value =
-                _uiState.value.copy(selectedMenu = MenuDetailsWithImage(menuDetails, image))
+            _menusExplorationState.value = _menusExplorationState.value.copy(
+                selectedMenu = MenuDetailsWithImage(menuDetails, image)
+            )
         }
     }
 

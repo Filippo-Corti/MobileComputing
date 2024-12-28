@@ -29,17 +29,18 @@ fun ConfirmOrderScreen(
 
     val TAG = "ConfirmOrderScreen"
 
-    val state by viewModel.uiState.collectAsState()
+    val appState by viewModel.appState.collectAsState()
+    val locationState by viewModel.locationState.collectAsState()
+    val menusState by viewModel.menusExplorationState.collectAsState()
 
-    val menuDetails = state.selectedMenu
+    val menuDetails = menusState.selectedMenu
 
     LaunchedEffect(menuId) {
         if (menuDetails == null)
             viewModel.fetchMenuDetails(menuId)
     }
 
-
-    if (menuDetails == null) {
+    if (menuDetails == null || appState.isLoading) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,7 +71,7 @@ fun ConfirmOrderScreen(
             fontSize = 28.sp,
         )
 
-        if (!(state.isLocationAllowed && state.lastKnownLocation == null)) { // Don't order if it's waiting for location
+        if (!(locationState.isLocationAllowed && locationState.lastKnownLocation == null)) {
             Button(
                 onClick = onOrderClick,
                 modifier = Modifier.padding(top = 16.dp)

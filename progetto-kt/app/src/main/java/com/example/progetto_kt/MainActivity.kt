@@ -71,7 +71,6 @@ class MainActivity : ComponentActivity() {
             preferencesController = preferencesController
         )
 
-
         val geocoder = Geocoder(this, Locale.getDefault())
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -105,9 +104,10 @@ fun MangiaEBasta(
 
     val TAG = "MangiaEBasta"
 
-    val state by viewModel.uiState.collectAsState()
+    val appState by viewModel.appState.collectAsState()
+    val locationState by viewModel.locationState.collectAsState()
 
-    if (state.isLoading) {
+    if (appState.isLoading) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -153,9 +153,8 @@ fun MangiaEBasta(
         }
     }
 
-
-    LaunchedEffect(state.hasCheckedPermissions) {
-        if (state.hasCheckedPermissions) return@LaunchedEffect
+    LaunchedEffect(locationState.hasCheckedPermissions) {
+        if (locationState.hasCheckedPermissions) return@LaunchedEffect
 
         viewModel.setLoading(true)
         if (viewModel.checkLocationPermission(context)) {

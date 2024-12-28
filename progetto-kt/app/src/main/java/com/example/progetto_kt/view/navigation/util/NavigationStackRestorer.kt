@@ -1,4 +1,4 @@
-package com.example.progetto_kt.view.navigation
+package com.example.progetto_kt.view.navigation.util
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.progetto_kt.view.navigation.AppScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlinx.coroutines.runBlocking
 

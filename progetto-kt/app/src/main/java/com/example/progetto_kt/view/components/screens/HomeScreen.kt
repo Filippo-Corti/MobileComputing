@@ -48,10 +48,12 @@ fun HomeScreen(
     onMenuClick: (Int) -> Unit
 ) {
 
-    val state by viewModel.uiState.collectAsState()
+    val appState by viewModel.appState.collectAsState()
+    val locationState by viewModel.locationState.collectAsState()
+    val menusState by viewModel.menusExplorationState.collectAsState()
 
+    // Pull to Refresh
     var isRefreshing by remember { mutableStateOf(false) }
-
     val refreshState = rememberPullToRefreshState()
     val coroutineScope = rememberCoroutineScope()
     val onRefresh : () -> Unit = {
@@ -62,15 +64,15 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(state.reloadMenus) {
-        if (state.nearbyMenus.isEmpty() && !state.isLoading || state.reloadMenus) {
+    LaunchedEffect(menusState.reloadMenus) {
+        if (menusState.nearbyMenus.isEmpty() && !appState.isLoading || menusState.reloadMenus) {
             isRefreshing = true
             viewModel.fetchNearbyMenus()
             isRefreshing = false
         }
     }
 
-    if (state.isLoading) {
+    if (appState.isLoading) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -92,9 +94,9 @@ fun HomeScreen(
             fontWeight = FontWeight(700),
             textAlign = TextAlign.Center,
         )
-        if (state.isLocationAllowed) {
+        if (locationState.isLocationAllowed) {
             Text(
-                text = "Location is allowed - Showing menus in ${state.lastKnownLocation?.address}",
+                text = "Location is allowed - Showing menus in ${locationState.lastKnownLocation?.address}",
                 modifier = Modifier
                     .padding(16.dp, 25.dp)
                     .fillMaxWidth(),
@@ -119,7 +121,7 @@ fun HomeScreen(
                     .defaultMinSize(minHeight = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(state.nearbyMenus) { menu ->
+                items(menusState.nearbyMenus) { menu ->
                     val byteArray = Base64.decode(menu.image.raw)
                     val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 

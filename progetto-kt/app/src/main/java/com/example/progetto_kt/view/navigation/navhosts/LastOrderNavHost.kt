@@ -1,16 +1,11 @@
-package com.example.progetto_kt.view.navigation
+package com.example.progetto_kt.view.navigation.navhosts
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
-import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.example.progetto_kt.view.components.screens.AccountScreen
-import com.example.progetto_kt.view.components.screens.AddEditAccountScreen
 import com.example.progetto_kt.view.components.screens.LastOrderScreen
+import com.example.progetto_kt.view.navigation.AppScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 fun NavGraphBuilder.lastOrderNavHost(

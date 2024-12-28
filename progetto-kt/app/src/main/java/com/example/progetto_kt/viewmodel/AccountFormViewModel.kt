@@ -23,7 +23,7 @@ class AccountFormViewModel(
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
 
-    private val _formParams = MutableStateFlow<UserUpdateParams>(
+    private val _formParams = MutableStateFlow(
         UserUpdateParams(
             firstName = initValues?.firstName ?: "",
             lastName = initValues?.lastName ?: "",
@@ -43,7 +43,6 @@ class AccountFormViewModel(
             fetchSessionData()
         }
     }
-
 
     fun fetchSessionData() {
         viewModelScope.launch {

@@ -31,13 +31,14 @@ fun MenuDetailsScreen(
     onBackClick : () -> Unit
 ) {
 
-    val state by viewModel.uiState.collectAsState()
+    val appState by viewModel.appState.collectAsState()
+    val menusState by viewModel.menusExplorationState.collectAsState()
 
     LaunchedEffect(menuId) {
         viewModel.fetchMenuDetails(menuId)
     }
 
-    if (state.isLoading || state.selectedMenu == null || state.selectedMenu?.menuDetails?.id != menuId) {
+    if (appState.isLoading || menusState.selectedMenu == null || menusState.selectedMenu?.menuDetails?.id != menuId) {
         return Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -49,8 +50,8 @@ fun MenuDetailsScreen(
         }
     }
 
-    val menuDetails = state.selectedMenu!!.menuDetails
-    val byteArray = Base64.decode(state.selectedMenu!!.image.raw)
+    val menuDetails = menusState.selectedMenu!!.menuDetails
+    val byteArray = Base64.decode(menusState.selectedMenu!!.image.raw)
     val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 
     Column(

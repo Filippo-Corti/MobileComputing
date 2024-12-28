@@ -35,7 +35,7 @@ fun AddEditAccountScreen(
         initializer {
             AccountFormViewModel(
                 viewModel.getUserRepository(),
-                viewModel.uiState.value.user
+                viewModel.userState.value.user
             )
         }
     }
