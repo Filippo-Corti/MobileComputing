@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-
 data class UIState(
     val user: User? = null,
     val lastOrder: Order? = null,
@@ -56,8 +55,7 @@ class MainViewModel(
             _uiState.value = _uiState.value.copy(isLoading = true)
             fetchUserSession()
             fetchAllUserData()
-            fetchNearbyMenus()
-            Log.d(TAG, "Fetched launch information and menus")
+            Log.d(TAG, "Fetched launch information")
             _uiState.value = _uiState.value.copy(isLoading = false)
         }
     }
@@ -96,7 +94,7 @@ class MainViewModel(
 
     fun getCurrentLocation() : APILocation {
         val location = _uiState.value.lastKnownLocation
-        if (location != null && !_uiState.value.isLocationAllowed) {
+        if (location != null && _uiState.value.isLocationAllowed) {
             return APILocation(
                 latitude = location.latitude,
                 longitude = location.longitude
@@ -130,7 +128,7 @@ class MainViewModel(
             Log.e(TAG, "Error: ${e.message}")
             _uiState.value = _uiState.value.copy(error = e)
         } catch (e : Exception) {
-            Log.e(TAG, "Error: ${e.message}")
+            Log.e(TAG, "Error: $e")
             setError(
                 error = Error(
                     type = ErrorType.NETWORK,
