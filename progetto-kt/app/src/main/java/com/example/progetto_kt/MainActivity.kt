@@ -153,6 +153,7 @@ fun MangiaEBasta(
                     Log.d("MangiaEBasta", "Saved new Location $location")
                     viewModel.setLastKnownLocation(location)
                 }
+                viewModel.setLoading(false)
             }
 
             override fun onLocationAvailability(availability: com.google.android.gms.location.LocationAvailability) {
@@ -160,6 +161,7 @@ fun MangiaEBasta(
                 if (!availability.isLocationAvailable) {
                     Log.w("MangiaEBasta", "Location not available")
                 }
+                viewModel.setLoading(false)
             }
         }
     }

@@ -56,8 +56,11 @@ class MainViewModel(
             fetchUserSession()
             fetchAllUserData()
             Log.d(TAG, "Fetched launch information")
-            _uiState.value = _uiState.value.copy(isLoading = false)
         }
+    }
+
+    fun setLoading(isLoading : Boolean) {
+        _uiState.value = _uiState.value.copy(isLoading = isLoading)
     }
 
     fun setError(error : Error) {
@@ -79,7 +82,6 @@ class MainViewModel(
     private suspend fun fetchAllUserData() {
         fetchUserDetails()
         fetchLastOrderDetails()
-        fetchOrderedMenu()
     }
 
     /*** Location Management ***/

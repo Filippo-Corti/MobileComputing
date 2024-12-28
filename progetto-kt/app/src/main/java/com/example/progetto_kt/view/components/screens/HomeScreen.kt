@@ -46,24 +46,24 @@ fun HomeScreen(
 ) {
 
     val state by viewModel.uiState.collectAsState()
-    var menusLoaded by remember { mutableStateOf(false) }
     var isRefreshing by remember { mutableStateOf(false) }
 
     val refreshState = rememberPullToRefreshState()
     val coroutineScope = rememberCoroutineScope()
     val onRefresh : () -> Unit = {
-        if (!state.isLoading) {
-            isRefreshing = true
-            coroutineScope.launch {
-                viewModel.fetchNearbyMenus()
-                isRefreshing = false
-                menusLoaded = true
-            }
+        isRefreshing = true
+        coroutineScope.launch {
+            viewModel.fetchNearbyMenus()
+            isRefreshing = false
         }
     }
 
     LaunchedEffect(Unit) {
-        onRefresh()
+        if (state.nearbyMenus.isEmpty() && !state.isLoading) {
+            isRefreshing = true
+            viewModel.fetchNearbyMenus()
+            isRefreshing = false
+        }
     }
 
     if (state.isLoading) {
@@ -115,31 +115,29 @@ fun HomeScreen(
                     .defaultMinSize(minHeight = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (menusLoaded) {
-                    items(state.nearbyMenus) { menu ->
-                        val byteArray = Base64.decode(menu.image.raw)
-                        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                items(state.nearbyMenus) { menu ->
+                    val byteArray = Base64.decode(menu.image.raw)
+                    val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .clickable { onMenuClick(menu.menu.id) },
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .clickable { onMenuClick(menu.menu.id) },
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Image(
-                                    bitmap = bitmap.asImageBitmap(),
-                                    contentDescription = menu.menu.name,
-                                    modifier = Modifier.size(70.dp, 70.dp)
-                                )
-                                Text(text = menu.menu.name)
-                            }
-                            Text(text = "${menu.menu.price} €")
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = menu.menu.name,
+                                modifier = Modifier.size(70.dp, 70.dp)
+                            )
+                            Text(text = menu.menu.name)
                         }
+                        Text(text = "${menu.menu.price} €")
                     }
                 }
             }

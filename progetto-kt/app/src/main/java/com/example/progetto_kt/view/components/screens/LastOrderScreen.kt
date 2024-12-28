@@ -150,18 +150,15 @@ fun LastOrderScreen(
                         enabled = true
                     }
 
-                    Log.d("LastOrderScreen", "$userLocation $droneLocation $deliveryLocation")
-
                     // Calculate the camera options to include all locations
                     mapView.mapboxMap.cameraForCoordinates(
                         coordinates = listOf(userLocation, droneLocation, deliveryLocation),
                         camera = CameraOptions.Builder().build(),
                         coordinatesPadding = EdgeInsets(100.0, 100.0, 100.0, 100.0),
-                        maxZoom = 20.0,
+                        maxZoom = 17.0,
                         offset = null,
                     ) { cameraOptions ->
 
-                        Log.d("LastOrderScreen", "Camera options zoom: ${cameraOptions.zoom}")
 
                         // Set the camera
                         mapView.camera.easeTo(cameraOptions
@@ -170,7 +167,7 @@ fun LastOrderScreen(
                                 if (cameraOptions.zoom != null)
                                     cameraOptions.zoom!!.toInt().toDouble()
                                 else
-                                    16.0
+                                    17.0
                             )
                             .build()
                         )

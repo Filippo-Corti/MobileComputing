@@ -73,6 +73,7 @@ fun buildNavigationStackString(controller : NavController) : String {
     return stackAsString
 }
 
+@SuppressLint("RestrictedAPI")
 @Composable
 fun RootNavHost(
     viewModel: MainViewModel,
@@ -100,10 +101,14 @@ fun RootNavHost(
     LaunchedEffect(Unit) {
         val lastStack= viewModel.getLastNavigationStack()
 
+        navController.popBackStack(AppScreen.HomeStack.params.route, true)
+        Log.d(TAG, "Current stack is ${navController.currentBackStack.value}")
         Log.d(TAG, "Last screen was $lastStack")
         lastStack?.let {
             it.split(";").forEach { route ->
-                navController.navigate(route)
+                navController.navigate(route) {
+                    launchSingleTop = true
+                }
             }
         }
     }
