@@ -159,7 +159,7 @@ class MainViewModel(
         }
     }
 
-    private fun getCurrentAPILocation() : APILocation {
+    fun getCurrentAPILocation() : APILocation {
         val location = _locationState.value.lastKnownLocation
         if (location != null && _locationState.value.isLocationAllowed) {
             return APILocation(

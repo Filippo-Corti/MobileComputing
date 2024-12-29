@@ -1,7 +1,6 @@
 package com.example.progetto_kt.view.components.screens
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,10 +11,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -25,25 +26,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.LocalPinnableContainer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import com.example.progetto_kt.R
+import com.example.progetto_kt.model.dataclasses.toPoint
 import com.example.progetto_kt.viewmodel.MainViewModel
-import kotlinx.coroutines.flow.map
+import com.example.progetto_kt.viewmodel.util.CustomMarkerBuilder
+import com.mapbox.maps.extension.compose.MapEffect
+import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
+import com.mapbox.maps.extension.compose.annotation.rememberIconImage
+import com.mapbox.maps.extension.compose.rememberMapState
+import com.mapbox.maps.plugin.PuckBearing
+import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
+import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
+
+
+@Suppress("Deprecation")
 @OptIn(ExperimentalEncodingApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -55,11 +82,14 @@ fun HomeScreen(
     val locationState by viewModel.locationState.collectAsState()
     val menusState by viewModel.menusExplorationState.collectAsState()
 
+    val listState = rememberLazyListState()
+    var scrolledToId by remember { mutableIntStateOf(-1) }
+
     // Pull to Refresh
+    val coroutineScope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
-    val coroutineScope = rememberCoroutineScope()
-    val onRefresh : () -> Unit = {
+    val onRefresh: () -> Unit = {
         isRefreshing = true
         viewModel.fetchNearbyMenusAsync {
             isRefreshing = false
@@ -87,80 +117,161 @@ fun HomeScreen(
         }
     }
 
-    Column {
-        Text(
-            text = "Menus around you",
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        state = refreshState,
+        onRefresh = onRefresh
+    ) {
+        LazyColumn(
             modifier = Modifier
-                .padding(16.dp, 25.dp)
-                .fillMaxWidth(),
-            fontSize = 25.sp,
-            fontWeight = FontWeight(700),
-            textAlign = TextAlign.Center,
-        )
-        if (locationState.isLocationAllowed) {
-            Text(
-                text = "Location is allowed - Showing menus in ${locationState.lastKnownLocation?.address}",
-                modifier = Modifier
-                    .padding(16.dp, 25.dp)
-                    .fillMaxWidth(),
-            )
-        } else {
-            Text(
-                text = "Location is not allowed - Showing menus around Milan",
-                modifier = Modifier
-                    .padding(16.dp, 25.dp)
-                    .fillMaxWidth(),
-            )
-        }
-
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            state = refreshState,
-            onRefresh = onRefresh
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            state = listState
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 100.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(menusState.nearbyMenus) { menu ->
 
-                    Row(
+            item {
+                Text(
+                    text = "Menus around you",
+                    modifier = Modifier
+                        .padding(16.dp, 25.dp)
+                        .fillMaxWidth(),
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight(700),
+                    textAlign = TextAlign.Center,
+                )
+                if (locationState.isLocationAllowed) {
+                    Text(
+                        text = "Location is allowed - Showing menus in ${locationState.lastKnownLocation?.address}",
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .clickable { onMenuClick(menu.menu.id) },
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
+                            .padding(16.dp, 25.dp)
+                            .fillMaxWidth(),
+                    )
+                } else {
+                    Text(
+                        text = "Location is not allowed - Showing menus around Milan",
+                        modifier = Modifier
+                            .padding(16.dp, 25.dp)
+                            .fillMaxWidth(),
+                    )
+                }
+            }
 
-                            if (menu.image != null) {
-                                val byteArray = Base64.decode(menu.image.raw)
-                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            item {
 
-                                Image(
-                                    bitmap = bitmap.asImageBitmap(),
-                                    contentDescription = menu.menu.name,
-                                    modifier = Modifier.size(70.dp, 70.dp)
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .size(70.dp, 70.dp)
-                                        .background(color = Color.Gray)
-                                )
-                            }
-                            Text(text = menu.menu.name)
-                        }
-                        Text(text = "${menu.menu.price} €")
+                val userLocation = viewModel.getCurrentAPILocation().toPoint()
+                val mapViewportState = rememberMapViewportState {
+                    setCameraOptions {
+                        center(userLocation)
+                        zoom(11.0)
                     }
+                }
+
+                MapboxMap(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp),
+
+                    mapViewportState = mapViewportState,
+                ) {
+
+                    if (locationState.isLocationAllowed) {
+                        MapEffect(Unit) { mapView ->
+                            mapView.gestures.updateSettings {
+                                scrollEnabled = false
+                                pitchEnabled = false
+                                rotateEnabled = false
+                            }
+
+                            mapView.location.updateSettings {
+                                locationPuck = createDefault2DPuck(withBearing = true)
+                                puckBearingEnabled = true
+                                puckBearing = PuckBearing.HEADING
+                                enabled = true
+                            }
+                            mapViewportState.transitionToFollowPuckState(
+                                FollowPuckViewportStateOptions.Builder()
+                                    .zoom(11.0)
+                                    .pitch(0.0)
+                                    .build()
+                            )
+                        }
+                    }
+
+                    menusState.nearbyMenus.forEachIndexed { idx, menu ->
+                        if (menu.image != null) {
+                            val markerBitmap = CustomMarkerBuilder.getCustomMarker(
+                                context = LocalContext.current,
+                                menu = menu
+                            )
+
+                            val marker = rememberIconImage(
+                                key = menu.menu.id,
+                                painter = BitmapPainter(markerBitmap.asImageBitmap())
+                            )
+
+                            PointAnnotation(
+                                point = menu.menu.location.toPoint(),
+                                init = {
+                                    iconImage = marker
+                                    iconSize = 1.2
+                                },
+                                onClick = {
+                                    coroutineScope.launch {
+                                        scrolledToId = menu.menu.id
+                                        listState.animateScrollToItem(idx + 2, -250)
+                                    }
+                                    true
+                                }
+                            )
+                        }
+                    }
+
+                }
+            }
+
+            items(menusState.nearbyMenus) { menu ->
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clickable {
+                            scrolledToId = menu.menu.id
+                            onMenuClick(menu.menu.id)
+                        }
+                        .background(if (menu.menu.id == scrolledToId) Color.LightGray else Color.Transparent),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+
+                        if (menu.image != null) {
+                            val byteArray = Base64.decode(menu.image.raw)
+                            val bitmap =
+                                BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = menu.menu.name,
+                                modifier = Modifier.size(70.dp, 70.dp)
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(70.dp, 70.dp)
+                                    .background(color = Color.Gray)
+                            )
+                        }
+                        Text(text = menu.menu.name)
+                    }
+                    Text(text = "${menu.menu.price} €")
                 }
             }
         }
-
     }
+
 }
