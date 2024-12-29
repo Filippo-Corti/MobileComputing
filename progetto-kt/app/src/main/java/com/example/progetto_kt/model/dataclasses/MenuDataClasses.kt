@@ -35,7 +35,7 @@ data class MenuImage (
 
 data class MenuWithImage (
     val menu : Menu,
-    val image : MenuImage
+    val image : MenuImage? = null
 )
 
 data class MenuDetailsWithImage (

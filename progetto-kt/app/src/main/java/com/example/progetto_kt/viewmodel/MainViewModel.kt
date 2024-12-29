@@ -409,6 +409,14 @@ class MainViewModel(
         }
     }
 
+    // Fetches Menu Images Asynchronously
+    fun fetchNearbyMenusAsync(onOperationEnd : () -> Unit) {
+        viewModelScope.launch {
+            fetchNearbyMenus()
+            onOperationEnd()
+        }
+    }
+
     suspend fun fetchNearbyMenus() {
         val location = getCurrentAPILocation()
         runWithErrorHandling {
@@ -417,19 +425,29 @@ class MainViewModel(
                 latitude = location.latitude,
                 longitude = location.longitude
             )
-            val menusWithImages = menus.map { menu ->
+            val menusWithNoImages = menus.map { menu ->
+                MenuWithImage(menu, null)
+            }
+            _menusExplorationState.value = _menusExplorationState.value.copy(
+                nearbyMenus = menusWithNoImages,
+                reloadMenus = false
+            )
+
+            menus.forEach { menu ->
                 val image = menuRepository.getMenuImage(
                     sid = _sid.value!!,
                     menuId = menu.id,
                     imageVersion = menu.imageVersion
                 )
                 menu.location.address = getAddressFromLocation(menu.location)
-                MenuWithImage(menu, image)
+                val updatedMenu = MenuWithImage(menu, image)
+
+                _menusExplorationState.value = _menusExplorationState.value.copy(
+                    nearbyMenus = _menusExplorationState.value.nearbyMenus.map {
+                        if (it.menu.id == menu.id) updatedMenu else it
+                    }
+                )
             }
-            _menusExplorationState.value = _menusExplorationState.value.copy(
-                nearbyMenus = menusWithImages,
-                reloadMenus = false
-            )
         }
     }
 

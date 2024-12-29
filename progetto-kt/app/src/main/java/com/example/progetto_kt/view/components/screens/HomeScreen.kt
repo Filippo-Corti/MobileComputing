@@ -3,8 +3,10 @@ package com.example.progetto_kt.view.components.screens
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -30,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,8 +61,7 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val onRefresh : () -> Unit = {
         isRefreshing = true
-        coroutineScope.launch {
-            viewModel.fetchNearbyMenus()
+        viewModel.fetchNearbyMenusAsync {
             isRefreshing = false
         }
     }
@@ -67,8 +69,9 @@ fun HomeScreen(
     LaunchedEffect(menusState.reloadMenus) {
         if (menusState.nearbyMenus.isEmpty() && !appState.isLoading || menusState.reloadMenus) {
             isRefreshing = true
-            viewModel.fetchNearbyMenus()
-            isRefreshing = false
+            viewModel.fetchNearbyMenusAsync {
+                isRefreshing = false
+            }
         }
     }
 
@@ -122,8 +125,6 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(menusState.nearbyMenus) { menu ->
-                    val byteArray = Base64.decode(menu.image.raw)
-                    val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
 
                     Row(
                         modifier = Modifier
@@ -136,11 +137,23 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = menu.menu.name,
-                                modifier = Modifier.size(70.dp, 70.dp)
-                            )
+
+                            if (menu.image != null) {
+                                val byteArray = Base64.decode(menu.image.raw)
+                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = menu.menu.name,
+                                    modifier = Modifier.size(70.dp, 70.dp)
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(70.dp, 70.dp)
+                                        .background(color = Color.Gray)
+                                )
+                            }
                             Text(text = menu.menu.name)
                         }
                         Text(text = "${menu.menu.price} €")
