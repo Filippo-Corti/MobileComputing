@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "allowJs": true,           // Allows JavaScript files to be included
+      "checkJs": true,           // Enables type checking for JavaScript files
+      "noEmit": true,            // Prevents TypeScript from emitting compiled files
+      "types": [				 // Includes browser (DOM) types and your custom types
+        "node", 
+        "./model/types/util.d.ts", 
+        "./model/types/user.d.ts", 
+        "./model/types/order.d.ts", 
+        "./model/types/menu.d.ts"
+      ], 
+      "moduleResolution": "node",  // Use Node.js module resolution
+      "resolveJsonModule": true,
+      "target": "ESNext",
+      "module": "ESNext",          // Use ESNext to support import/export syntax
+    },
+    "extends": "expo/tsconfig.base"
+  }
+  

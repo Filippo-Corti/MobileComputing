@@ -2,12 +2,10 @@ import * as SQLite from 'expo-sqlite';
 
 export default class DBController {
 
-    constructor() {
-        this.db = null;
-        this.openDB();
-    }
+    static db = null
 
-    async openDB() {
+    static async openDB() {
+        if (this.db) return 
         this.db = await SQLite.openDatabaseAsync('imagesDB');
         const query = `
             CREATE TABLE IF NOT EXISTS MenuImages (
@@ -20,19 +18,27 @@ export default class DBController {
         await this.db.execAsync(query);
     }
 
-    async insertMenuImage(menuId, menuImage, imageVersion) {
+    /**
+     * @param {MenuImageWithVersion} newData 
+     */
+    static async insertMenuImage(newData) {
         const query = `
             INSERT INTO MenuImages(MenuId, Image, Version)
             VALUES (?, ?, ?)
         `;
         try {
-            await this.db.runAsync(query, menuId, menuImage, imageVersion);
+            await this.db.runAsync(query, newData.menuId, newData.image, newData.version);
         } catch (err) {
-            console.log(err);
+            console.log("Error saving image into Local DB", err);
         }
     }
 
-    async getMenuImageByVersion(menuId, imageVersion) {
+    /**
+     * @param {number} menuId 
+     * @param {number} imageVersion 
+     * @returns {Promise<MenuImageWithVersion>?}
+     */
+    static async getMenuImageByVersion(menuId, imageVersion) {
         const query = `
             SELECT * FROM MenuImages
             WHERE MenuId = ? AND Version = ?            
@@ -41,7 +47,7 @@ export default class DBController {
             const result = await this.db.getFirstAsync(query, menuId, imageVersion);
             return result;
         } catch (err) {
-            console.log(err);
+            console.log("Error loading image from Local DB", err);
         }
     }
 
