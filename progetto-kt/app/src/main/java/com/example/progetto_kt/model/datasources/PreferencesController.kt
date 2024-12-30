@@ -23,6 +23,7 @@ class PreferencesController private constructor (
 
         private var INSTANCE: PreferencesController? = null
 
+        // Avoids the creation of multiple instances of the PreferencesController when the App is restarted via code
         fun getInstance(dataStore: DataStore<Preferences>): PreferencesController {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: PreferencesController(dataStore).also { INSTANCE = it }
@@ -53,7 +54,7 @@ class PreferencesController private constructor (
 
     suspend fun isFirstLaunch() : Boolean {
         val alreadyRun = this.get(KEYS_HAS_ALREADY_RUN)
-        if (alreadyRun == null) {
+        if (alreadyRun == null || alreadyRun == false) {
             this.set(KEYS_HAS_ALREADY_RUN, true)
             this.set(KEYS_IS_REGISTERED, false)
             return true

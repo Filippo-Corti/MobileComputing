@@ -300,8 +300,7 @@ class APIController(
             endpoint = "menu/$menuId/image",
             method = HttpMethod.GET,
             queryParams = mapOf(
-                "sid" to sid,
-                "mid" to menuId
+                "sid" to sid
             )
         )
 

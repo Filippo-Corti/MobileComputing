@@ -26,7 +26,8 @@ data class User(
     @SerialName("cardNumber") val cardNumber : String,
     @SerialName("cardExpireMonth") val cardExpireMonth : Int,
     @SerialName("cardExpireYear") val cardExpireYear : Int,
-    @SerialName("cardCVV") val cardCVV : String)
+    @SerialName("cardCVV") val cardCVV : String
+)
 
 @Serializable
 data class UserUpdateParams(
