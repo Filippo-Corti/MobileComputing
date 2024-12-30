@@ -3,12 +3,12 @@ import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../../../styles/global';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../context/UserContext';
-import ViewModel from '../../../viewmodel/ViewModel';
+import { AppStateContext } from '../../context/AppStateContext';
 
 const { height } = Dimensions.get('window');
 
@@ -17,7 +17,9 @@ const HomeScreen = ({ }) => {
     const navigation = useNavigation();
 
     const [nearestMenus, setNearestMenus] = useState([]);
+    const { appState, locationState } = useContext(AppStateContext);
     const { userData } = useContext(UserContext);
+
 
     const fetchNearestMenus = async () => {
         try {
@@ -37,8 +39,8 @@ const HomeScreen = ({ }) => {
         initializeAndFetch();
     }, []);
 
-
     console.log("Nearest menus are", nearestMenus.length)
+    console.log("Location State is", locationState);
 
     return (
         <SafeAreaView style={globalStyles.container}>

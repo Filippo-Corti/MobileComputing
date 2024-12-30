@@ -13,7 +13,7 @@ import ProgressBar from './view/components/common/other/ProgressBar';
 import FormField from './view/components/common/forms/FormField';
 import {useForm} from 'react-hook-form';
 import SelectNumber from './view/components/common/forms/SelectNumber';
-import BottomModal from './view/components/navigation/BottomModal';
+import BottomModal from './view/components/common/other/BottomModal';
 import InfoTextBox from './view/components/common/other/InfoTextBox';
 import MenuPreview from './view/components/common/other/MenuPreview';
 

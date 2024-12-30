@@ -4,8 +4,6 @@ export default class APIController {
 
     static BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425/";
 
-    
-
     /**
      * @param {string} endpoint 
      * @param {HTTP_METHOD} method 

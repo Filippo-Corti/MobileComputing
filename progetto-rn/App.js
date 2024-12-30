@@ -1,8 +1,8 @@
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useFonts } from 'expo-font';
 import { fonts } from './styles/global';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import HomeStack from './view/components/navigation/HomeStack';
 import LastOrderScreen from './view/components/screens/LastOrderScreen';
 import AccountStack from './view/components/navigation/AccountStack';
@@ -13,18 +13,18 @@ import ViewModel from './viewmodel/ViewModel';
 import { useEffect, useState } from 'react';
 import { UserContextProvider } from './view/context/UserContext';
 import PositionViewModel from './viewmodel/PositionViewModel';
-import { set } from 'react-hook-form';
-import { AppStateContextProvider } from './view/context/AppStateContext';
+import { AppStateContextProvider, startTrackingLocation } from './view/context/AppStateContext';
 import MyError from './model/types/MyError';
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
 
-	const [fontsLoaded] = useFonts({
-		[fonts.regular]: require('./assets/fonts/UberMoveText-Regular.otf'),
-		[fonts.medium]: require('./assets/fonts/UberMoveText-Medium.otf'),
-		[fonts.bold]: require('./assets/fonts/UberMoveText-Bold.otf'),
+
+	const [fontsLoaded] = useFonts({ // @ts-ignore
+		[fonts.regular]: require('./assets/fonts/UberMoveText-Regular.otf'), // @ts-ignore
+		[fonts.medium]: require('./assets/fonts/UberMoveText-Medium.otf'), // @ts-ignore
+		[fonts.bold]: require('./assets/fonts/UberMoveText-Bold.otf'), // @ts-ignore
 		[fonts.logo]: require('./assets/fonts/Geologica-Medium.ttf'),
 	});
 
@@ -52,7 +52,7 @@ export default function App() {
 		const user = (isRegistered)
 			? await ViewModel.fetchUserDetails()
 			: null;
-			
+
 		setUserState({
 			user: user,
 			isUserRegistered: isRegistered
@@ -61,24 +61,25 @@ export default function App() {
 
 	const checkLocationPermission = async () => {
 		const locationAllowed = await PositionViewModel.checkLocationPermission();
-		setLocationState({
-			...locationState,
-			isLocationAllowed: locationAllowed,
-			hasCheckedPermission: true
-		});
-		console.log("Location Allowed:", locationAllowed);
-		if (!locationAllowed) {
-			setAppState({
-				...appState,
+		if (locationAllowed) {
+			startTrackingLocation((location) => {
+				 setLocationState(prevState => ({
+						...prevState,
+						lastKnownLocation: location,
+						isLocationAllowed: true,
+					}));
+			});
+		} else {
+			setAppState(prevState => ({
+				...prevState,
 				error: new MyError(
 					"POSITION_UNALLOWED",
 					"We need your Location",
 					"This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
 					"I'll do it"
-				)
-			});
+				),
+			}));
 		}
-		console.log("Location Allowed:", locationAllowed);
 	}
 
 	useEffect(() => {
@@ -86,19 +87,29 @@ export default function App() {
 			await ViewModel.getUserSession();
 
 			await initalizeUserContext();
-			console.log("User State Initialized:", userState);
-			await checkLocationPermission();
-			console.log("Location State Initialized:", locationState);
-			setAppState({
-				...appState,
+			setAppState(prevState => ({
+				...prevState,
 				isLoading: false
-			});
-			console.log("App State Initialized:", appState);
+			}));
 		};
 
 		initializeAndFetch();
 
 	}, []);
+
+	useEffect(() => {
+		const checkLocationAsync = async () => {
+			console.log("Triggered Location Check and ", locationState.hasCheckedPermission);
+			if (locationState.hasCheckedPermission) return;
+			await checkLocationPermission();
+			setLocationState(prevState => ({
+				...prevState,
+				hasCheckedPermission: true
+			}));
+		};
+		checkLocationAsync();
+	}, [locationState.hasCheckedPermission]);
+
 
 	if (appState.isLoading || !fontsLoaded) {
 		return (
@@ -124,9 +135,8 @@ export default function App() {
 						<Tab.Screen name="LastOrder" component={LastOrderScreen} />
 						<Tab.Screen name="AccountStack" component={AccountStack} />
 					</Tab.Navigator>
-				</NavigationContainer>
 
-				{appState.error && <Text>There was an error {appState.error} </Text>}
+				</NavigationContainer>
 			</UserContextProvider>
 		</AppStateContextProvider>
 	);

@@ -48,6 +48,7 @@ export default class PositionViewModel {
      */
     static async getCurrentLocation() {
         const location = await Location.getCurrentPositionAsync()
+        console.log("Fetched Current Location", location);
         return {
             lat: location.coords.latitude,
             lng: location.coords.longitude,
@@ -68,6 +69,7 @@ export default class PositionViewModel {
                     distanceInterval: 10, // Minimum distance (in meters) between updates
                 },
                 (location) => {
+                    console.log("Fetched a new Current Location", location);
                     callback({
                         lat: location.coords.latitude,
                         lng: location.coords.longitude,

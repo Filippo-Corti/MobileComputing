@@ -1,6 +1,5 @@
 export {}
 
-
 declare global {
 
     type APILocation = {
