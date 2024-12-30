@@ -39,9 +39,9 @@ declare global {
 
     // Entity For SQLite Database
     type MenuImageWithVersion = {
-        menuId : number,
-        version : number,
-        image : string
+        MenuId : number,
+        Version : number,
+        Image : string
     }
 
 }
