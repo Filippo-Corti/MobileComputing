@@ -28,8 +28,8 @@ class UserRepository(
         return preferencesController.get(PreferencesController.KEYS_IS_REGISTERED) ?: false
     }
 
-    suspend fun saveNavigationStack(screen : String) {
-        preferencesController.set(PreferencesController.KEYS_NAV_STACK, screen)
+    suspend fun saveNavigationStack(stack : String) {
+        preferencesController.set(PreferencesController.KEYS_NAV_STACK, stack)
     }
 
     suspend fun getLastNavigationStack() : String? {
