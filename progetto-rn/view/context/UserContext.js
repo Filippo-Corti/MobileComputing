@@ -1,25 +1,36 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useMemo } from 'react';
 
-export const UserContext = createContext();
+export const UserContext = createContext(null);
 
-export const UserContextProvider = ({ userDataInit, orderDataInit, children }) => {
+/**
+ * @param {{ 
+ *  userStateInit: UserState, 
+ * 	orderStateInit: LastOrderState, 
+ * 	children: React.ReactNode 
+ * }} props 
+ * @returns {JSX.Element}
+ */
+export const UserContextProvider = ({
+	userStateInit,
+	orderStateInit,
+	children
+}) => {
 
-  const [userData, setUserData] = useState(userDataInit);
-  const [orderData, setOrderData] = useState(orderDataInit);
+	const [userState, setUserState] = useState(userStateInit);
+	const [orderState, setOrderState] = useState(orderStateInit);
 
-  useEffect(() => {
-    setUserData(userDataInit); // Update when userDataInit changes
-  }, [userDataInit]);
+	const contextValue = useMemo(() => ({
+		userState,
+		setUserState,
+		orderState,
+		setOrderState,
+	}), [userState, orderState]);
 
-  useEffect(() => {
-    setOrderData(orderDataInit); // Update when orderDataInit changes
-  }, [orderDataInit]);
-
-  return (
-    <UserContext.Provider value={{ userData, setUserData, orderData, setOrderData}}>
-      {children}
-    </UserContext.Provider>
-  );
+	return (
+		<UserContext.Provider value={contextValue}>
+			{children}
+		</UserContext.Provider>
+	);
 };
 
 

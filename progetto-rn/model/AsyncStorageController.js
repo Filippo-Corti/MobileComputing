@@ -1,9 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+export const KEYS = {
+    SID: "SID",
+    UID: "UID",
+    HAS_ALREADY_RUN: "hasAlreadyRun",
+    IS_REGISTERED: "isRegistered",
+    NAV_STACK: "navStack"
+}
+
 export default class AsyncStorageController {
 
     /**
-     * @param {ASYNC_STORAGE_KEYS} key 
+     * @param {string} key 
      * @returns {Promise<any>?}
      */
     static async get(key) {
@@ -13,7 +21,7 @@ export default class AsyncStorageController {
     }
 
     /**
-     * @param {ASYNC_STORAGE_KEYS} key 
+     * @param {string} key 
      * @param {any} value 
      */
     static async set(key, value) {
@@ -25,18 +33,18 @@ export default class AsyncStorageController {
      * @param {number} uid 
      */
     static async memorizeSessionKeys(sid, uid) {
-        await this.set(ASYNC_STORAGE_KEYS.SID, sid);
-        await this.set(ASYNC_STORAGE_KEYS.UID, uid);
+        await this.set(KEYS.SID, sid);
+        await this.set(KEYS.UID, uid);
     }
 
     /**
      * @returns {Promise<boolean>}
      */
     static async isFirstLaunch() {
-        const alreadyRun = await this.get(ASYNC_STORAGE_KEYS.HAS_ALREADY_RUN);
+        const alreadyRun = await this.get(KEYS.HAS_ALREADY_RUN);
         if (alreadyRun == null || alreadyRun == false) {
-            await this.set(ASYNC_STORAGE_KEYS.HAS_ALREADY_RUN, true);
-            await this.set(ASYNC_STORAGE_KEYS.IS_REGISTERED, false);
+            await this.set(KEYS.HAS_ALREADY_RUN, true);
+            await this.set(KEYS.IS_REGISTERED, false);
             return true;
         }
         return false;

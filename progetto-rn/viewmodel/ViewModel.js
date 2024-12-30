@@ -1,6 +1,7 @@
 import APIController from "../model/APIController";
-import AsyncStorageController from "../model/AsyncStorageController";
+import AsyncStorageController, {KEYS} from "../model/AsyncStorageController";
 import DBController from "../model/DBController";
+import MyError from "../model/types/MyError";
 
 export default class ViewModel {
 
@@ -13,7 +14,7 @@ export default class ViewModel {
     static assertSessionData() {
         if (!ViewModel.sid || !ViewModel.uid) {
             throw new MyError(
-                ERROR_TYPE.NETWORK,
+                "NETWORK",
                 "Authentication Error",
                 "We couldn't authenticate you, please try un-installing and re-installing the app.",
                 "Try Again"
@@ -32,21 +33,21 @@ export default class ViewModel {
      * @returns {Promise<boolean>}
      */
     static async isRegistered() {
-        return await AsyncStorageController.get(ASYNC_STORAGE_KEYS.IS_REGISTERED) || false;
+        return await AsyncStorageController.get(KEYS.IS_REGISTERED) || false;
     }
 
     /**
      * @param {string} stack 
      */
     static async saveNavigationStack(stack) {
-        await AsyncStorageController.set(ASYNC_STORAGE_KEYS.NAV_STACK, stack);
+        await AsyncStorageController.set(KEYS.NAV_STACK, stack);
     }
 
     /**
      * @returns {Promise<string>?}
      */
     static async getNavigationStack() {
-        return await AsyncStorageController.get(ASYNC_STORAGE_KEYS.NAV_STACK);
+        return await AsyncStorageController.get(KEYS.NAV_STACK);
     }
 
     /**
@@ -65,11 +66,13 @@ export default class ViewModel {
     /**
      */
     static async fetchUserSession() {
+        console.log("Fetching User Session");
         const isFirstLaunch = await AsyncStorageController.isFirstLaunch();
+        console.log("First Launch Status:", isFirstLaunch);
         if (!isFirstLaunch) {
             console.log("Not First Launch")
-            ViewModel.sid = await AsyncStorageController.get(ASYNC_STORAGE_KEYS.SID);
-            ViewModel.uid = await AsyncStorageController.get(ASYNC_STORAGE_KEYS.UID);
+            ViewModel.sid = await AsyncStorageController.get(KEYS.SID);
+            ViewModel.uid = await AsyncStorageController.get(KEYS.UID);
         } else {
             console.log("First Launch")
             const sessionData = await APIController.createNewUserSession();
@@ -85,7 +88,6 @@ export default class ViewModel {
      */
     static async fetchUserDetails() {
         this.assertSessionData();
-
         return await APIController.getUserDetails(ViewModel.sid, ViewModel.uid);
     }
 
@@ -97,7 +99,7 @@ export default class ViewModel {
         this.assertSessionData();
 
         await APIController.updateUserDetails(ViewModel.sid, ViewModel.uid, user);
-        await AsyncStorageController.set(ASYNC_STORAGE_KEYS.IS_REGISTERED, true);
+        await AsyncStorageController.set(KEYS.IS_REGISTERED, true);
     }
 
     /**

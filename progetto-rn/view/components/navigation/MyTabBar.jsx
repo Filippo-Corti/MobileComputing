@@ -1,8 +1,17 @@
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import MyIcon, {IconNames} from '../common/icons/MyIcon';
 import {globalStyles} from '../../../styles/global';
+import colors from '../../../styles/colors';
 
-export default MyTabBar = ({state, descriptors, navigation}) => {
+/**
+ * @param {import('@react-navigation/bottom-tabs').BottomTabBarProps} props 
+ * @returns {JSX.Element}
+ */
+const MyTabBar = ({
+    state, 
+    descriptors, 
+    navigation
+}) => {
 
     const iconNames = [IconNames.HOME, IconNames.SHOPPING_BAG, IconNames.USER];
     const iconSizes = [32, 28, 28]
@@ -12,7 +21,6 @@ export default MyTabBar = ({state, descriptors, navigation}) => {
         <View style={{flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 14}}>
             {state.routes.map((route, index) => {
                 const {options} = descriptors[route.key];
-                const label = options.tabBarLabel !== undefined ? options.tabBarLabel : options.title !== undefined ? options.title : route.name;
 
                 const isFocused = state.index === index;
 
@@ -40,7 +48,6 @@ export default MyTabBar = ({state, descriptors, navigation}) => {
                         accessibilityRole="button"
                         accessibilityState={isFocused ? {selected: true} : {}}
                         accessibilityLabel={options.tabBarAccessibilityLabel}
-                        testID={options.tabBarTestID}
                         onPress={onPress}
                         onLongPress={onLongPress}
                         style={{flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1}}
@@ -55,3 +62,5 @@ export default MyTabBar = ({state, descriptors, navigation}) => {
     );
 
 }
+
+export default MyTabBar;

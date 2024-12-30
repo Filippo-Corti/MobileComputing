@@ -4,11 +4,12 @@ import EditAccountScreen from '../screens/EditAccountScreen';
 
 const Stack = createNativeStackNavigator();
 
-export default AccountStack = ({}) => {
+const AccountStack = ({ }) => {
 
     return (
         <Stack.Navigator
-            screenOptions={{
+          id={undefined}
+          screenOptions={{
             headerShown: false
           }}
         >
@@ -17,3 +18,5 @@ export default AccountStack = ({}) => {
         </Stack.Navigator>
       );
 }
+
+export default AccountStack;

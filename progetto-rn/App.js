@@ -1,4 +1,4 @@
-import { View, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { useFonts } from 'expo-font';
 import { fonts } from './styles/global';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -13,78 +13,122 @@ import ViewModel from './viewmodel/ViewModel';
 import { useEffect, useState } from 'react';
 import { UserContextProvider } from './view/context/UserContext';
 import PositionViewModel from './viewmodel/PositionViewModel';
+import { set } from 'react-hook-form';
+import { AppStateContextProvider } from './view/context/AppStateContext';
+import MyError from './model/types/MyError';
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
 
-  const [fontsLoaded] = useFonts({
-    [fonts.regular]: require('./assets/fonts/UberMoveText-Regular.otf'),
-    [fonts.medium]: require('./assets/fonts/UberMoveText-Medium.otf'),
-    [fonts.bold]: require('./assets/fonts/UberMoveText-Bold.otf'),
-    [fonts.logo]: require('./assets/fonts/Geologica-Medium.ttf'),
-  });
+	const [fontsLoaded] = useFonts({
+		[fonts.regular]: require('./assets/fonts/UberMoveText-Regular.otf'),
+		[fonts.medium]: require('./assets/fonts/UberMoveText-Medium.otf'),
+		[fonts.bold]: require('./assets/fonts/UberMoveText-Bold.otf'),
+		[fonts.logo]: require('./assets/fonts/Geologica-Medium.ttf'),
+	});
 
-  const viewModel = ViewModel.getViewModel()
+	const [userState, setUserState] = useState({ // UserState
+		user: null,
+		isUserRegistered: false
+	});
+	const [lastOrderState, setLastOrderState] = useState({ // LastOrderState
+		lastOrder: null,
+		lastOrderMenu: null
+	});
+	const [locationState, setLocationState] = useState({ // LocationState
+		lastKnownLocation: null,
+		isLocationAllowed: false,
+		hasCheckedPermission: false
+	});
+	const [appState, setAppState] = useState({ // AppState
+		isLoading: true,
+		isFirstLaunch: true,
+		error: null
+	});
 
-  const [userData, setUserData] = useState(null);
-  const [orderData, setOrderData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+	const initalizeUserContext = async () => {
+		const isRegistered = await ViewModel.isRegistered();
+		const user = (isRegistered)
+			? await ViewModel.fetchUserDetails()
+			: null;
+			
+		setUserState({
+			user: user,
+			isUserRegistered: isRegistered
+		});
+	}
 
-  const fetchUserData = async () => {
-    try {
-      const [userData, orderData] = await viewModel.fetchLaunchInformation();
-      setUserData(userData);
-      setOrderData(orderData);
-      console.log("FetchUserData:", userData != null, orderData != null);
-    } catch (err) {
-      console.error("Error loading the Menu Data:", err);
-    }
-  }
+	const checkLocationPermission = async () => {
+		const locationAllowed = await PositionViewModel.checkLocationPermission();
+		setLocationState({
+			...locationState,
+			isLocationAllowed: locationAllowed,
+			hasCheckedPermission: true
+		});
+		console.log("Location Allowed:", locationAllowed);
+		if (!locationAllowed) {
+			setAppState({
+				...appState,
+				error: new MyError(
+					"POSITION_UNALLOWED",
+					"We need your Location",
+					"This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
+					"I'll do it"
+				)
+			});
+		}
+		console.log("Location Allowed:", locationAllowed);
+	}
 
-  const askForLocation = async () => {
-    const locationAllowed = await PositionViewModel.askForLocationPermission();
-    viewModel.locationAllowed = locationAllowed;
-    console.log("Location Allowed?", viewModel.locationAllowed)
-  }
+	useEffect(() => {
+		const initializeAndFetch = async () => {
+			await ViewModel.getUserSession();
 
-  useEffect(() => {
-    const initializeAndFetch = async () => {
-      await fetchUserData();
-      setIsLoading(false);
-      await askForLocation();
-    };
+			await initalizeUserContext();
+			console.log("User State Initialized:", userState);
+			await checkLocationPermission();
+			console.log("Location State Initialized:", locationState);
+			setAppState({
+				...appState,
+				isLoading: false
+			});
+			console.log("App State Initialized:", appState);
+		};
 
-    initializeAndFetch();
+		initializeAndFetch();
 
-  }, []);
+	}, []);
 
-  console.log("------------ Reload ------------");
+	if (appState.isLoading || !fontsLoaded) {
+		return (
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<MyLogo />
+				<ActivityIndicator size="large" color={colors.primary} />
+			</View>
+		);
+	}
 
-  if (isLoading || !fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <MyLogo />
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
+	return (
+		<AppStateContextProvider locationStateInit={locationState} appStateInit={appState}>
+			<UserContextProvider userStateInit={userState} orderStateInit={lastOrderState}>
+				<NavigationContainer>
+					<Tab.Navigator
+						id={undefined}
+						screenOptions={{
+							headerShown: false
+						}}
+						tabBar={(props) => <MyTabBar {...props} />}
+					>
+						<Tab.Screen name="HomeStack" component={HomeStack} />
+						<Tab.Screen name="LastOrder" component={LastOrderScreen} />
+						<Tab.Screen name="AccountStack" component={AccountStack} />
+					</Tab.Navigator>
+				</NavigationContainer>
 
-  return (
-    <UserContextProvider userDataInit={userData} orderDataInit={orderData}>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            headerShown: false
-          }}
-          tabBar={(props) => <MyTabBar {...props} />}
-        >
-          <Tab.Screen name="HomeStack" component={HomeStack} />
-          <Tab.Screen name="LastOrder" component={LastOrderScreen} />
-          <Tab.Screen name="AccountStack" component={AccountStack} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </UserContextProvider>
-  );
+				{appState.error && <Text>There was an error {appState.error} </Text>}
+			</UserContextProvider>
+		</AppStateContextProvider>
+	);
 }
 

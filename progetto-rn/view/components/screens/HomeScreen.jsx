@@ -1,7 +1,7 @@
 import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
 import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../../styles/global';
+import { globalStyles } from '../../../styles/global';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
@@ -12,14 +12,7 @@ import ViewModel from '../../../viewmodel/ViewModel';
 
 const { height } = Dimensions.get('window');
 
-export default HomeScreen = ({ }) => {
-
-    const viewModel = ViewModel.getViewModel()
-
-    const userLocation = {
-        longitude: -122.427,
-        latitude: 37.422,
-    }
+const HomeScreen = ({ }) => {
 
     const navigation = useNavigation();
 
@@ -28,9 +21,9 @@ export default HomeScreen = ({ }) => {
 
     const fetchNearestMenus = async () => {
         try {
-            const menus = await viewModel.getNearestMenusWithImages(userLocation);
-            setNearestMenus(menus);
-            console.log("Fetched Nearest Menus Data:", menus.length);
+            // const menus = await viewModel.getNearestMenusWithImages(userLocation);
+            //setNearestMenus(menus);
+           // console.log("Fetched Nearest Menus Data:", menus.length);
         } catch (err) {
             console.error("Error fetching the nearest menus details:", err);
         }
@@ -53,14 +46,7 @@ export default HomeScreen = ({ }) => {
 
                 <Header userData={userData} />
 
-                <MapView
-                    style={styles.map}
-                    initialRegion={{
-                        ...userLocation,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                    }}
-                />
+                
 
                 <MenusList nearestMenus={nearestMenus} navigation={navigation} />
 
@@ -128,3 +114,5 @@ const styles = StyleSheet.create({
     }
 
 });
+
+export default HomeScreen;

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import Modal from 'react-native-modal';
 import {globalStyles} from '../../../styles/global';
+import LargeButton from '../common/buttons/LargeButton';
 
 export default BottomModal = ({onConfirm, title, text, confirmText, rejectText, openButtonText}) => {
 

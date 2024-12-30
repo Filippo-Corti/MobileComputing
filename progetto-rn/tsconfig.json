@@ -8,7 +8,8 @@
         "./model/types/util.d.ts", 
         "./model/types/user.d.ts", 
         "./model/types/order.d.ts", 
-        "./model/types/menu.d.ts"
+        "./model/types/menu.d.ts",
+        "./view/types.d.ts",
       ], 
       "moduleResolution": "node",  // Use Node.js module resolution
       "resolveJsonModule": true,
