@@ -44,6 +44,7 @@ export default function App() {
 	const [appState, setAppState] = useState({ // AppState
 		isLoading: true,
 		isFirstLaunch: true,
+		reloadMenus: false,
 		error: null
 	});
 
@@ -62,12 +63,18 @@ export default function App() {
 	const checkLocationPermission = async () => {
 		const locationAllowed = await PositionViewModel.checkLocationPermission();
 		if (locationAllowed) {
-			startTrackingLocation((location) => {
-				 setLocationState(prevState => ({
-						...prevState,
-						lastKnownLocation: location,
-						isLocationAllowed: true,
-					}));
+			const newLocation = await PositionViewModel.getCurrentLocation();
+			setLocationState(prevState => ({
+				...prevState,
+				hasCheckedPermission: true,
+				lastKnownLocation: newLocation,
+				isLocationAllowed: true,
+			}));
+			PositionViewModel.subscribeToLocationUpdates((location) => {
+				setLocationState(prevState => ({
+					...prevState,
+					lastKnownLocation: location,
+				}));
 			});
 		} else {
 			setAppState(prevState => ({
@@ -79,6 +86,10 @@ export default function App() {
 					"I'll do it"
 				),
 			}));
+			setLocationState(prevState => ({
+				...prevState,
+				hasCheckedPermission: true
+			}));
 		}
 	}
 
@@ -87,10 +98,6 @@ export default function App() {
 			await ViewModel.getUserSession();
 
 			await initalizeUserContext();
-			setAppState(prevState => ({
-				...prevState,
-				isLoading: false
-			}));
 		};
 
 		initializeAndFetch();
@@ -99,12 +106,11 @@ export default function App() {
 
 	useEffect(() => {
 		const checkLocationAsync = async () => {
-			console.log("Triggered Location Check and ", locationState.hasCheckedPermission);
 			if (locationState.hasCheckedPermission) return;
 			await checkLocationPermission();
-			setLocationState(prevState => ({
+			setAppState(prevState => ({
 				...prevState,
-				hasCheckedPermission: true
+				isLoading: false
 			}));
 		};
 		checkLocationAsync();

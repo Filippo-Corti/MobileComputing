@@ -1,4 +1,4 @@
-import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
+import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../../../styles/global';
@@ -9,9 +9,14 @@ import MenuPreview from '../common/other/MenuPreview';
 import { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../context/UserContext';
 import { AppStateContext } from '../../context/AppStateContext';
+import ViewModel from '../../../viewmodel/ViewModel';
+import colors from '../../../styles/colors';
 
 const { height } = Dimensions.get('window');
 
+/**
+ * @returns {JSX.Element}
+ */
 const HomeScreen = ({ }) => {
 
     const navigation = useNavigation();
@@ -23,24 +28,65 @@ const HomeScreen = ({ }) => {
 
     const fetchNearestMenus = async () => {
         try {
-            // const menus = await viewModel.getNearestMenusWithImages(userLocation);
-            //setNearestMenus(menus);
-           // console.log("Fetched Nearest Menus Data:", menus.length);
+            const menus = await ViewModel.fetchNearbyMenus(locationState.lastKnownLocation.lat, locationState.lastKnownLocation.lng);
+            setNearestMenus([...menus])
+            // Lazy Load Images
+            // menus.forEach(menu => {
+            //     ViewModel.fetchMenuImage(menu.menu.mid, menu.menu.imageVersion).then((image) => {
+            //         setNearestMenus(prevState => {
+            //             const newMenus = [...prevState];
+            //             const index = newMenus.findIndex(m => m.menu.mid === menu.menu.mid);
+            //             newMenus[index].image = image;
+            //             return newMenus;
+            //         })
+            //     })
+            // });
+                    
         } catch (err) {
-            console.error("Error fetching the nearest menus details:", err);
+            appState.setAppState(prevState => ({
+                ...prevState,
+                error: err
+            }));
         }
     }
 
     useEffect(() => {
-        const initializeAndFetch = async () => {
-            await fetchNearestMenus();
+        console.log("useEffect re-rendered:", locationState.lastKnownLocation);
+        const fetchMenus = async () => {
+            const location = locationState.lastKnownLocation;
+            if (appState.isLoading || !location) return;
+            
+            try {
+              const menus = await ViewModel.fetchNearbyMenus(
+                location.lat,
+                location.lng
+              );
+              setNearestMenus(menus);
+            } catch (err) {
+              appState.setAppState(prevState => ({
+                ...prevState,
+                error: err
+              }));
+            }
         };
 
-        initializeAndFetch();
-    }, []);
+        fetchMenus();
+    }, [
+        locationState.lastKnownLocation?.lat, 
+        locationState.lastKnownLocation?.lng, 
+        appState.isLoading
+    ]);
 
-    console.log("Nearest menus are", nearestMenus.length)
     console.log("Location State is", locationState);
+
+    if (appState.isLoading || !nearestMenus) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <MyLogo />
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    } 
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -49,7 +95,6 @@ const HomeScreen = ({ }) => {
                 <Header userData={userData} />
 
                 
-
                 <MenusList nearestMenus={nearestMenus} navigation={navigation} />
 
                 <StatusBar style="auto" />
@@ -87,13 +132,13 @@ const MenusList = ({ nearestMenus, navigation }) => (
             data={nearestMenus}
             renderItem={({ item }) => {
                 return (<MenuPreview
-                    menuInformation={item}
+                    menu={item}
                     onPress={() => navigation.navigate("MenuDetails")}
                     style={{ borderTopWidth: 1 }}
                 />)
             }}
             contentContainerStyle={{ flexGrow: 1 }}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.menu.mid}
             scrollEnabled={false}
             style={{
                 flex: 1,

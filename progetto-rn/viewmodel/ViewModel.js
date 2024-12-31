@@ -128,13 +128,17 @@ export default class ViewModel {
     /**
      * @param {number} latitude 
      * @param {number} longitude 
-     * @returns {Promise<Array<Menu>>}
+     * @returns {Promise<Array<MenuWithImage>>}
      * @throws {MyError}
      */
     static async fetchNearbyMenus(latitude, longitude) {
         this.assertSessionData();
-
-        return await APIController.getNearbyMenus(ViewModel.sid, latitude, longitude);
+        const menus = await APIController.getNearbyMenus(ViewModel.sid, latitude, longitude);
+        const menusWithImages = menus.map(menu => ({
+            menu: menu,
+            image: null
+        }))
+        return menusWithImages;
     }
 
     /**

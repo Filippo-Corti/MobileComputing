@@ -2,38 +2,48 @@ import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import { globalStyles } from '../../../../styles/global';
 import MyIcon, { IconNames } from '../icons/MyIcon';
 import PositionViewModel from '../../../../viewmodel/PositionViewModel';
+import colors from '../../../../styles/colors';
 
-export default MenuPreview = ({ menuInformation, onPress, style }) => {
-
-    const userLocation = {
-        longitude: -122.427,
-        latitude: 37.422,
-    }
+/**
+ * @param {{
+ *  menu: MenuWithImage,
+ *  onPress : Function,
+ *  style: import('react-native').ViewStyle
+ * }} props
+ * @returns {JSX.Element}
+ */
+const MenuPreview = ({ 
+    menu, 
+    onPress, 
+    style 
+}) => {
 
     onPress = onPress || (() => {})
 
-
-    const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(userLocation, menuInformation.location).toFixed(1);
+    //const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(userLocation, menuInformation.location).toFixed(1);
+    const distanceFromYou = 0
 
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={() => onPress()}>
             <View style={styles.textContainer}>
                 <View>
-                    <Text style={styles.title}>{menuInformation.name}</Text>
-                    <Text style={styles.price}>€{menuInformation.formatPrice()}</Text>
-                    <Text style={styles.description}>{menuInformation.shortDescription}</Text>
+                    <Text style={styles.title}>{menu.menu.name}</Text>
+                    <Text style={styles.price}>€{menu.menu.price}</Text>
+                    <Text style={styles.description}>{menu.menu.shortDescription}</Text>
                 </View>
                 <View>
-                    <Text style={styles.otherInfo}>{menuInformation.deliveryTime}min • {distanceFromYou}km from you</Text>
+                    <Text style={styles.otherInfo}>{menu.menu.deliveryTime}min • {distanceFromYou}km from you</Text>
                 </View>
             </View>
             <View style={styles.imageContainer}>
-                {menuInformation.image && <Image source={{ uri: menuInformation.image }} style={styles.image} />}
-                {!menuInformation.image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />}
+                {menu.image && <Image source={{ uri: menu.image.base64 }} style={styles.image} />}
+                {!menu.image && <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />}
             </View>
         </TouchableOpacity>
     );
 }
+
+export default MenuPreview;
 
 const styles = StyleSheet.create({
 

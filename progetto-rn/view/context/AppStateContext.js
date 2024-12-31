@@ -34,12 +34,3 @@ export const AppStateContextProvider = ({
     );
 };
 
-export async function startTrackingLocation(callback) {
-    // Get Current Location and Subscribe to Future Updates
-    const lastKnownLocation = await PositionViewModel.getCurrentLocation();
-    callback(lastKnownLocation);
-    PositionViewModel.subscribeToLocationUpdates((location) => {
-        callback(location);
-    });
-}
-

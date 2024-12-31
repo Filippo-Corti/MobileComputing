@@ -81,6 +81,7 @@ export default BottomModal;
 
 const styles = StyleSheet.create({
 	container: {
+		position: 'absolute',
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',

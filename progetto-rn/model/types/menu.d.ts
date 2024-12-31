@@ -29,7 +29,7 @@ declare global {
 
     type MenuWithImage = {
         menu : Menu
-        image : MenuImage
+        image : MenuImage?
     }
 
     type MenuDetailsWithImage = {
