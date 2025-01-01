@@ -59,7 +59,7 @@ fun AddEditAccountScreen(
             label = "First Name",
             value = formParams.firstName,
             onValueChange = { formViewModel.onFirstNameChange(it) },
-            errorMessage = "First Name should be < 15 characters and not empty",
+            errorMessage = "First Name should be at most 15 characters and not empty",
             keyBoardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
             )
@@ -69,7 +69,7 @@ fun AddEditAccountScreen(
             label = "Last Name",
             value = formParams.lastName,
             onValueChange = { formViewModel.onLastNameChange(it) },
-            errorMessage = "Last Name should be < 15 characters and not empty",
+            errorMessage = "Last Name should be at most 15 characters and not empty",
             keyBoardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
             )
@@ -80,7 +80,7 @@ fun AddEditAccountScreen(
             label = "Card Full Name",
             value = formParams.cardFullName,
             onValueChange = { formViewModel.onCardFullNameChange(it) },
-            errorMessage = "Last Name should be < 15 characters and not empty",
+            errorMessage = "Credit Card Name should be at most 31 characters and not empty",
             keyBoardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
             )
