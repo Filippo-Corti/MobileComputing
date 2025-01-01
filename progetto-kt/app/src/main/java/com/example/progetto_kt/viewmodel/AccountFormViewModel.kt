@@ -13,6 +13,7 @@ import com.example.progetto_kt.model.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class AccountFormViewModel(
     private val userRepository: UserRepository,
@@ -92,7 +93,7 @@ class AccountFormViewModel(
         Log.d(TAG, "Card Expire Year Changed: $value")
         _formParams.value = _formParams.value.copy(cardExpireYear = value)
 
-        return (value > 0)
+        return (value >= Calendar.getInstance().get(Calendar.YEAR))
     }
 
     fun onCardCVVChange(value : String) : Boolean {
