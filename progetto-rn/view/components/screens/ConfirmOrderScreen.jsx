@@ -29,7 +29,7 @@ const ConfirmOrderScreen = ({
     const menuDetails = route.params.menu;
 
     const { appState, setError, locationState } = useContext(AppStateContext);
-    const { userState, setOrderState } = useContext(UserContext);
+    const { userState, setUserState, setOrderState } = useContext(UserContext);
 
     const onConfirmOrder = async () => {
         if (!userState.isUserRegistered) {
@@ -68,6 +68,14 @@ const ConfirmOrderScreen = ({
                 lastOrderMenu: orderedMenu
             });
 
+            const newUser = await ViewModel.fetchUserDetails();
+            setUserState({
+                user: newUser,
+                isUserRegistered: true
+            });
+
+            // @ts-ignore
+            navigation.navigate("Home");
             // @ts-ignore
             navigation.navigate("LastOrder");
         } catch (error) {

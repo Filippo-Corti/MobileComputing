@@ -1,86 +1,51 @@
-import { View, ScrollView, Text, Button, StyleSheet, Dimensions } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../../styles/global';
+import { globalStyles } from '../../../styles/global';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import MyLogo from '../common/icons/MyLogo';
-import MenuPreview from '../common/other/MenuPreview';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../common/other/ProgressBar';
-import InfoTextBox from '../common/other/InfoTextBox';
-import PositionViewModel from '../../../viewmodel/PositionViewModel';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import ViewModel from '../../../viewmodel/ViewModel';
-import * as Location from 'expo-location';
 import MenuSmallPreview from '../common/other/MenuSmallPreview';
 import { useIsFocused } from '@react-navigation/native';
-
+import React from 'react';
+import Separator from '../common/other/Separator';
+import colors from '../../../styles/colors';
+import { AppStateContext } from '../../context/AppStateContext';
+import MyLogo from '../common/icons/MyLogo';
 
 const { height } = Dimensions.get('window');
 
-export default LastOrderScreen = ({ }) => {
-
-    const viewModel = ViewModel.getViewModel()
-
-    const userLocation = {
-        longitude: 9.232131,
-        latitude: 45.476770,
-    }
+/**
+ * @returns {JSX.Element} 
+ */
+const LastOrderScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const [deliveryAddress, setDeliveryAddress] = useState(null);
-    const [droneAddress, setDroneAddress] = useState(null);
-    const { userData, orderData, setOrderData } = useContext(UserContext);
+    const { userState, orderState, setOrderState } = useContext(UserContext);
+    const { appState, locationState, setError } = useContext(AppStateContext);
 
     const fetchLastOrder = async () => {
-        console.log("Executing Fetch")
+        if (!userState.user.lastOid) return;
         try {
-            const orderDetails = await viewModel.getOrderAndMenuDetails(orderData.id);
-            setOrderData(orderDetails);
-            //console.log("Fetched Order Data:", orderDetails.deliveryLocation);
+            const order = await ViewModel.fetchOrderDetails(userState.user.lastOid);
+            const orderedMenu = await ViewModel.fetchMenuDetails(
+                locationState.lastKnownLocation.lat,
+                locationState.lastKnownLocation.lng,
+                order.mid
+            );
+            setOrderState({
+                lastOrder: order,
+                lastOrderMenu: orderedMenu,
+            });
         } catch (err) {
-            console.error("Error fetching the last order details:", err);
+            setError(err);
         }
     }
-
-    const fetchDeliveryAddress = async () => {
-        try {
-            //console.log("Fetching delivery address, with orderData", orderData, orderData.deliveryLocation)
-            const delAddressString = await PositionViewModel.getAddressFromCoordinates(orderData.deliveryLocation)
-            setDeliveryAddress(delAddressString)
-            //console.log("Fetched Order Address via Reverse Geocoding:", delAddressString);
-        } catch (err) {
-            console.log("Error fetching the last order address:", err, orderData.menuId);
-            setDeliveryAddress("(" + orderData.deliveryLocation.latitude + ", " + orderData.deliveryLocation.longitude + ")");
-        }
-    }
-
-    const fetchDroneAddress = async () => {
-        try {
-            //console.log("Fetching drone address, with orderData", orderData != null)
-            const droneAddressString = await PositionViewModel.getAddressFromCoordinates(orderData.currentLocation)
-            setDroneAddress(droneAddressString)
-            //console.log("Fetched Drone Address via Reverse Geocoding:", droneAddressString);
-        } catch (err) {
-            console.log("Error fetching the drone address:", err);
-            setDroneAddress("(" + orderData.currentLocation.latitude + ", " + orderData.currentLocation.longitude + ")");
-        }
-    }
-
-    const fetchData = async () => {
-        if (orderData && orderData.id)
-            await fetchLastOrder();
-
-        if (orderData.deliveryLocation)
-            await fetchDeliveryAddress();
-
-        if (orderData.currentLocation)
-            await fetchDroneAddress();
-    };
-
 
     // Auto - Reload every 5 seconds
     const isFocused = useIsFocused(); // Tracks if the screen is currently focused
@@ -89,7 +54,8 @@ export default LastOrderScreen = ({ }) => {
     useEffect(() => {
         if (isFocused) {
             console.log("Screen is focused, starting timer");
-            intervalId.current = setInterval(fetchData, 5000);
+            fetchLastOrder();
+            intervalId.current = setInterval(fetchLastOrder, 5000);
         } else {
             console.log("Screen is not focused, stopping timer");
             if (intervalId.current) {
@@ -107,43 +73,34 @@ export default LastOrderScreen = ({ }) => {
         };
     }, [isFocused]);
 
-    useEffect(() => {
-        const initializeAndFetch = async () => {
-            if (orderData && orderData.id && !orderData.orderDetailsRetrieved)
-                await fetchLastOrder();
+    if (appState.isLoading || !orderState.lastOrder || !orderState.lastOrderMenu) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <MyLogo />
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
 
-            if (orderData.deliveryLocation)
-                await fetchDeliveryAddress();
+    if (!userState.isUserRegistered || !userState.user || !userState.user.lastOid) {
+        return (
+            <NoOrderState 
+                // @ts-ignore
+                onPress={() => navigation.navigate("HomeStack")} 
+            />
+        );
 
-            if (orderData.currentLocation)
-                await fetchDroneAddress();
-        };
-
-        initializeAndFetch();
-    }, [orderData]);
-
-
-    const showOrder = (viewModel && orderData && orderData.id && orderData.orderDetailsRetrieved);
-    const deltas = (showOrder)
-        ? PositionViewModel.calculateMapDeltas2Positions(userLocation, orderData.deliveryLocation, orderData.currentLocation)
-        : null;
-
-    const timeInfo = (showOrder) ? viewModel.extractFormattedOrderInformation(orderData) : null
-
-    // console.log("User Data is ", userData);
-    // console.log("Order Data is ", orderData);
-    // console.log("Showing order:", showOrder)
-    // console.log("Address is", deliveryAddress);
-    console.log("Time Info is", timeInfo)
+    }
 
     return (
         <SafeAreaView style={globalStyles.container}>
             <ScrollView>
+                    
+                    <ShowOrderState 
+                        orderData={orderState.lastOrder} 
+                        menuData={orderState.lastOrderMenu}
+                    />
 
-                {(showOrder)
-                    ? <ShowOrderState orderData={orderData} deliveryAddress={deliveryAddress} droneAddress={droneAddress} timeInfo={timeInfo} deltas={deltas} />
-                    : <NoOrderState navigation={navigation} />
-                }
                 <StatusBar style="auto" />
             </ScrollView>
         </SafeAreaView>
@@ -168,7 +125,7 @@ const Header = ({timeInfo}) => (
     </View>
 )
 
-const NoOrderState = ({ navigation }) => (
+const NoOrderState = ({ onPress }) => (
     <View style={[globalStyles.insetContainer, { marginTop: 20, marginHorizontal: 5 }]}>
         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
             This is where your order will appear after you placed it. {'\n'}
@@ -177,17 +134,20 @@ const NoOrderState = ({ navigation }) => (
             Right now you haven’t placed your first order yet. Go check some menus in the home page!
         </Text>
         <View style={{ alignSelf: 'flex-end', marginTop: 20 }}>
-            <ButtonWithArrow text="Explore menus" onPress={() => navigation.navigate("HomeStack")} />
+            <ButtonWithArrow text="Explore menus" onPress={onPress} />
         </View>
     </View>
 )
 
-const ShowOrderState = ({ orderData, deliveryAddress, droneAddress, timeInfo, deltas }) => (
+const ShowOrderState = ({ 
+    orderData,
+    menuData
+}) => (
     <>
 
-        <Header timeInfo={timeInfo} />
+        {/* <Header timeInfo={timeInfo} /> */}
 
-        <MapView
+        {/* <MapView
             style={styles.map}
             provider="google"
             showsCompass={true}
@@ -214,7 +174,7 @@ const ShowOrderState = ({ orderData, deliveryAddress, droneAddress, timeInfo, de
                 onPress={() => console.log("Hello Marker")}
             />
 
-        </MapView>
+        </MapView> */}
         <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
             <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
                 Delivery details
@@ -224,7 +184,7 @@ const ShowOrderState = ({ orderData, deliveryAddress, droneAddress, timeInfo, de
                     Pick it up at
                 </Text>
                 <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                    {deliveryAddress}
+                    {orderData.deliveryLocation.address}
                 </Text>
             </View>
             <View style={{ marginVertical: 5 }}>
@@ -232,7 +192,7 @@ const ShowOrderState = ({ orderData, deliveryAddress, droneAddress, timeInfo, de
                     Drone is currently at
                 </Text>
                 <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                    {droneAddress}
+                    {orderData.currentPosition.address}
                 </Text>
             </View>
         </View>
@@ -244,12 +204,14 @@ const ShowOrderState = ({ orderData, deliveryAddress, droneAddress, timeInfo, de
             </Text>
         </View>
         <MenuSmallPreview
-            image={orderData.menu.image}
-            title={"1x " + orderData.menu.name}
-            price={orderData.menu.formatPrice()}
+            image={menuData.image.base64}
+            title={"1x " + menuData.menu.name}
+            price={menuData.menu.price}
         />
     </>
 )
+
+export default LastOrderScreen;
 
 const styles = StyleSheet.create({
 

@@ -112,7 +112,10 @@ export default class ViewModel {
     static async fetchOrderDetails(orderId) {
         this.assertSessionData();
 
-        return await APIController.getOrderDetails(ViewModel.sid, orderId);
+        const order = await APIController.getOrderDetails(ViewModel.sid, orderId);
+        order.currentPosition.address = await PositionViewModel.getAddressFromLocation(order.currentPosition);
+        order.deliveryLocation.address = await PositionViewModel.getAddressFromLocation(order.deliveryLocation);
+        return order;
     }
 
     /**

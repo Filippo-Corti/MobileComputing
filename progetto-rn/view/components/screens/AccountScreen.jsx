@@ -56,8 +56,6 @@ const AccountScreen = ({ }) => {
         );
     }
 
-    console.log("UserState is", userState);
-
     if (!userState.isUserRegistered || !userState.user) {
         return (
             <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
@@ -84,7 +82,10 @@ const AccountScreen = ({ }) => {
                                 navigation.navigate("LastOrder")
                             } else {
                                 // @ts-ignore
-                                navigation.navigate("MenuDetails", { menuId: orderState.lastOrder.mid })
+                                navigation.navigate("HomeStack", { 
+                                    screen: "MenuDetails",
+                                    params: { menuId: orderState.lastOrder.mid } 
+                                })
                             }
                         }}
                     />
