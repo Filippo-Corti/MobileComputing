@@ -33,7 +33,7 @@ declare global {
     }
 
     type MenuDetailsWithImage = {
-        menuDetails : MenuDetails
+        menu : MenuDetails
         image : MenuImage
     }
 

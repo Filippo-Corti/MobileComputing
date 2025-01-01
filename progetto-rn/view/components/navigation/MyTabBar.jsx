@@ -56,8 +56,6 @@ const MyTabBar = ({
         setError(null);
     }
 
-    console.log("Error now is", appState.error);
-
     return (
         <>
 

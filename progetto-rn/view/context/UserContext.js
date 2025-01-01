@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo } from 'react';
+import React, { createContext, useState, useMemo, useEffect } from 'react';
 
 /**
  * @typedef {Object} UserContextValue
@@ -28,6 +28,14 @@ export const UserContextProvider = ({
 
 	const [userState, setUserState] = useState(userStateInit);
 	const [orderState, setOrderState] = useState(orderStateInit);
+
+	useEffect(() => {
+		setUserState(userStateInit);
+	}, [userStateInit]);
+
+	useEffect(() => {
+		setOrderState(orderStateInit);
+	}, [orderStateInit]);
 
 	/** @type {UserContextValue} */
 	const contextValue = useMemo(() => ({

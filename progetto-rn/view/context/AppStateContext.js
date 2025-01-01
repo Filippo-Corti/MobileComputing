@@ -1,4 +1,4 @@
-import React, { createContext, useState, useMemo } from 'react';
+import React, { createContext, useState, useMemo, useEffect } from 'react';
 
 /**
  * @typedef {Object} AppStateContextValue
@@ -31,12 +31,20 @@ export const AppStateContextProvider = ({
     const [appState, setAppState] = useState(appStateInit);
 
     const setError = (error) => {
-        if (appState.error) return
+        if (appState.error && error != null) return
         setAppState(prevState => ({
             ...prevState,
             error
         }));
     }
+
+    useEffect(() => {
+        setLocationState(locationStateInit);
+    }, [locationStateInit]);
+
+    useEffect(() => {
+        setAppState(appStateInit);
+    }, [appStateInit]);
 
     
     /** @type {AppStateContextValue} */

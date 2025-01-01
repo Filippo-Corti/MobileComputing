@@ -38,7 +38,7 @@ const MenuDetailsScreen = ({
 
     useEffect(() => {
         const fetchMenuDetails = async () => {
-            if (menuDetails && menuDetails.menuDetails.mid === menuId) return;
+            if (menuDetails && menuDetails.menu.mid === menuId) return;
             const menu = await ViewModel.fetchMenuDetails(
                 locationState.lastKnownLocation.lat,
                 locationState.lastKnownLocation.lng,
@@ -51,8 +51,7 @@ const MenuDetailsScreen = ({
         fetchMenuDetails();
     }, [menuId]);
 
-
-    if (appState.isLoading || !menuDetails || menuDetails.menuDetails.mid !== menuId) {
+    if (appState.isLoading || !menuDetails || menuDetails.menu.mid !== menuId) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color={colors.primary} />
@@ -77,18 +76,18 @@ const MenuDetailsScreen = ({
 
                     <View style={[globalStyles.insetContainer, { marginVertical: 20 }]}>
                         <Text style={[globalStyles.textBlack, globalStyles.textTitleBold, {marginTop: 5, marginBottom: 10,}]}>
-                            {menuDetails.menuDetails.name}
+                            {menuDetails.menu.name}
                         </Text>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', gap: 5, marginBottom: 10 }}>
                             <MyIcon name={IconNames.PRICE_TAG} size={22} color={colors.primary} />
                             <Text style={[globalStyles.textDarkGray, globalStyles.textSubtitleMedium]}>
-                                €{menuDetails.menuDetails.price}
+                                €{menuDetails.menu.price}
                             </Text>
                         </View>
 
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, {marginTop: 10,}]}>
-                            {menuDetails.menuDetails.longDescription}
+                            {menuDetails.menu.longDescription}
                         </Text>
                     </View>
 
@@ -96,19 +95,19 @@ const MenuDetailsScreen = ({
                     <InfoTextBox
                         iconName={IconNames.MARKER}
                         label={"Menu Location"}
-                        text={menuDetails.menuDetails.location.address}
+                        text={menuDetails.menu.location.address}
                     />
                     <Separator size={10} color={colors.lightGray} />
                     <InfoTextBox
                         iconName={IconNames.CLOCK}
-                        text={"Approximately " + menuDetails.menuDetails.deliveryTime + " min(s)"}
+                        text={"Approximately " + menuDetails.menu.deliveryTime + " min(s)"}
                     />
                     <Separator size={1} color={colors.lightGray} />
                 </View>
 
                 <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
                     <LargeButton 
-                        text={"Order • €" + menuDetails.menuDetails.price} 
+                        text={"Order • €" + menuDetails.menu.price} 
                         onPress={navigateToConfirmOrder}
                     />
                 </View>

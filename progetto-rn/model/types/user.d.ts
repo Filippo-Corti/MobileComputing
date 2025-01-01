@@ -3,7 +3,7 @@ export {}
 declare global {
 
     enum OrderStatus {
-        ON_DELIVERY = "ON _DELIVERY",
+        ON_DELIVERY = "ON_DELIVERY",
         COMPLETED = "COMPLETED"
     }
 

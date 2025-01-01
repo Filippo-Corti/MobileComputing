@@ -57,7 +57,7 @@ const ConfirmOrderScreen = ({
         }
 
         try {
-            const order = await ViewModel.orderMenu(menuDetails.menuDetails.mid, locationState.lastKnownLocation);
+            const order = await ViewModel.orderMenu(menuDetails.menu.mid, locationState.lastKnownLocation);
             const orderedMenu = await ViewModel.fetchMenuDetails(
                 locationState.lastKnownLocation.lat, 
                 locationState.lastKnownLocation.lng, 
@@ -69,7 +69,7 @@ const ConfirmOrderScreen = ({
             });
 
             // @ts-ignore
-            navigation.navigate("LastOrderScreen");
+            navigation.navigate("LastOrder");
         } catch (error) {
             setError(error);
         }
@@ -102,7 +102,7 @@ const ConfirmOrderScreen = ({
                         <InfoTextBox
                             iconName={IconNames.MARKER}
                             label={"Menu Location"}
-                            text={menuDetails.menuDetails.location.address}
+                            text={menuDetails.menu.location.address}
                         />
                         {locationState.lastKnownLocation && locationState.lastKnownLocation.address &&
                             <>
@@ -120,15 +120,15 @@ const ConfirmOrderScreen = ({
                                 Delivery Time
                             </Text>
                             <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                {menuDetails.menuDetails.deliveryTime} min(s)
+                                {menuDetails.menu.deliveryTime} min(s)
                             </Text>
                         </View>
                         <Separator size={10} color={colors.lightGray} />
 
                         <MenuSmallPreview
                             image={menuDetails.image.base64}
-                            title={menuDetails.menuDetails.name}
-                            price={menuDetails.menuDetails.price}
+                            title={menuDetails.menu.name}
+                            price={menuDetails.menu.price}
                         />
                         <Separator size={1} color={colors.lightGray} />
                         <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginVertical: 20 }]}>
@@ -136,7 +136,7 @@ const ConfirmOrderScreen = ({
                                 Total
                             </Text>
                             <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                {"€" + menuDetails.menuDetails.price}
+                                {"€" + menuDetails.menu.price}
                             </Text>
                         </View>
                         <Separator size={1} color={colors.lightGray} />

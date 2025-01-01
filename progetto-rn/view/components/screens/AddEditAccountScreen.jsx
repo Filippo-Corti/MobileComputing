@@ -1,57 +1,82 @@
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../../styles/global';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { globalStyles } from '../../../styles/global';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import Separator from '../common/other/Separator';
 import LargeButton from '../common/buttons/LargeButton';
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import FormField from '../common/forms/FormField';
 import SelectNumber from '../common/forms/SelectNumber';
-import User from '../../../model/types/User';
 import { UserContext } from '../../context/UserContext';
 import { useContext } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
-import Order from '../../../model/types/Order';
+import { AppStateContext } from '../../context/AppStateContext';
+import MyLogo from '../common/icons/MyLogo';
+import colors from '../../../styles/colors';
+import AccountFormViewModel from '../../../viewmodel/AccountFormViewModel';
 
-export default ConfirmOrderScreen = ({ route }) => {
+/**
+ * @param {{
+*  route: { params: { newAccount: boolean } }
+* }} props 
+* @returns {JSX.Element}
+*/
+const AddEditAccountScreen = ({ 
+    route = { params: { newAccount: false } }
+}) => {
     
-    const viewModel = ViewModel.getViewModel();
-
     const navigation = useNavigation();
+    const newAccount = route.params.newAccount;
 
-    const { newAccount } = route?.params || false;
+    const { userState, setUserState } = useContext(UserContext);
+    const {appState, setError} = useContext(AppStateContext);
 
-    const { userData, setUserData, orderData, setOrderData } = useContext(UserContext);
-
-    const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount && userData) ? {
+    const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount && userState.user) ? {
         defaultValues: {
-            ...userData
+            firstName: userState.user.firstName,
+            lastName: userState.user.lastName,
+            cardFullName: userState.user.cardFullName,
+            cardNumber: userState.user.cardNumber,
+            cardExpireMonth: userState.user.cardExpireMonth,
+            cardExpireYear: userState.user.cardExpireYear,
+            cardCVV: userState.user.cardCVV,
         }
     } : {
         defaultValues: {
-            ccExpMonth: 1,
-            ccExpYear: 2025,
+            firstName: "",
+            lastName: "",
+            cardFullName: "",
+            cardNumber: "",
+            cardExpireMonth: 1,
+            cardExpireYear: 2025,
+            cardCVV: "",
         }
     });
 
     const handleSaveChanges = async (formData) => {
-        console.log("Params OK")
-        console.log(formData);
-
-        // Update user details on the server
-        await viewModel.updateUserDetails(formData);
-
-        // Update user details in the app context
-        setUserData(formData);
-        if (!orderData) {
-            setOrderData(new Order(null, null, false)); 
+        try {
+            await ViewModel.updateUserDetails(formData)
+            const updatedUser = await ViewModel.fetchUserDetails();
+            setUserState({ 
+                user: updatedUser,
+                isUserRegistered: true
+            });
+            // @ts-ignore
+            navigation.navigate("Account");
+        } catch (err) {
+            setError(err);
         }
-        console.log("Update OK");
-
-        navigation.navigate("Account");
     }
 
+    if (appState.isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <MyLogo />
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
@@ -74,21 +99,21 @@ export default ConfirmOrderScreen = ({ route }) => {
                         </Text>
                         <View>
                             <FormField
-                                name="fName"
+                                name="firstName"
                                 label="First Name"
                                 control={control}
-                                error={errors.fName}
-                                validate={(fName) => User.validateFirstName(fName) || "First Name must be less than 15 characters long and not empty"}
+                                error={errors.firstName}
+                                validate={(v) => AccountFormViewModel.validateFirstName(v) || "First Name should be at most 15 characters and not empty"}
                                 inputMode="text"
                                 autoCapitalize="words"
                             />
 
                             <FormField
-                                name="lName"
+                                name="lastName"
                                 label="Last Name"
                                 control={control}
-                                error={errors.lName}
-                                validate={(lName) => User.validateLastName(lName) || "Last Name must be less than 15 characters long and not empty"}
+                                error={errors.lastName}
+                                validate={(v) => AccountFormViewModel.validateLastName(v) || "Last Name should be at most 15 characters and not empty"}
                                 inputMode="text"
                                 autoCapitalize="words"
                             />
@@ -103,21 +128,21 @@ export default ConfirmOrderScreen = ({ route }) => {
                         </Text>
                         <View>
                             <FormField
-                                name="ccFullName"
+                                name="cardFullName"
                                 label="Holder Name"
                                 control={control}
-                                error={errors.ccFullName}
-                                validate={(ccFullName) => User.validateFullName(ccFullName) || "Holder Name must be less than 31 characters long and not empty"}
+                                error={errors.cardFullName}
+                                validate={(v) => AccountFormViewModel.validateCardFullName(v) || "Credit Card Name should be at most 31 characters and not empty"}
                                 inputMode="text"
                                 autoCapitalize="words"
                             />
 
                             <FormField
-                                name="ccNumber"
+                                name="cardNumber"
                                 label="Number"
                                 control={control}
-                                error={errors.ccNumber}
-                                validate={(ccNumber) => User.validateNumber(ccNumber) || "Number must be 16 digits long, with no blank spaces"}
+                                error={errors.cardNumber}
+                                validate={(v) => AccountFormViewModel.validateCardNumber(v) || "Card Number should be 16 digits"}
                                 inputMode="numeric"
                             />
 
@@ -125,33 +150,33 @@ export default ConfirmOrderScreen = ({ route }) => {
                                 <Text style={[globalStyles.textDarkGray, globalStyles.textRegularNormal, { marginBottom: 10, }]}>Expiry Date </Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                                     <SelectNumber
-                                        name="ccExpMonth"
+                                        name="cardExpireMonth"
                                         min={1}
                                         max={12}
                                         control={control}
-                                        error={errors.ccExpMonth}
-                                        validate={(ccExpMonth) => User.validateExpireMonth(ccExpMonth) || "Month must be a number between 1 and 12"} //This should never show
+                                        error={errors.cardExpireMonth}
+                                        validate={(v) => AccountFormViewModel.validateCardExpireMonth(v) || "Month must be a number between 1 and 12"} //This should never show
                                         style={{ width: '30%', marginRight: 10 }}
                                     />
                                     <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>/</Text>
                                     <SelectNumber
-                                        name="ccExpYear"
+                                        name="cardExpireYear"
                                         min={2025}
                                         max={2035}
                                         control={control}
-                                        error={errors.ccExpYear}
-                                        validate={(ccExpYear) => User.validateExpireYear(ccExpYear) || "Year must be a number between 2025 and 2035"} //This should never show
+                                        error={errors.cardExpireYear}
+                                        validate={(v) => AccountFormViewModel.validateCardExpireYear(v)  || "Year must be a number between 2025 and 2035"} //This should never show
                                         style={{ width: '30%', marginLeft: 10 }}
                                     />
                                 </View>
                             </View>
 
                             <FormField
-                                name="ccCVV"
+                                name="cardCVV"
                                 label="CVV"
                                 control={control}
-                                error={errors.ccCVV}
-                                validate={(ccCVV) => User.validateCVV(ccCVV) || "CVV must be 3 digits long, with no blank spaces"}
+                                error={errors.cardCVV}
+                                validate={(v) => AccountFormViewModel.validateCardCVV(v) || "Card Number should be 3 digits"}
                                 inputMode="numeric"
                             />
 
@@ -169,3 +194,5 @@ export default ConfirmOrderScreen = ({ route }) => {
         </SafeAreaView>
     );
 }
+
+export default AddEditAccountScreen;

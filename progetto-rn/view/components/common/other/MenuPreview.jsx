@@ -6,22 +6,23 @@ import colors from '../../../../styles/colors';
 
 /**
  * @param {{
- *  menu: MenuWithImage,
- *  onPress : Function,
+ *  menu: MenuWithImage | MenuDetailsWithImage,
+ *  onPress : Function?,
  *  style: import('react-native').ViewStyle
  * }} props
  * @returns {JSX.Element}
  */
 const MenuPreview = ({ 
     menu, 
-    onPress, 
+    onPress = null,
     style 
 }) => {
 
-    onPress = onPress || (() => {})
-
+    onPress = onPress || (() => {});
+    
     //const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(userLocation, menuInformation.location).toFixed(1);
     const distanceFromYou = 0
+
 
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={() => onPress()}>

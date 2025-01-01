@@ -1,70 +1,97 @@
-import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { ScrollView, View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../../styles/global';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import MyIcon, { IconNames } from '../common/icons/MyIcon';
+import { globalStyles } from '../../../styles/global';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Separator from '../common/other/Separator';
 import CreditCard from '../common/other/CreditCard';
 import MinimalistButton from '../common/buttons/MinimalistButton';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useEffect } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
+import { AppStateContext } from '../../context/AppStateContext';
+import MyLogo from '../common/icons/MyLogo';
+import colors from '../../../styles/colors';
+import React from 'react';
+import MenuPreview from '../common/other/MenuPreview';
 
-export default AccountScreen = ({ }) => {
+/**
+ * @returns {JSX.Element} 
+ */
+const AccountScreen = ({ }) => {
 
     const navigation = useNavigation();
 
-    const viewModel = ViewModel.getViewModel()
-    const { userData, orderData, setOrderData } = useContext(UserContext);
-
-    const fetchLastOrder = async () => {
-        try {
-            const orderDetails = await viewModel.current.getOrderAndMenuDetails(orderData.id);
-            setOrderData(orderDetails);
-            console.log("Fetched Order Data:", orderDetails.deliveryLocation);
-        } catch (err) {
-            console.error("Error fetching the last order details:", err);
-        }
-    }
+    const { appState, locationState, setError } = useContext(AppStateContext);
+    const { userState, orderState, setOrderState } = useContext(UserContext);
 
     useEffect(() => {
-        const initializeAndFetch = async () => {
-            if (orderData && orderData.id && !orderData.orderDetailsRetrieved) 
-                await fetchLastOrder();
-        };
+        const fetchLastOrder = async () => {
+            if (!userState.user.lastOid) return;
+            try {
+                const order = await ViewModel.fetchOrderDetails(userState.user.lastOid);
+                const orderedMenu = await ViewModel.fetchMenuDetails(
+                    locationState.lastKnownLocation.lat,
+                    locationState.lastKnownLocation.lng,
+                    order.mid
+                );
+                setOrderState({
+                    lastOrder: order,
+                    lastOrderMenu: orderedMenu,
+                });
+            } catch (err) {
+                setError(err);
+            }
+        }
 
-        initializeAndFetch();
-    }, [userData, orderData]);
+        fetchLastOrder();
+    }, []);
 
-    console.log("User Data is", userData);
-    console.log("Order data is", orderData);
+    if (appState.isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <MyLogo />
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
 
-    const showOrder = (orderData && orderData.id && orderData.orderDetailsRetrieved);
-    const isLogged = (userData)
+    console.log("UserState is", userState);
+
+    if (!userState.isUserRegistered || !userState.user) {
+        return (
+            <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
+                <NotLoggedHeader navigation={navigation} />
+                <Separator size={1} color={colors.lightGray} />
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
             <ScrollView contentContainerStyle={[globalStyles.flexCenter, { flexDirection: 'column', justifyContent: 'flex-start', flexGrow: 1, marginTop: 35, }]}>
+                
+                <LoggedHeader userData={userState.user} navigation={navigation} />
+                <Separator size={1} color={colors.lightGray} />
 
-                { (isLogged)
-                    ?   
-                    <>
-                        <LoggedHeader userData={userData} navigation={navigation} />
-                        <Separator size={1} color={colors.lightGray} />
-
-                        { showOrder && <LastOrder orderData={orderData} /> }
-                        <Separator size={1} color={colors.lightGray} />
-
-                        <CreditCardBox userData={userData} />
-                    </>
-                    :
-                    <>
-                        <NotLoggedHeader userData={userData} navigation={navigation} />
-                        <Separator size={1} color={colors.lightGray} />
-                    </>
+                {orderState.lastOrderMenu && 
+                    <LastOrder 
+                        menuData={orderState.lastOrderMenu}
+                        orderData={orderState.lastOrder}
+                        onPress={() => {
+                            if (orderState.lastOrder.status === "ON_DELIVERY") {
+                                // @ts-ignore
+                                navigation.navigate("LastOrder")
+                            } else {
+                                // @ts-ignore
+                                navigation.navigate("MenuDetails", { menuId: orderState.lastOrder.mid })
+                            }
+                        }}
+                    />
                 }
+                <Separator size={1} color={colors.lightGray} />
 
+                <CreditCardBox userData={userState.user} />
 
             </ScrollView>
         </SafeAreaView>
@@ -72,11 +99,12 @@ export default AccountScreen = ({ }) => {
 }
 
 
-const NotLoggedHeader = ({navigation}) => (
+const NotLoggedHeader = ({ navigation }) => (
     <View style={{ marginBottom: 15, alignItems: 'center' }}>
 
         <Image
             style={styles.profileImage}
+            // @ts-ignore
             source={require('../../../assets/default-avatar.jpg')}
         />
 
@@ -85,25 +113,33 @@ const NotLoggedHeader = ({navigation}) => (
     </View>
 )
 
-const LoggedHeader = ({userData, navigation}) => (
+const LoggedHeader = ({ 
+    userData, 
+    navigation 
+}) => (
     <View style={{ marginBottom: 15, alignItems: 'center' }}>
-        
+
         <Image
             style={styles.profileImage}
+            // @ts-ignore
             source={require('../../../assets/default-avatar.jpg')}
         />
 
         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginBottom: 13, textAlign: 'center' }]}>
-            {userData.fName} {userData.lName}
+            {userData.firstName} {userData.lastName}
         </Text>
 
-        
-        <MinimalistButton text="EDIT ACCOUNT" onPress={() => navigation.navigate("EditAccount")} />
-        
+
+        <MinimalistButton text="EDIT ACCOUNT" onPress={() => navigation.navigate("EditAccount", { newAccount: false })} />
+
     </View>
 )
 
-const LastOrder = ({orderData}) => (
+const LastOrder = ({ 
+    menuData,
+    orderData,
+    onPress
+}) => (
     <View style={[globalStyles.insetContainer, { marginVertical: 20, }]}>
         <View style={[globalStyles.flexBetween, { width: '100%' }]}>
             <View>
@@ -112,27 +148,34 @@ const LastOrder = ({orderData}) => (
                 </Text>
             </View>
             <View>
-                <ButtonWithArrow text="See More" onPress={() => navigation.navigate("LastOrder")} />
+                {orderData.status === "ON_DELIVERY" 
+                    ? <ButtonWithArrow text="Check Last Order" onPress={onPress} />
+                    : <ButtonWithArrow text="Order Again" onPress={onPress} />
+                }
             </View>
         </View>
-        <MenuPreview menuInformation={orderData.menu}
+        <MenuPreview 
+            menu={menuData}
             style={{ marginTop: 8, }}
+            onPress={null}
         />
     </View>
 )
 
-const CreditCardBox = ({userData}) => (
+const CreditCardBox = ({ userData }) => (
     <View style={[globalStyles.insetContainer, { marginTop: 20, marginBottom: 40, width: '95%' }]}>
 
         <CreditCard cardInformation={{
-            number: userData.ccNumber,
-            holder: userData.ccFullName,
-            expiryMonth: userData.ccExpMonth,
-            expiryYear: userData.ccExpYear,
+            number: userData.cardNumber,
+            holder: userData.cardFullName,
+            expiryMonth: userData.cardExpireMonth,
+            expiryYear: userData.cardExpireYear,
         }} />
 
     </View>
 )
+
+export default AccountScreen;
 
 const styles = StyleSheet.create({
 

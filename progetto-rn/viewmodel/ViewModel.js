@@ -98,7 +98,8 @@ export default class ViewModel {
      */
     static async updateUserDetails(user) {
         this.assertSessionData();
-
+        user.sid = ViewModel.sid;
+        
         await APIController.updateUserDetails(ViewModel.sid, ViewModel.uid, user);
         await AsyncStorageController.set(KEYS.IS_REGISTERED, true);
     }
@@ -155,7 +156,7 @@ export default class ViewModel {
         menuDetails.location.address = await PositionViewModel.getAddressFromLocation(menuDetails.location);
         const image = await ViewModel.fetchMenuImage(menuId, menuDetails.imageVersion);
         return {
-            menuDetails: menuDetails,
+            menu: menuDetails,
             image: image
         }
     }
