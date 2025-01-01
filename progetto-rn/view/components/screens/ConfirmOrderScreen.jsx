@@ -12,6 +12,8 @@ import { AppStateContext } from '../../context/AppStateContext';
 import colors from '../../../styles/colors';
 import { UserContext } from '../../context/UserContext';
 import React from 'react';
+import MyError from '../../../model/types/MyError';
+import ViewModel from '../../../viewmodel/ViewModel';
 
 /**
  * @param {{
@@ -26,8 +28,52 @@ const ConfirmOrderScreen = ({
     const navigation = useNavigation();
     const menuDetails = route.params.menu;
 
-    const { appState, locationState } = useContext(AppStateContext);
-    const { userState } = useContext(UserContext);
+    const { appState, setError, locationState } = useContext(AppStateContext);
+    const { userState, setOrderState } = useContext(UserContext);
+
+    const onConfirmOrder = async () => {
+        if (!userState.isUserRegistered) {
+            setError(
+                new MyError(
+                    "ACCOUNT_DETAILS",
+                    "Please Register",
+                    "You need to register before you can order a menu.",
+                    "Register"
+                )
+            )
+            return
+        }
+
+        if (!locationState.isLocationAllowed) {
+            setError(
+                new MyError(
+                    "POSITION_UNALLOWED",
+                    "Location Not Allowed",
+                    "Please allow location access to place an order.",
+                    "Allow Location"
+                )
+            )
+            return
+        }
+
+        try {
+            const order = await ViewModel.orderMenu(menuDetails.menuDetails.mid, locationState.lastKnownLocation);
+            const orderedMenu = await ViewModel.fetchMenuDetails(
+                locationState.lastKnownLocation.lat, 
+                locationState.lastKnownLocation.lng, 
+                order.mid
+            );
+            setOrderState({
+                lastOrder: order,
+                lastOrderMenu: orderedMenu
+            });
+
+            // @ts-ignore
+            navigation.navigate("LastOrderScreen");
+        } catch (error) {
+            setError(error);
+        }
+    }
 
     if (appState.isLoading || !menuDetails) {
         return (
@@ -123,7 +169,7 @@ const ConfirmOrderScreen = ({
                             your order at the door. By placing your order, you agree
                             to take full responsibilty for it once it’s delivered.
                         </Text>
-                        <LargeButton text="Confirm and Pay" onPress={() => console.log("Pressed")} />
+                        <LargeButton text="Confirm and Pay" onPress={onConfirmOrder} />
                     </View>
 
                 </ScrollView>

@@ -24,7 +24,7 @@ export function handleErrorByType(
 			break;
 		case "ACCOUNT_DETAILS":
 			console.log("AccountDetails error");
-			onNavigateTo("AccountScreen");
+			onNavigateTo("AccountStack", {screen: "AccountScreen"});
 			break;
 		case "POSITION_UNALLOWED":
 			console.log("Position error");

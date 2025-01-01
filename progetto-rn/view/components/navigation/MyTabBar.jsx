@@ -21,7 +21,7 @@ const MyTabBar = ({
     const iconSizes = [32, 28, 28]
     const texts = ["Home", "Last Order", "Account"]
 
-    const { appState, setLocationState } = useContext(AppStateContext);
+    const { appState, setLocationState, setError } = useContext(AppStateContext);
 
     const handleError = (error) => {
         handleErrorByType(
@@ -53,7 +53,10 @@ const MyTabBar = ({
                 )
             }
         )
+        setError(null);
     }
+
+    console.log("Error now is", appState.error);
 
     return (
         <>

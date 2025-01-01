@@ -24,9 +24,13 @@ const HomeScreen = ({ }) => {
     /** @type {[Array<MenuWithImage>, React.Dispatch<React.SetStateAction<Array<MenuWithImage>>>]} */
     const [nearestMenus, setNearestMenus] = useState([]);
 
-    const { appState, setAppState, locationState } = useContext(AppStateContext);
+    const { appState, locationState, setError } = useContext(AppStateContext);
     const { userState } = useContext(UserContext);
 
+    const navigateToMenuDetails = (menuId) => {
+        // @ts-ignore
+        navigation.navigate("MenuDetails", { menuId });
+    }
 
     useEffect(() => {
         const fetchMenus = async () => {
@@ -51,10 +55,7 @@ const HomeScreen = ({ }) => {
                     })
                 });
             } catch (err) {
-                setAppState(prevState => ({
-                    ...prevState,
-                    error: err
-                }));
+                setError(err)
             }
         };
 
@@ -82,7 +83,7 @@ const HomeScreen = ({ }) => {
 
                 <Header user={userState.user} />
 
-                <MenusList nearestMenus={nearestMenus} navigation={navigation} />
+                <MenusList nearestMenus={nearestMenus} onItemClick={(menuId) => navigateToMenuDetails(menuId)} />
 
                 <StatusBar style="auto" />
             </ScrollView>
@@ -106,7 +107,10 @@ const Header = ({ user }) => (
     </View>
 );
 
-const MenusList = ({ nearestMenus, navigation }) => (
+const MenusList = ({ 
+    nearestMenus, 
+    onItemClick 
+}) => (
     <View style={[globalStyles.insetContainer, styles.afterMap, { flex: 1 }]}>
 
         <View style={[globalStyles.flexCenter, { marginVertical: 20 }]}>
@@ -121,7 +125,7 @@ const MenusList = ({ nearestMenus, navigation }) => (
                 <MenuPreview
                     menu={item}
                     onPress={() => {
-                        navigation.navigate("MenuDetails", { menuId: item.menu.mid })
+                        onItemClick(item.menu.mid);
                     }}
                     style={{ borderTopWidth: 1 }}
                 />

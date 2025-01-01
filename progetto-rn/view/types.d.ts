@@ -9,7 +9,7 @@ declare global {
 
     type LastOrderState = {
         lastOrder : Order? = null
-        lastOrderMenu : MenuDetails? = null
+        lastOrderMenu : MenuDetailsWithImage? = null
     }
 
     type LocationState = {

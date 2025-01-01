@@ -20,7 +20,6 @@ const Tab = createBottomTabNavigator();
 
 export default function App() {
 
-
 	const [fontsLoaded] = useFonts({ // @ts-ignore
 		[fonts.regular]: require('./assets/fonts/UberMoveText-Regular.otf'), // @ts-ignore
 		[fonts.medium]: require('./assets/fonts/UberMoveText-Medium.otf'), // @ts-ignore

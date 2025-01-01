@@ -31,6 +31,11 @@ const MenuDetailsScreen = ({
     
     const { appState, locationState } = useContext(AppStateContext);
 
+    const navigateToConfirmOrder = () => {
+        // @ts-ignore
+        navigation.navigate("ConfirmOrder", { menu: menuDetails });
+    }
+
     useEffect(() => {
         const fetchMenuDetails = async () => {
             if (menuDetails && menuDetails.menuDetails.mid === menuId) return;
@@ -104,10 +109,7 @@ const MenuDetailsScreen = ({
                 <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
                     <LargeButton 
                         text={"Order • €" + menuDetails.menuDetails.price} 
-                        onPress={() => 
-                            // @ts-ignore
-                            navigation.navigate("ConfirmOrder", { menu: menuDetails })
-                        } 
+                        onPress={navigateToConfirmOrder}
                     />
                 </View>
 

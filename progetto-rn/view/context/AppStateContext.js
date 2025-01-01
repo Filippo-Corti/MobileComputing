@@ -6,6 +6,7 @@ import React, { createContext, useState, useMemo } from 'react';
  * @property {React.Dispatch<React.SetStateAction<LocationState>>} setLocationState 
  * @property {AppState} appState 
  * @property {React.Dispatch<React.SetStateAction<AppState>>} setAppState
+ * @property {Function} setError
 */
 
 export const AppStateContext = createContext(
@@ -29,6 +30,14 @@ export const AppStateContextProvider = ({
     const [locationState, setLocationState] = useState(locationStateInit);
     const [appState, setAppState] = useState(appStateInit);
 
+    const setError = (error) => {
+        if (appState.error) return
+        setAppState(prevState => ({
+            ...prevState,
+            error
+        }));
+    }
+
     
     /** @type {AppStateContextValue} */
     const contextValue = useMemo(() => ({
@@ -36,6 +45,7 @@ export const AppStateContextProvider = ({
         setLocationState,
         appState,
         setAppState,
+        setError
     }), [locationState, appState]);
 
     return (
