@@ -170,7 +170,7 @@ export default class ViewModel {
 
         const menuImageFromServer = await APIController.getMenuImage(ViewModel.sid, menuId);
         if (!menuImageFromServer.base64.startsWith("data:image/jpeg;base64,")) {
-            menuImageFromServer.base64 = "data:image/jpeg;base64," + menuImageFromServer;
+            menuImageFromServer.base64 = "data:image/jpeg;base64," + menuImageFromServer.base64;
         }
 
         DBController.insertMenuImage(

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
 import * as Updates from 'expo-updates';
@@ -51,9 +51,14 @@ const BottomModal = ({
 	onConfirm
 }) => {
 
-	const [isModalVisible, setModalVisible] = useState(true);
+	const [isModalVisible, setModalVisible] = useState(false);
 
 	const toggleModal = () => setModalVisible(!isModalVisible);
+
+	useEffect(() => {
+		if (title && text) 
+			toggleModal()
+	}, [title, text])
 
 	return (
 		<View style={styles.container}>

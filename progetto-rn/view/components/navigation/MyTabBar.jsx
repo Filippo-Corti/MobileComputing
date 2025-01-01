@@ -3,7 +3,7 @@ import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import { globalStyles } from '../../../styles/global';
 import colors from '../../../styles/colors';
 import React, { useContext } from 'react';
-import { AppStateContext, startTrackingLocation } from '../../context/AppStateContext';
+import { AppStateContext } from '../../context/AppStateContext';
 import BottomModal, { handleErrorByType } from '../common/other/BottomModal';
 import PositionViewModel from '../../../viewmodel/PositionViewModel';
 
@@ -23,6 +23,38 @@ const MyTabBar = ({
 
     const { appState, setLocationState } = useContext(AppStateContext);
 
+    const handleError = (error) => {
+        handleErrorByType(
+            error,
+            (screen) => {
+                navigation.navigate(screen)
+            },
+            () => {
+                PositionViewModel.requestPermission().then (
+                    (permissionOk) => {
+                        if (permissionOk) {
+                            // Get the current location
+                            PositionViewModel.getCurrentLocation().then(newLocation => {;
+                            setLocationState(prevState => ({
+                                ...prevState,
+                                hasCheckedPermission: true,
+                                lastKnownLocation: newLocation,
+                                isLocationAllowed: true,
+                            }));
+                            // Subscribe to location updates
+                            PositionViewModel.subscribeToLocationUpdates((location) => {
+                                setLocationState(prevState => ({
+                                    ...prevState,
+                                    lastKnownLocation: location,
+                                }));
+                            });
+                        })}
+                    }
+                )
+            }
+        )
+    }
+
     return (
         <>
 
@@ -32,29 +64,7 @@ const MyTabBar = ({
                     text={appState.error.message}
                     confirmText={appState.error.actionText}
                     dismissText={appState.error.dismissText}
-                    onConfirm={() => {
-                        handleErrorByType(
-                            appState.error,
-                            (screen) => {
-                                navigation.navigate(screen)
-                            },
-                            () => {
-                                PositionViewModel.requestPermission().then (
-                                    (permissionOk) => {
-                                        if (permissionOk)
-                                            startTrackingLocation((location) => {
-                                                setLocationState(prevState => ({
-                                                    ...prevState,
-                                                    lastKnownLocation: location,
-                                                    isLocationAllowed: true,
-                                                }));
-                                            });
-                                    }
-                                )
-                            }
-                        )
-                    }
-                    }
+                    onConfirm={() => handleError(appState.error)}
                 />
             }
 

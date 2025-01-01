@@ -26,54 +26,40 @@ const HomeScreen = ({ }) => {
     const { userData } = useContext(UserContext);
 
 
-    const fetchNearestMenus = async () => {
-        try {
-            const menus = await ViewModel.fetchNearbyMenus(locationState.lastKnownLocation.lat, locationState.lastKnownLocation.lng);
-            setNearestMenus([...menus])
-            // Lazy Load Images
-            // menus.forEach(menu => {
-            //     ViewModel.fetchMenuImage(menu.menu.mid, menu.menu.imageVersion).then((image) => {
-            //         setNearestMenus(prevState => {
-            //             const newMenus = [...prevState];
-            //             const index = newMenus.findIndex(m => m.menu.mid === menu.menu.mid);
-            //             newMenus[index].image = image;
-            //             return newMenus;
-            //         })
-            //     })
-            // });
-                    
-        } catch (err) {
-            appState.setAppState(prevState => ({
-                ...prevState,
-                error: err
-            }));
-        }
-    }
-
     useEffect(() => {
-        console.log("useEffect re-rendered:", locationState.lastKnownLocation);
         const fetchMenus = async () => {
             const location = locationState.lastKnownLocation;
             if (appState.isLoading || !location) return;
-            
+
             try {
-              const menus = await ViewModel.fetchNearbyMenus(
-                location.lat,
-                location.lng
-              );
-              setNearestMenus(menus);
+                const menus = await ViewModel.fetchNearbyMenus(
+                    location.lat,
+                    location.lng
+                );
+                setNearestMenus(menus);
+                // Lazy Load Images
+                menus.forEach(menu => {
+                    ViewModel.fetchMenuImage(menu.menu.mid, menu.menu.imageVersion).then((image) => {
+                        setNearestMenus(prevState => {
+                            const newMenus = [...prevState];
+                            const index = newMenus.findIndex(m => m.menu.mid === menu.menu.mid);
+                            newMenus[index].image = image;
+                            return newMenus;
+                        })
+                    })
+                });
             } catch (err) {
-              appState.setAppState(prevState => ({
-                ...prevState,
-                error: err
-              }));
+                appState.setAppState(prevState => ({
+                    ...prevState,
+                    error: err
+                }));
             }
         };
 
         fetchMenus();
     }, [
-        locationState.lastKnownLocation?.lat, 
-        locationState.lastKnownLocation?.lng, 
+        locationState.lastKnownLocation?.lat,
+        locationState.lastKnownLocation?.lng,
         appState.isLoading
     ]);
 
@@ -86,7 +72,7 @@ const HomeScreen = ({ }) => {
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
-    } 
+    }
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -94,7 +80,7 @@ const HomeScreen = ({ }) => {
 
                 <Header userData={userData} />
 
-                
+
                 <MenusList nearestMenus={nearestMenus} navigation={navigation} />
 
                 <StatusBar style="auto" />
@@ -130,13 +116,13 @@ const MenusList = ({ nearestMenus, navigation }) => (
 
         {nearestMenus && <FlatList
             data={nearestMenus}
-            renderItem={({ item }) => {
-                return (<MenuPreview
+            renderItem={({ item }) => 
+                <MenuPreview
                     menu={item}
                     onPress={() => navigation.navigate("MenuDetails")}
                     style={{ borderTopWidth: 1 }}
-                />)
-            }}
+                />
+            }
             contentContainerStyle={{ flexGrow: 1 }}
             keyExtractor={item => item.menu.mid}
             scrollEnabled={false}

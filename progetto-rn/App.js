@@ -13,7 +13,7 @@ import ViewModel from './viewmodel/ViewModel';
 import { useEffect, useState } from 'react';
 import { UserContextProvider } from './view/context/UserContext';
 import PositionViewModel from './viewmodel/PositionViewModel';
-import { AppStateContextProvider, startTrackingLocation } from './view/context/AppStateContext';
+import { AppStateContextProvider } from './view/context/AppStateContext';
 import MyError from './model/types/MyError';
 
 const Tab = createBottomTabNavigator();
@@ -63,6 +63,7 @@ export default function App() {
 	const checkLocationPermission = async () => {
 		const locationAllowed = await PositionViewModel.checkLocationPermission();
 		if (locationAllowed) {
+			// Get the current location
 			const newLocation = await PositionViewModel.getCurrentLocation();
 			setLocationState(prevState => ({
 				...prevState,
@@ -70,6 +71,7 @@ export default function App() {
 				lastKnownLocation: newLocation,
 				isLocationAllowed: true,
 			}));
+			// Subscribe to location updates
 			PositionViewModel.subscribeToLocationUpdates((location) => {
 				setLocationState(prevState => ({
 					...prevState,
