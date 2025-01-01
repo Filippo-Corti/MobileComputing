@@ -2,6 +2,7 @@ import APIController from "../model/APIController";
 import AsyncStorageController, {KEYS} from "../model/AsyncStorageController";
 import DBController from "../model/DBController";
 import MyError from "../model/types/MyError";
+import PositionViewModel from "./PositionViewModel";
 
 export default class ViewModel {
 
@@ -145,13 +146,18 @@ export default class ViewModel {
      * @param {number} latitude 
      * @param {number} longitude 
      * @param {number} menuId 
-     * @returns {Promise<MenuDetails>}
+     * @returns {Promise<MenuDetailsWithImage>}
      * @throws {MyError}
      */
     static async fetchMenuDetails(latitude, longitude, menuId) {
         this.assertSessionData();
-
-        return await APIController.getMenuDetails(ViewModel.sid, latitude, longitude, menuId);
+        const menuDetails = await APIController.getMenuDetails(ViewModel.sid, latitude, longitude, menuId);
+        menuDetails.location.address = await PositionViewModel.getAddressFromLocation(menuDetails.location);
+        const image = await ViewModel.fetchMenuImage(menuId, menuDetails.imageVersion);
+        return {
+            menuDetails: menuDetails,
+            image: image
+        }
     }
 
     /**

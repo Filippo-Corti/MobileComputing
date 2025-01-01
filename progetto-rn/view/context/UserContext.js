@@ -1,6 +1,16 @@
 import React, { createContext, useState, useMemo } from 'react';
 
-export const UserContext = createContext(null);
+/**
+ * @typedef {Object} UserContextValue
+ * @property {UserState} userState
+ * @property {React.Dispatch<React.SetStateAction<UserState>>} setUserState 
+ * @property {LastOrderState} orderState 
+ * @property {React.Dispatch<React.SetStateAction<LastOrderState>>} setOrderState
+*/
+
+export const UserContext = createContext(
+    /** @type {UserContextValue} */(null)
+);
 
 /**
  * @param {{ 
@@ -19,6 +29,7 @@ export const UserContextProvider = ({
 	const [userState, setUserState] = useState(userStateInit);
 	const [orderState, setOrderState] = useState(orderStateInit);
 
+	/** @type {UserContextValue} */
 	const contextValue = useMemo(() => ({
 		userState,
 		setUserState,

@@ -2,14 +2,14 @@ import {View, Text, StyleSheet} from 'react-native';
 import MyIcon from '../icons/MyIcon';
 import {globalStyles} from '../../../../styles/global';
 
-export default InfoTextBox = ({text, label, iconName}) => {
+export default InfoTextBox = ({text, label = null, iconName}) => {
 
     return (
         <View style={styles.container}>
-            { iconName && <View style={styles.iconContainer}>
+            { iconName && <View>
                 <MyIcon name={iconName} size={32} color="black"/>
             </View> }
-            <View style={styles.textContainer}>
+            <View style={{flex: 1}}>
                 { label && <Text style={styles.label}>{label}</Text> }
                 <Text style={styles.text}>{text}</Text>
             </View>
@@ -36,6 +36,9 @@ const styles = StyleSheet.create({
     text: {
         ...globalStyles.textBlack,
         ...globalStyles.textNormalMedium,
+        maxWidth: '100%',
+        flexWrap: 'wrap',
+        flexShrink: 1,
     },
 
 

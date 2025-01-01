@@ -1,7 +1,16 @@
 import React, { createContext, useState, useMemo } from 'react';
-import PositionViewModel from '../../viewmodel/PositionViewModel';
 
-export const AppStateContext = createContext(null);
+/**
+ * @typedef {Object} AppStateContextValue
+ * @property {LocationState} locationState 
+ * @property {React.Dispatch<React.SetStateAction<LocationState>>} setLocationState 
+ * @property {AppState} appState 
+ * @property {React.Dispatch<React.SetStateAction<AppState>>} setAppState
+*/
+
+export const AppStateContext = createContext(
+    /** @type {AppStateContextValue} */ (null)
+);
 
 /**
  * @param {{ 
@@ -20,6 +29,8 @@ export const AppStateContextProvider = ({
     const [locationState, setLocationState] = useState(locationStateInit);
     const [appState, setAppState] = useState(appStateInit);
 
+    
+    /** @type {AppStateContextValue} */
     const contextValue = useMemo(() => ({
         locationState,
         setLocationState,

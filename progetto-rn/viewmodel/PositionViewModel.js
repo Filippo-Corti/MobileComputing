@@ -49,10 +49,11 @@ export default class PositionViewModel {
     static async getCurrentLocation() {
         const location = await Location.getCurrentPositionAsync()
         console.log("Fetched Current Location", location);
+        const address = await PositionViewModel.getAddressFromCoordinates(location.coords.latitude, location.coords.longitude);
         return {
             lat: location.coords.latitude,
             lng: location.coords.longitude,
-            address: null
+            address: address
         }
     }
 

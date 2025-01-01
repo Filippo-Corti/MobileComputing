@@ -21,9 +21,11 @@ const HomeScreen = ({ }) => {
 
     const navigation = useNavigation();
 
+    /** @type {[Array<MenuWithImage>, React.Dispatch<React.SetStateAction<Array<MenuWithImage>>>]} */
     const [nearestMenus, setNearestMenus] = useState([]);
-    const { appState, locationState } = useContext(AppStateContext);
-    const { userData } = useContext(UserContext);
+
+    const { appState, setAppState, locationState } = useContext(AppStateContext);
+    const { userState } = useContext(UserContext);
 
 
     useEffect(() => {
@@ -49,7 +51,7 @@ const HomeScreen = ({ }) => {
                     })
                 });
             } catch (err) {
-                appState.setAppState(prevState => ({
+                setAppState(prevState => ({
                     ...prevState,
                     error: err
                 }));
@@ -78,8 +80,7 @@ const HomeScreen = ({ }) => {
         <SafeAreaView style={globalStyles.container}>
             <ScrollView>
 
-                <Header userData={userData} />
-
+                <Header user={userState.user} />
 
                 <MenusList nearestMenus={nearestMenus} navigation={navigation} />
 
@@ -89,11 +90,11 @@ const HomeScreen = ({ }) => {
     );
 }
 
-const Header = ({ userData }) => (
+const Header = ({ user }) => (
     <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginTop: 22 }]}>
         <View>
             <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                Welcome Back{(userData) ? ", " + userData.fName : ""}
+                Welcome Back{(user) ? ", " + user.firstName : ""}
             </Text>
             <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
                 What are you craving?
@@ -119,7 +120,9 @@ const MenusList = ({ nearestMenus, navigation }) => (
             renderItem={({ item }) => 
                 <MenuPreview
                     menu={item}
-                    onPress={() => navigation.navigate("MenuDetails")}
+                    onPress={() => {
+                        navigation.navigate("MenuDetails", { menuId: item.menu.mid })
+                    }}
                     style={{ borderTopWidth: 1 }}
                 />
             }

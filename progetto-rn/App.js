@@ -2,7 +2,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { useFonts } from 'expo-font';
 import { fonts } from './styles/global';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import HomeStack from './view/components/navigation/HomeStack';
 import LastOrderScreen from './view/components/screens/LastOrderScreen';
 import AccountStack from './view/components/navigation/AccountStack';

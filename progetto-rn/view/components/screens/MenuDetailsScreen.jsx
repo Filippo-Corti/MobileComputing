@@ -1,37 +1,59 @@
-import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { globalStyles, imageBase64 } from '../../../styles/global';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { globalStyles } from '../../../styles/global';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import Separator from '../common/other/Separator';
 import InfoTextBox from '../common/other/InfoTextBox';
 import LargeButton from '../common/buttons/LargeButton';
-
+import { useContext, useEffect, useState } from 'react';
+import ViewModel from '../../../viewmodel/ViewModel';
+import { AppStateContext } from '../../context/AppStateContext';
+import colors from '../../../styles/colors';
 
 const { height } = Dimensions.get('window');
 
-export default MenuDetailsScreen = ({ menuInformation }) => {
-
-    menuInformation = {
-        title: 'McMushroom Pizza',
-        price: 17,
-        description: 'Garlic, olive oil base, mozarella, cremini mushrooms, ricotta, thyme, white truffle oil. Add arugula for an extra charge lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        deliveryTime: 30,
-        distanceFromYou: 0.2,
-        image: imageBase64,
-    }
-
-    let image = menuInformation.image;
-    if (image) {
-        if (!image.startsWith("data:image/jpeg;base64,")) {
-            image = "data:image/jpeg;base64," + image;
-        }
-    }
-
-    let price = menuInformation.price.toFixed(2);
-
+/**
+ * @param {{
+ *  route: { params: { menuId: number } }
+ * }} props 
+ * @returns {JSX.Element}
+ */
+const MenuDetailsScreen = ({ 
+    route
+}) => {
 
     const navigation = useNavigation();
+    const menuId = route.params.menuId;
+
+    /** @type {[MenuDetailsWithImage, React.Dispatch<React.SetStateAction<MenuDetailsWithImage>>]} */
+    const [menuDetails, setMenuDetails] = useState(null);
+    
+    const { appState, locationState } = useContext(AppStateContext);
+
+    useEffect(() => {
+        const fetchMenuDetails = async () => {
+            if (menuDetails && menuDetails.menuDetails.mid === menuId) return;
+            const menu = await ViewModel.fetchMenuDetails(
+                locationState.lastKnownLocation.lat,
+                locationState.lastKnownLocation.lng,
+                menuId
+            );
+            setMenuDetails(menu);
+            console.log("Menu Details Fetched");
+        };
+
+        fetchMenuDetails();
+    }, [menuId]);
+
+
+    if (appState.isLoading || !menuDetails || menuDetails.menuDetails.mid !== menuId) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
@@ -39,29 +61,29 @@ export default MenuDetailsScreen = ({ menuInformation }) => {
 
                 <View style={{ flex: 1 }}>
                     <View style={styles.imageContainer}>
-                        {image && <Image source={{ uri: image }} style={styles.image} />}
-                        {!image && <View style={styles.iconContainer}>
+                        {menuDetails.image && <Image source={{ uri: menuDetails.image.base64 }} style={styles.image} />}
+                        {!menuDetails.image && <View style={styles.iconContainer}>
                             <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />
                         </View>}
-                        <TouchableOpacity style={[styles.backArrowContainer, { borderWidth: (!image) ? 1 : 0 }]} onPress={() => navigation.goBack()}>
+                        <TouchableOpacity style={[styles.backArrowContainer, { borderWidth: (!menuDetails.image) ? 1 : 0 }]} onPress={() => navigation.goBack()}>
                             <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                         </TouchableOpacity>
                     </View>
 
                     <View style={[globalStyles.insetContainer, { marginVertical: 20 }]}>
                         <Text style={[globalStyles.textBlack, globalStyles.textTitleBold, {marginTop: 5, marginBottom: 10,}]}>
-                            {menuInformation.title}
+                            {menuDetails.menuDetails.name}
                         </Text>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', gap: 5, marginBottom: 10 }}>
                             <MyIcon name={IconNames.PRICE_TAG} size={22} color={colors.primary} />
                             <Text style={[globalStyles.textDarkGray, globalStyles.textSubtitleMedium]}>
-                                €{price}
+                                €{menuDetails.menuDetails.price}
                             </Text>
                         </View>
 
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, {marginTop: 10,}]}>
-                            {menuInformation.description}
+                            {menuDetails.menuDetails.longDescription}
                         </Text>
                     </View>
 
@@ -69,24 +91,32 @@ export default MenuDetailsScreen = ({ menuInformation }) => {
                     <InfoTextBox
                         iconName={IconNames.MARKER}
                         label={"Menu Location"}
-                        text={"San Francisco Bay Area"}
+                        text={menuDetails.menuDetails.location.address}
                     />
                     <Separator size={10} color={colors.lightGray} />
                     <InfoTextBox
                         iconName={IconNames.CLOCK}
-                        text={"Approximately " + menuInformation.deliveryTime + " min(s)"}
+                        text={"Approximately " + menuDetails.menuDetails.deliveryTime + " min(s)"}
                     />
                     <Separator size={1} color={colors.lightGray} />
                 </View>
 
                 <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
-                    <LargeButton text={"Order • €" + price} onPress={() => navigation.navigate("ConfirmOrder")} />
+                    <LargeButton 
+                        text={"Order • €" + menuDetails.menuDetails.price} 
+                        onPress={() => 
+                            // @ts-ignore
+                            navigation.navigate("ConfirmOrder", { menu: menuDetails })
+                        } 
+                    />
                 </View>
 
             </ScrollView>
         </SafeAreaView>
     );
 }
+
+export default MenuDetailsScreen;
 
 const styles = StyleSheet.create({
 
