@@ -99,6 +99,7 @@ const LastOrderScreen = ({ }) => {
                     <ShowOrderState 
                         orderData={orderState.lastOrder} 
                         menuData={orderState.lastOrderMenu}
+                        locationData={locationState}
                     />
 
                 <StatusBar style="auto" />
@@ -107,23 +108,49 @@ const LastOrderScreen = ({ }) => {
     );
 }
 
-const Header = ({timeInfo}) => (
-    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
-        <View style={{ flex: 1 }}>
-            <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
-                {timeInfo.statusText}
-            </Text>
-            {
-                <>
-                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
-                        <Text style={[globalStyles.textNormalMedium]}>{timeInfo.deliveryText}</Text> ({timeInfo.minutesText})
-                    </Text>
-                    <ProgressBar progress={timeInfo.progress} />
-                </>
-            }
+const Header = ({
+    orderData
+}) => {
+    
+    const now = new Date().getTime()
+    const creationTime = new Date(orderData.creationTimestamp).getTime()
+    const expectedDeliveryTime = new Date(orderData.expectedDeliveryTimestamp).getTime()
+    const deliveryTime = new Date(orderData.deliveryTimestamp).getTime()
+    const completed = (orderData.status === "COMPLETED")
+    const totalTime = expectedDeliveryTime - creationTime
+    const elapsedTime = now - creationTime
+
+    const progress = (completed) ? 100 : (elapsedTime / totalTime) * 100
+    const minutesAway = Math.floor((((completed) ? deliveryTime : expectedDeliveryTime) - now) / 60000)
+
+
+    return (
+        <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginVertical: 22 }]}>
+            <View style={{ flex: 1 }}>
+                <Text style={[globalStyles.textBlack, globalStyles.textTitleMedium]}>
+                    {(completed) ? "Your order has arrived!" : "Almost there..."}
+                </Text>
+                {
+                    <>
+                        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
+                            <Text style={[globalStyles.textNormalMedium]}>
+                                {(completed) 
+                                    ? "Arrived at " + new Date(deliveryTime).toLocaleTimeString() 
+                                    : "Arriving at " + new Date(expectedDeliveryTime).toLocaleTimeString()
+                                }
+                            </Text> 
+                            {(completed)
+                                ? "  (" + (- minutesAway) + " minutes ago)"
+                                : "  (" + minutesAway + " minutes away)"
+                            }
+                        </Text>
+                        <ProgressBar progress={progress} />
+                    </>
+                }
+            </View>
         </View>
-    </View>
-)
+    )       
+}
 
 const NoOrderState = ({ onPress }) => (
     <View style={[globalStyles.insetContainer, { marginTop: 20, marginHorizontal: 5 }]}>
@@ -141,75 +168,110 @@ const NoOrderState = ({ onPress }) => (
 
 const ShowOrderState = ({ 
     orderData,
-    menuData
-}) => (
-    <>
+    menuData,
+    locationData
+}) => {
 
-        {/* <Header timeInfo={timeInfo} /> */}
+    const showMap = locationData.isLocationAllowed && locationData.lastKnownLocation
 
-        {/* <MapView
-            style={styles.map}
-            provider="google"
-            showsCompass={true}
-            showsPointsOfInterest={false}
-            showsUserLocation={true}
-            followsUserLocation={true}
-            loadingEnabled={true}
-            initialRegion={{
-                ...orderData.deliveryLocation,
-                ...deltas
-            }}
-        >
-            <Marker
-                coordinate={orderData.deliveryLocation}
-                title="Delivery Place"
-                description="The Location where the drone will deliver the order"
-                onPress={() => console.log("Hello Marker")}
-            />
+    const userLocation = locationData.lastKnownLocation
+    const droneLocation = orderData.currentPosition
+    const deliveryLocation = orderData.deliveryLocation
 
-            <Marker
-                coordinate={orderData.currentLocation}
-                title="Drone Location"
-                description="The current location of the drone"
-                onPress={() => console.log("Hello Marker")}
-            />
+    const map = useRef(null);
 
-        </MapView> */}
-        <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
-            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                Delivery details
-            </Text>
-            <View style={{ marginVertical: 5 }}>
-                <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                    Pick it up at
+    const loadMap = () => {
+        console.log("Map is ready, fitting to coordinates");
+        if (map.current && showMap) {
+            console.log("Doing it");
+            const coords = [
+                { latitude: userLocation.lat, longitude: userLocation.lng },
+                { latitude: droneLocation.lat, longitude: droneLocation.lng },
+                { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
+            ];
+
+            map.current.fitToCoordinates(coords, {
+                edgePadding: { top: 100, right: 100, bottom: 100, left: 100 }
+            });
+
+        }
+    }
+
+    console.log("Drone Location", droneLocation);
+
+    return (
+        <>
+            <Header orderData={orderData} />
+
+            {showMap && 
+                <MapView
+                    key={"order-map"}
+                    ref={map}
+                    style={styles.map}
+                    showsCompass={true}
+                    showsPointsOfInterest={false}
+                    showsUserLocation={true}
+                    loadingEnabled={true}
+                    showsMyLocationButton={true}
+                    onMapReady={loadMap}
+                >
+                    <Marker
+                        coordinate={{
+                            latitude: deliveryLocation.lat,
+                            longitude: deliveryLocation.lng,
+                        }}
+                        title="Delivery Place"
+                        description="The Location where the drone will deliver the order"
+                    />
+
+                    <Marker
+                        coordinate={{
+                            latitude: droneLocation.lat,
+                            longitude: droneLocation.lng,
+                        }}
+                        title="Drone Location"
+                        description="The current location of the drone"
+                    />
+
+                </MapView> 
+            }
+
+            <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
+                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                    Delivery details
                 </Text>
-                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                    {orderData.deliveryLocation.address}
+                <View style={{ marginVertical: 5 }}>
+                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                        Pick it up at
+                    </Text>
+                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                        {orderData.deliveryLocation.address}
+                    </Text>
+                </View>
+                <View style={{ marginVertical: 5 }}>
+                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                        Drone is currently at
+                    </Text>
+                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                        {orderData.currentPosition.address}
+                    </Text>
+                </View>
+            </View>
+            <Separator size={10} color={colors.lightGray} />
+
+            <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
+                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                    Order details
                 </Text>
             </View>
-            <View style={{ marginVertical: 5 }}>
-                <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                    Drone is currently at
-                </Text>
-                <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                    {orderData.currentPosition.address}
-                </Text>
-            </View>
-        </View>
-        <Separator size={10} color={colors.lightGray} />
-
-        <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>
-            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                Order details
-            </Text>
-        </View>
-        <MenuSmallPreview
-            image={menuData.image.base64}
-            title={"1x " + menuData.menu.name}
-            price={menuData.menu.price}
-        />
-    </>
-)
+            <MenuSmallPreview
+                image={menuData.image.base64}
+                title={"1x " + menuData.menu.name}
+                price={menuData.menu.price}
+            />
+        </>
+    )
+}
 
 export default LastOrderScreen;
 

@@ -117,6 +117,7 @@ const MenuDetailsScreen = ({
     );
 }
 
+
 export default MenuDetailsScreen;
 
 const styles = StyleSheet.create({
