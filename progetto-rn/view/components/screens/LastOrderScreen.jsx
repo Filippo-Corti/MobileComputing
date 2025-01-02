@@ -145,7 +145,7 @@ const Header = ({
                             </Text>
                             {(completed)
                                 ? "  (" + (- minutesAway) + " minutes ago)"
-                                : "  (" + minutesAway + " minutes away)"
+                                : "  (" + (minutesAway + 1) + " minutes away)"
                             }
                         </Text>
                         <ProgressBar progress={progress} />
