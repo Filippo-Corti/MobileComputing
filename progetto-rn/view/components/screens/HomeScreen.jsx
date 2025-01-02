@@ -1,4 +1,4 @@
-import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
 import MapView from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../../../styles/global';
@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MyLogo from '../common/icons/MyLogo';
 import MenuPreview from '../common/other/MenuPreview';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { UserContext } from '../../context/UserContext';
 import { AppStateContext } from '../../context/AppStateContext';
 import ViewModel from '../../../viewmodel/ViewModel';
@@ -23,6 +23,7 @@ const HomeScreen = ({ }) => {
 
     /** @type {[Array<MenuWithImage>, React.Dispatch<React.SetStateAction<Array<MenuWithImage>>>]} */
     const [nearestMenus, setNearestMenus] = useState([]);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const { appState, locationState, setError } = useContext(AppStateContext);
     const { userState } = useContext(UserContext);
@@ -32,32 +33,39 @@ const HomeScreen = ({ }) => {
         navigation.navigate("MenuDetails", { menuId });
     }
 
-    useEffect(() => {
-        const fetchMenus = async () => {
-            const location = locationState.lastKnownLocation;
-            if (appState.isLoading || !location) return;
+    const fetchMenus = async () => {
+        const location = locationState.lastKnownLocation;
+        if (appState.isLoading || !location) return;
 
-            try {
-                const menus = await ViewModel.fetchNearbyMenus(
-                    location.lat,
-                    location.lng
-                );
-                setNearestMenus(menus);
-                // Lazy Load Images
-                menus.forEach(menu => {
-                    ViewModel.fetchMenuImage(menu.menu.mid, menu.menu.imageVersion).then((image) => {
-                        setNearestMenus(prevState => {
-                            const newMenus = [...prevState];
-                            const index = newMenus.findIndex(m => m.menu.mid === menu.menu.mid);
-                            newMenus[index].image = image;
-                            return newMenus;
-                        })
+        try {
+            const menus = await ViewModel.fetchNearbyMenus(
+                location.lat,
+                location.lng
+            );
+            setNearestMenus(menus);
+            // Lazy Load Images
+            menus.forEach(menu => {
+                ViewModel.fetchMenuImage(menu.menu.mid, menu.menu.imageVersion).then((image) => {
+                    setNearestMenus(prevState => {
+                        const newMenus = [...prevState];
+                        const index = newMenus.findIndex(m => m.menu.mid === menu.menu.mid);
+                        newMenus[index].image = image;
+                        return newMenus;
                     })
-                });
-            } catch (err) {
-                setError(err)
-            }
-        };
+                })
+            });
+        } catch (err) {
+            setError(err)
+        }
+    };
+
+    const onRefresh = useCallback(() => {
+        setIsRefreshing(true);
+        fetchMenus().then(() => setIsRefreshing(false));
+    }, []);
+
+
+    useEffect(() => {
 
         fetchMenus();
     }, [
@@ -79,7 +87,14 @@ const HomeScreen = ({ }) => {
 
     return (
         <SafeAreaView style={globalStyles.container}>
-            <ScrollView>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
+            >
 
                 <Header user={userState.user} />
 
