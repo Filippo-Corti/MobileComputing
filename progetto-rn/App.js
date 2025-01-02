@@ -15,6 +15,7 @@ import { UserContextProvider } from './view/context/UserContext';
 import PositionViewModel from './viewmodel/PositionViewModel';
 import { AppStateContextProvider } from './view/context/AppStateContext';
 import MyError from './model/types/MyError';
+import NavigationPersistence from './view/components/navigation/NavigationPersistence';
 
 const Tab = createBottomTabNavigator();
 
@@ -130,7 +131,7 @@ export default function App() {
 	return (
 		<AppStateContextProvider locationStateInit={locationState} appStateInit={appState}>
 			<UserContextProvider userStateInit={userState} orderStateInit={lastOrderState}>
-				<NavigationContainer>
+				<NavigationPersistence>
 					<Tab.Navigator
 						id={undefined}
 						screenOptions={{
@@ -143,7 +144,7 @@ export default function App() {
 						<Tab.Screen name="AccountStack" component={AccountStack} />
 					</Tab.Navigator>
 
-				</NavigationContainer>
+				</NavigationPersistence>
 			</UserContextProvider>
 		</AppStateContextProvider>
 	);
