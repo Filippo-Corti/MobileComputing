@@ -91,6 +91,8 @@ const ConfirmOrderScreen = ({
         );
     }
 
+    const cardLast4 = userState.user.cardNumber.slice(-4);
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
@@ -161,7 +163,7 @@ const ConfirmOrderScreen = ({
                                     <View style={{ flex: 1 }}>
                                         <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
                                             {userState.user.cardFullName}'s Credit Card {'\n'}
-                                            {userState.user.cardNumber}
+                                            **** **** **** {cardLast4}
                                         </Text>
                                     </View>
                                 </View>
