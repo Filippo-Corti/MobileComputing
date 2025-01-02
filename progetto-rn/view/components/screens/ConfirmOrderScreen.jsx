@@ -91,7 +91,7 @@ const ConfirmOrderScreen = ({
         );
     }
 
-    const cardLast4 = userState.user.cardNumber.slice(-4);
+    const cardLast4 = userState?.user?.cardNumber?.slice(-4);
 
     return (
         <SafeAreaProvider>

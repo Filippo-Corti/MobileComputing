@@ -85,61 +85,35 @@ export default class PositionViewModel {
         }
     }
 
-    //Returns the values for latitudeDelta and longitudeDelta so that the map
-    //centered in centerPosition also shows toShowPosition
-    // static calculateMapDeltas(centerPosition, toShowPosition) {
-    //     const latitudeDelta = Math.abs(centerPosition.latitude - toShowPosition.latitude) * 2 * 1.50;
-    //     const longitudeDelta = Math.abs(centerPosition.longitude - toShowPosition.longitude) * 2 * 1.50;
-    //     return {
-    //         latitudeDelta: Math.max(0.001, latitudeDelta),
-    //         longitudeDelta: Math.max(0.001, longitudeDelta),
-    //     }
-    // }
+    /**
+     * @param {APILocation} coords1 
+     * @param {APILocation} coords2 
+     * @returns {number}
+     */
+    static coordinatesDistanceInKm(coords1, coords2) {
+        function toRad(x) {
+            return x * Math.PI / 180;
+        }
 
-    // static calculateMapDeltas2Positions(centerPosition, toShowPosition1, toShowPosition2) {
-    //     const deltas1 = this.calculateMapDeltas(centerPosition, toShowPosition1);
-    //     const deltas2 = this.calculateMapDeltas(centerPosition, toShowPosition2);
+        const lon1 = coords1.lng;
+        const lat1 = coords1.lat;
 
-    //     const latitudeDelta = parseFloat(Math.max(deltas1.latitudeDelta, deltas2.latitudeDelta).toFixed(6));
-    //     const longitudeDelta = parseFloat(Math.max(deltas1.longitudeDelta, deltas2.longitudeDelta).toFixed(6));
+        const lon2 = coords2.lng;
+        const lat2 = coords2.lat;
 
-    //     return {
-    //         latitudeDelta: latitudeDelta,
-    //         longitudeDelta: longitudeDelta
-    //     }
-    // }
+        const R = 6371; // km
 
-    // static parseLocation(location) {
-    //     return {
-    //         latitude: location.lat,
-    //         longitude: location.lng,
-    //     }
-    // }
+        const x1 = lat2 - lat1;
+        const dLat = toRad(x1);
+        const x2 = lon2 - lon1;
+        const dLon = toRad(x2)
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
 
-    // static coordinatesDistanceInKm(coords1, coords2) {
-    //     function toRad(x) {
-    //         return x * Math.PI / 180;
-    //     }
-
-    //     const lon1 = coords1.longitude;
-    //     const lat1 = coords1.latitude;
-
-    //     const lon2 = coords2.longitude;
-    //     const lat2 = coords2.latitude;
-
-    //     const R = 6371; // km
-
-    //     const x1 = lat2 - lat1;
-    //     const dLat = toRad(x1);
-    //     const x2 = lon2 - lon1;
-    //     const dLon = toRad(x2)
-    //     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    //         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-    //         Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    //     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    //     const d = R * c;
-
-    //     return d;
-    // }
+        return d;
+    }
 
 }

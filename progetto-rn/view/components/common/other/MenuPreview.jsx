@@ -3,6 +3,8 @@ import { globalStyles } from '../../../../styles/global';
 import MyIcon, { IconNames } from '../icons/MyIcon';
 import PositionViewModel from '../../../../viewmodel/PositionViewModel';
 import colors from '../../../../styles/colors';
+import { AppStateContext } from '../../../context/AppStateContext';
+import { useContext } from 'react';
 
 /**
  * @param {{
@@ -19,9 +21,10 @@ const MenuPreview = ({
 }) => {
 
     onPress = onPress || (() => {});
+
+    const {locationState} = useContext(AppStateContext);
     
-    //const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(userLocation, menuInformation.location).toFixed(1);
-    const distanceFromYou = 0
+    const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(locationState.lastKnownLocation, menu.menu.location).toFixed(1);
 
 
     return (
@@ -33,7 +36,7 @@ const MenuPreview = ({
                     <Text style={styles.description}>{menu.menu.shortDescription}</Text>
                 </View>
                 <View>
-                    <Text style={styles.otherInfo}>{menu.menu.deliveryTime}min • {distanceFromYou}km from you</Text>
+                    {locationState.lastKnownLocation && <Text style={styles.otherInfo}>{menu.menu.deliveryTime}min • {distanceFromYou}km from you</Text>}
                 </View>
             </View>
             <View style={styles.imageContainer}>

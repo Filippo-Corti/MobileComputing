@@ -10,6 +10,7 @@ import { useContext, useEffect, useState } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
 import { AppStateContext } from '../../context/AppStateContext';
 import colors from '../../../styles/colors';
+import React from 'react';
 
 const { height } = Dimensions.get('window');
 
@@ -19,7 +20,7 @@ const { height } = Dimensions.get('window');
  * }} props 
  * @returns {JSX.Element}
  */
-const MenuDetailsScreen = ({ 
+const MenuDetailsScreen = ({
     route
 }) => {
 
@@ -28,7 +29,7 @@ const MenuDetailsScreen = ({
 
     /** @type {[MenuDetailsWithImage, React.Dispatch<React.SetStateAction<MenuDetailsWithImage>>]} */
     const [menuDetails, setMenuDetails] = useState(null);
-    
+
     const { appState, locationState } = useContext(AppStateContext);
 
     const navigateToConfirmOrder = () => {
@@ -75,7 +76,7 @@ const MenuDetailsScreen = ({
                     </View>
 
                     <View style={[globalStyles.insetContainer, { marginVertical: 20 }]}>
-                        <Text style={[globalStyles.textBlack, globalStyles.textTitleBold, {marginTop: 5, marginBottom: 10,}]}>
+                        <Text style={[globalStyles.textBlack, globalStyles.textTitleBold, { marginTop: 5, marginBottom: 10, }]}>
                             {menuDetails.menu.name}
                         </Text>
 
@@ -86,7 +87,7 @@ const MenuDetailsScreen = ({
                             </Text>
                         </View>
 
-                        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, {marginTop: 10,}]}>
+                        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginTop: 10, }]}>
                             {menuDetails.menu.longDescription}
                         </Text>
                     </View>
@@ -97,17 +98,20 @@ const MenuDetailsScreen = ({
                         label={"Menu Location"}
                         text={menuDetails.menu.location.address}
                     />
-                    <Separator size={10} color={colors.lightGray} />
-                    <InfoTextBox
-                        iconName={IconNames.CLOCK}
-                        text={"Approximately " + menuDetails.menu.deliveryTime + " min(s)"}
-                    />
-                    <Separator size={1} color={colors.lightGray} />
+                    {locationState.lastKnownLocation &&
+                        <>
+                            <Separator size={10} color={colors.lightGray} />
+                            <InfoTextBox
+                                iconName={IconNames.CLOCK}
+                                text={"Approximately " + menuDetails.menu.deliveryTime + " min(s)"}
+                            />
+                            <Separator size={1} color={colors.lightGray} />
+                        </>}
                 </View>
 
                 <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
-                    <LargeButton 
-                        text={"Order • €" + menuDetails.menu.price} 
+                    <LargeButton
+                        text={"Order • €" + menuDetails.menu.price}
                         onPress={navigateToConfirmOrder}
                     />
                 </View>
