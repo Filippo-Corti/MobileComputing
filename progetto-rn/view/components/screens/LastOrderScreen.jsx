@@ -73,7 +73,7 @@ const LastOrderScreen = ({ }) => {
         };
     }, [isFocused]);
 
-    if (appState.isLoading || !orderState.lastOrder || !orderState.lastOrderMenu) {
+    if (appState.isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <MyLogo />
@@ -82,12 +82,16 @@ const LastOrderScreen = ({ }) => {
         );
     }
 
-    if (!userState.isUserRegistered || !userState.user || !userState.user.lastOid) {
+    if (!userState.isUserRegistered || !userState.user || !userState.user.lastOid || !orderState.lastOrder || !orderState.lastOrderMenu) {
         return (
-            <NoOrderState 
-                // @ts-ignore
-                onPress={() => navigation.navigate("HomeStack")} 
-            />
+            <SafeAreaView style={globalStyles.container}>
+                <ScrollView>
+                    <NoOrderState
+                        // @ts-ignore
+                        onPress={() => navigation.navigate("HomeStack")}
+                    />
+                </ScrollView>
+            </SafeAreaView>
         );
 
     }
@@ -95,12 +99,12 @@ const LastOrderScreen = ({ }) => {
     return (
         <SafeAreaView style={globalStyles.container}>
             <ScrollView>
-                    
-                    <ShowOrderState 
-                        orderData={orderState.lastOrder} 
-                        menuData={orderState.lastOrderMenu}
-                        locationData={locationState}
-                    />
+
+                <ShowOrderState
+                    orderData={orderState.lastOrder}
+                    menuData={orderState.lastOrderMenu}
+                    locationData={locationState}
+                />
 
                 <StatusBar style="auto" />
             </ScrollView>
@@ -111,7 +115,7 @@ const LastOrderScreen = ({ }) => {
 const Header = ({
     orderData
 }) => {
-    
+
     const now = new Date().getTime()
     const creationTime = new Date(orderData.creationTimestamp).getTime()
     const expectedDeliveryTime = new Date(orderData.expectedDeliveryTimestamp).getTime()
@@ -134,11 +138,11 @@ const Header = ({
                     <>
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
                             <Text style={[globalStyles.textNormalMedium]}>
-                                {(completed) 
-                                    ? "Arrived at " + new Date(deliveryTime).toLocaleTimeString() 
+                                {(completed)
+                                    ? "Arrived at " + new Date(deliveryTime).toLocaleTimeString()
                                     : "Arriving at " + new Date(expectedDeliveryTime).toLocaleTimeString()
                                 }
-                            </Text> 
+                            </Text>
                             {(completed)
                                 ? "  (" + (- minutesAway) + " minutes ago)"
                                 : "  (" + minutesAway + " minutes away)"
@@ -149,7 +153,7 @@ const Header = ({
                 }
             </View>
         </View>
-    )       
+    )
 }
 
 const NoOrderState = ({ onPress }) => (
@@ -166,7 +170,7 @@ const NoOrderState = ({ onPress }) => (
     </View>
 )
 
-const ShowOrderState = ({ 
+const ShowOrderState = ({
     orderData,
     menuData,
     locationData
@@ -183,7 +187,6 @@ const ShowOrderState = ({
     const loadMap = () => {
         console.log("Map is ready, fitting to coordinates");
         if (map.current && showMap) {
-            console.log("Doing it");
             const coords = [
                 { latitude: userLocation.lat, longitude: userLocation.lng },
                 { latitude: droneLocation.lat, longitude: droneLocation.lng },
@@ -203,7 +206,7 @@ const ShowOrderState = ({
         <>
             <Header orderData={orderData} />
 
-            {showMap && 
+            {showMap &&
                 <MapView
                     key={"order-map"}
                     ref={map}
@@ -233,7 +236,7 @@ const ShowOrderState = ({
                         description="The current location of the drone"
                     />
 
-                </MapView> 
+                </MapView>
             }
 
             <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
