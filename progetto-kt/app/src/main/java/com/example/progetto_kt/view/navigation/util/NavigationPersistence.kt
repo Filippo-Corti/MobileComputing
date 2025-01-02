@@ -43,7 +43,7 @@ fun buildNavigationStackString(controller: NavController): String {
 }
 
 @Composable
-fun NavigationStackRestorer(
+fun NavigationPersistence(
     navController: NavController,
     viewModel: MainViewModel,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
