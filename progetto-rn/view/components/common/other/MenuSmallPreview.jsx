@@ -3,8 +3,22 @@ import { globalStyles } from '../../../../styles/global';
 import MyIcon, { IconNames } from '../icons/MyIcon';
 import colors from '../../../../styles/colors';
 
+/**
+ * @param {{
+ * image: string,
+ * title: string,
+ * price: number
+ * }} props 
+ * @returns {JSX.Element}
+ */
+const MenuSmallPreview = ({
+    image, 
+    title, 
+    price 
+}) => {
 
-export default MenuSmallPreview = ({image, title, price }) => {
+    const priceString = price.toFixed(2);
+
     return (
         <View style={[globalStyles.flexBetween, { gap: 20, marginHorizontal: 30, marginVertical: 20 }]}>
             <View style={styles.imageContainer}>
@@ -15,11 +29,13 @@ export default MenuSmallPreview = ({image, title, price }) => {
             </View>
             <View style={{ flex: 1 }}>
                 <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>{title}</Text>
-                <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>{"€" + price}</Text>
+                <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>{"€" + priceString}</Text>
             </View>
         </View>
     )
 }
+
+export default MenuSmallPreview;
 
 
 const styles = StyleSheet.create({

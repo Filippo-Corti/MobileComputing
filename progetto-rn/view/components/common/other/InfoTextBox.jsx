@@ -2,7 +2,19 @@ import {View, Text, StyleSheet} from 'react-native';
 import MyIcon from '../icons/MyIcon';
 import {globalStyles} from '../../../../styles/global';
 
-export default InfoTextBox = ({text, label = null, iconName}) => {
+/**
+ * @param {{
+ * text: string,
+ * label: string?,
+ * iconName: string
+ * }} props 
+ * @returns {JSX.Element}
+ */
+const InfoTextBox = ({
+    text, 
+    label = null, 
+    iconName
+}) => {
 
     return (
         <View style={styles.container}>
@@ -17,6 +29,8 @@ export default InfoTextBox = ({text, label = null, iconName}) => {
     )
 
 }
+
+export default InfoTextBox;
 
 const styles = StyleSheet.create({
 

@@ -12,10 +12,8 @@ import { UserContext } from '../../context/UserContext';
 import { useContext } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
 import { AppStateContext } from '../../context/AppStateContext';
-import MyLogo from '../common/icons/MyLogo';
 import colors from '../../../styles/colors';
 import AccountFormViewModel from '../../../viewmodel/AccountFormViewModel';
-import SplashScreen from '../common/other/SplashScreen';
 
 /**
  * @param {{
@@ -104,8 +102,10 @@ const AddEditAccountScreen = ({
                                 control={control}
                                 error={errors.firstName}
                                 validate={(v) => AccountFormViewModel.validateFirstName(v) || "First Name should be at most 15 characters and not empty"}
-                                inputMode="text"
-                                autoCapitalize="words"
+                                inputProps={{ 
+                                    inputMode: "text",
+                                    autoCapitalize: "words"
+                                }}
                             />
 
                             <FormField
@@ -114,8 +114,10 @@ const AddEditAccountScreen = ({
                                 control={control}
                                 error={errors.lastName}
                                 validate={(v) => AccountFormViewModel.validateLastName(v) || "Last Name should be at most 15 characters and not empty"}
-                                inputMode="text"
-                                autoCapitalize="words"
+                                inputProps={{ 
+                                    inputMode: "text",
+                                    autoCapitalize: "words"
+                                }}
                             />
                         </View>
                     </View>
@@ -133,8 +135,10 @@ const AddEditAccountScreen = ({
                                 control={control}
                                 error={errors.cardFullName}
                                 validate={(v) => AccountFormViewModel.validateCardFullName(v) || "Credit Card Name should be at most 31 characters and not empty"}
-                                inputMode="text"
-                                autoCapitalize="words"
+                                inputProps={{ 
+                                    inputMode: "text",
+                                    autoCapitalize: "words"
+                                }}
                             />
 
                             <FormField
@@ -143,7 +147,9 @@ const AddEditAccountScreen = ({
                                 control={control}
                                 error={errors.cardNumber}
                                 validate={(v) => AccountFormViewModel.validateCardNumber(v) || "Card Number should be 16 digits"}
-                                inputMode="numeric"
+                                inputProps={{ 
+                                    inputMode: "numeric",
+                                }}
                             />
 
                             <View style={{ marginVertical: 15 }}>
@@ -177,7 +183,9 @@ const AddEditAccountScreen = ({
                                 control={control}
                                 error={errors.cardCVV}
                                 validate={(v) => AccountFormViewModel.validateCardCVV(v) || "Card Number should be 3 digits"}
-                                inputMode="numeric"
+                                inputProps={{ 
+                                    inputMode: "numeric",
+                                }}
                             />
 
                         </View>

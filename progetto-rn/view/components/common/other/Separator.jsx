@@ -1,6 +1,16 @@
-import {View, StyleSheet, Dimensions} from 'react-native';
+import {View} from 'react-native';
 
-export default Separator = ({size, color}) => {
+/**
+ * @param {{
+ * size: number,
+ * color: import('react-native').ColorValue,
+ * }} props 
+ * @returns {JSX.Element}
+ */
+const Separator = ({
+    size, 
+    color
+}) => {
 
     return (
         <View style={{
@@ -10,3 +20,5 @@ export default Separator = ({size, color}) => {
         }}></View>
     )
 }
+
+export default Separator;

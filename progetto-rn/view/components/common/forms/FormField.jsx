@@ -7,8 +7,25 @@ import {
 import {globalStyles} from '../../../../styles/global'
 import { Controller } from 'react-hook-form'
 
-
-export default FormField = ({ name, label, error, control, validate, ...inputProps }) => {
+/**
+ * @param {{
+ * name: string,
+ * label: string,
+ * error: import('react-hook-form').FieldError,
+ * control: import('react-hook-form').Control<any, any>,
+ * validate: import('react-hook-form').Validate<any, any>,
+ * inputProps?: React.ComponentProps<typeof TextInput>,
+ * }} props
+ * @returns 
+ */
+const FormField = ({ 
+    name, 
+    label, 
+    error, 
+    control, 
+    validate, 
+    inputProps 
+}) => {
 
     validate = validate || ((v) => true); 
 
@@ -37,6 +54,8 @@ export default FormField = ({ name, label, error, control, validate, ...inputPro
         </View>
     )
 }
+
+export default FormField;
 
 
 const styles = StyleSheet.create({

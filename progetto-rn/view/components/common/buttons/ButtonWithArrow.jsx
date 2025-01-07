@@ -1,8 +1,19 @@
 import {TouchableOpacity, StyleSheet, Text} from 'react-native';
 import {globalStyles} from '../../../../styles/global';
 import MyIcon, {IconNames} from '../icons/MyIcon';
+import colors from '../../../../styles/colors';
 
-export default ButtonWithArrow = ({text, onPress}) => {
+/**
+ * @param {{
+ * text: string,
+ * onPress: function
+ * }} props
+ * @returns {JSX.Element}
+ */
+const ButtonWithArrow = ({
+    text, 
+    onPress
+}) => {
 
     return (
         <TouchableOpacity style={styles.button} onPress={() => onPress()}>
@@ -12,6 +23,7 @@ export default ButtonWithArrow = ({text, onPress}) => {
     )
 }
 
+export default ButtonWithArrow;
 
 const styles = StyleSheet.create({
     button: {

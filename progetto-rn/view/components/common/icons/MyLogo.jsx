@@ -1,15 +1,16 @@
 import {View, Text, StyleSheet} from 'react-native';
-import {fonts, globalStyles} from '../../../../styles/global';
+import {globalStyles} from '../../../../styles/global';
 
-export default MyLogo = () => {
-
+/**
+ * @returns {JSX.Element}
+ */
+const MyLogo = () => {
     return (
         <View>
             <Text style={styles.logoFirst}>Mangia</Text>
             <Text style={styles.logoSecond}>e Basta</Text>
         </View>
     )
-
 }
 
 const styles = StyleSheet.create({

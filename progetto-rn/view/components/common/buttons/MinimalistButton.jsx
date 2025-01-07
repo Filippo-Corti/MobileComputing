@@ -1,7 +1,17 @@
 import {TouchableOpacity, StyleSheet, Text} from 'react-native';
 import {globalStyles} from '../../../../styles/global';
 
-export default MinimalistButton = ({text, onPress}) => {
+/**
+ * @param {{
+ * text: string,
+ * onPress: function
+ * }} props
+ * @returns {JSX.Element}
+ */
+const MinimalistButton = ({
+    text, 
+    onPress
+}) => {
 
     return (
         <TouchableOpacity style={styles.button} onPress={() => onPress()}>
@@ -9,6 +19,8 @@ export default MinimalistButton = ({text, onPress}) => {
         </TouchableOpacity>
     )
 }
+
+export default MinimalistButton;
 
 const styles = StyleSheet.create({
     button: {

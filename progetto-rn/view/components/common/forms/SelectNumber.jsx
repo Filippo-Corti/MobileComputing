@@ -2,8 +2,29 @@ import { StyleSheet, Text, View } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 import { Controller } from 'react-hook-form'
 import { globalStyles } from '../../../../styles/global';
+import colors from '../../../../styles/colors';
 
-export default SelectNumer = ({ name, min, max, error, control, validate, style }) => {
+/**
+ * @param {{
+ * name: string,
+ * min: number,
+ * max: number,
+ * error: import('react-hook-form').FieldError,
+ * control: import('react-hook-form').Control<any, any>,
+ * validate: import('react-hook-form').Validate<any, any>,
+ * style: import('react-native').ViewStyle
+ * }} props
+ * @returns {JSX.Element}
+ */
+const SelectNumer = ({ 
+  name, 
+  min, 
+  max, 
+  error, 
+  control, 
+  validate, 
+  style 
+}) => {
 
   const data = new Array(max - min + 1).fill().map((_, idx) => (min + idx).toString().padStart(2, '0'));
 
@@ -50,8 +71,11 @@ export default SelectNumer = ({ name, min, max, error, control, validate, style 
   )
 }
 
+export default SelectNumer;
+
 
 const styles = StyleSheet.create({
+  
   dropdownButtonStyle: {
     width: '100%',
     backgroundColor: colors.white,
@@ -64,17 +88,20 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 10,
   },
+
   dropdownButtonTxtStyle: {
     flex: 1,
     textAlign: 'center',
     ...globalStyles.textBlack,
     ...globalStyles.textNormalMedium,
   },
+
   dropdownMenuStyle: {
     backgroundColor: colors.lightGray,
     borderRadius: 8,
     height: 150,
   },
+
   dropdownItemStyle: {
     width: '100%',
     flexDirection: 'row',
@@ -85,14 +112,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.gray,
   },
+
   dropdownItemTxtStyle: {
     flex: 1,
     textAlign: 'center',
     ...globalStyles.textBlack,
     ...globalStyles.textNormalMedium,
   },
+
   dropdownItemIconStyle: {
     fontSize: 28,
     marginRight: 8,
+  },
+
+  textError: {
+      color: '#fc6d47',
+      marginTop: 8,
   },
 });

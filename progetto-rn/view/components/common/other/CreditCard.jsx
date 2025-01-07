@@ -2,7 +2,13 @@ import {View, Text, StyleSheet} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import MyIcon, {IconNames} from '../icons/MyIcon';
 
-export default CreditCard = ({cardInformation}) => {
+/**
+ * @param {{
+ * cardInformation: {number: string, holder: string, expiryMonth: number, expiryYear: number},
+ * }} props 
+ * @returns {JSX.Element}
+ */
+const CreditCard = ({cardInformation}) => {
 
     const last4Digits = cardInformation.number.slice(-4);
     const formattedDate = cardInformation.expiryMonth.toString().padStart(2, '0') + '/' + cardInformation.expiryYear.toString().slice(-2);
@@ -25,11 +31,11 @@ export default CreditCard = ({cardInformation}) => {
                     <Text style={styles.number}>**** **** **** {last4Digits}</Text>
                 </View>
                 <View style={styles.info}>
-                    <View style={styles.infocells}>
+                    <View>
                         <Text style={styles.label}>Card Holder name </Text>
                         <Text style={styles.data}>{cardInformation.holder}</Text>
                     </View>
-                    <View style={styles.infocells}>
+                    <View>
                         <Text style={styles.label}>Expiry Date</Text>
                         <Text style={styles.data}>{formattedDate}</Text>
                     </View>
@@ -38,6 +44,8 @@ export default CreditCard = ({cardInformation}) => {
         </View>
     )
 }
+
+export default CreditCard;
 
 const styles = StyleSheet.create({
     gradient: {
