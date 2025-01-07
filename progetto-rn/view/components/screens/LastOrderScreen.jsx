@@ -148,8 +148,8 @@ const Header = ({
                         <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular, { marginVertical: 10 }]}>
                             <Text style={[globalStyles.textNormalMedium]}>
                                 {(completed)
-                                    ? "Arrived at " + new Date(deliveryTime).toLocaleTimeString()
-                                    : "Arriving at " + new Date(expectedDeliveryTime).toLocaleTimeString()
+                                    ? "Arrived at " + new Date(deliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                    : "Arriving at " + new Date(expectedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                                 }
                             </Text>
                             {(completed)
