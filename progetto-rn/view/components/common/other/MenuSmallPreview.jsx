@@ -7,7 +7,7 @@ import colors from '../../../../styles/colors';
  * @param {{
  * image: string,
  * title: string,
- * price: number
+ * price: string
  * }} props 
  * @returns {JSX.Element}
  */
@@ -16,8 +16,6 @@ const MenuSmallPreview = ({
     title, 
     price 
 }) => {
-
-    const priceString = price.toFixed(2);
 
     return (
         <View style={[globalStyles.flexBetween, { gap: 20, marginHorizontal: 30, marginVertical: 20 }]}>
@@ -29,7 +27,7 @@ const MenuSmallPreview = ({
             </View>
             <View style={{ flex: 1 }}>
                 <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>{title}</Text>
-                <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>{"€" + priceString}</Text>
+                <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>{"€" + price}</Text>
             </View>
         </View>
     )

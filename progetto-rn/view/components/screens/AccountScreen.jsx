@@ -10,11 +10,9 @@ import { UserContext } from '../../context/UserContext';
 import { useContext, useEffect } from 'react';
 import ViewModel from '../../../viewmodel/ViewModel';
 import { AppStateContext } from '../../context/AppStateContext';
-import MyLogo from '../common/icons/MyLogo';
 import colors from '../../../styles/colors';
 import React from 'react';
 import MenuPreview from '../common/other/MenuPreview';
-import SplashScreen from '../common/other/SplashScreen';
 
 /**
  * @returns {JSX.Element} 

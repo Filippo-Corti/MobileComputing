@@ -5,7 +5,7 @@ import {globalStyles} from '../../../../styles/global';
 /**
  * @param {{
  * text: string,
- * label: string?,
+ * label?: string,
  * iconName: string
  * }} props 
  * @returns {JSX.Element}

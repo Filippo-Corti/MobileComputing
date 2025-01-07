@@ -5,8 +5,8 @@ import colors from '../../../../styles/colors';
 /**
  * @param {{
  * text: string,
- * gray: boolean?,
- * disabled: boolean?,
+ * gray?: boolean,
+ * disabled?: boolean,
  * onPress: function
  * }} props
  * @returns {JSX.Element}

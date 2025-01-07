@@ -13,6 +13,8 @@ const MyLogo = () => {
     )
 }
 
+export default MyLogo;
+
 const styles = StyleSheet.create({
     logoFirst: {
         ...globalStyles.textTitleLogo, 
