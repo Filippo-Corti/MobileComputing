@@ -1,14 +1,10 @@
-import { View, ActivityIndicator } from 'react-native';
 import { useFonts } from 'expo-font';
 import { fonts } from './styles/global';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
 import HomeStack from './view/components/navigation/HomeStack';
 import LastOrderScreen from './view/components/screens/LastOrderScreen';
 import AccountStack from './view/components/navigation/AccountStack';
 import MyTabBar from './view/components/navigation/MyTabBar';
-import MyLogo from './view/components/common/icons/MyLogo';
-import colors from './styles/colors';
 import ViewModel from './viewmodel/ViewModel';
 import { useEffect, useState } from 'react';
 import { UserContextProvider } from './view/context/UserContext';
@@ -16,6 +12,7 @@ import PositionViewModel from './viewmodel/PositionViewModel';
 import { AppStateContextProvider } from './view/context/AppStateContext';
 import MyError from './model/types/MyError';
 import NavigationPersistence from './view/components/navigation/NavigationPersistence';
+import SplashScreen from './view/components/common/other/SplashScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -97,34 +94,28 @@ export default function App() {
 
 	useEffect(() => {
 		const initializeAndFetch = async () => {
-			await ViewModel.getUserSession();
-
-			await initalizeUserContext();
-		};
-
-		initializeAndFetch();
-
-	}, []);
-
-	useEffect(() => {
-		const checkLocationAsync = async () => {
 			if (locationState.hasCheckedPermission) return;
+
+			// Initialize the location context
 			await checkLocationPermission();
+
+			// Initialize the user context
+			await ViewModel.getUserSession();
+			await initalizeUserContext();
+
 			setAppState(prevState => ({
 				...prevState,
 				isLoading: false
 			}));
 		};
-		checkLocationAsync();
+		
+		initializeAndFetch();
 	}, [locationState.hasCheckedPermission]);
 
 
 	if (appState.isLoading || !fontsLoaded) {
 		return (
-			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-				<MyLogo />
-				<ActivityIndicator size="large" color={colors.primary} />
-			</View>
+			<SplashScreen />
 		);
 	}
 

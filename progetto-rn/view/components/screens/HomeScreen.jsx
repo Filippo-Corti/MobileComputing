@@ -11,6 +11,11 @@ import { UserContext } from '../../context/UserContext';
 import { AppStateContext } from '../../context/AppStateContext';
 import ViewModel from '../../../viewmodel/ViewModel';
 import colors from '../../../styles/colors';
+import React from 'react';
+import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
+import MinimalistButton from '../common/buttons/MinimalistButton';
+import MyError from '../../../model/types/MyError';
+import SplashScreen from '../common/other/SplashScreen';
 
 const { height } = Dimensions.get('window');
 
@@ -34,10 +39,12 @@ const HomeScreen = ({ }) => {
     }
 
     const fetchMenus = async () => {
-        const location = locationState.lastKnownLocation;
-        if (appState.isLoading || !location) return;
+        if (appState.isLoading) return;
+
+        const location = locationState.lastKnownLocation || ViewModel.DEFAULT_LOCATION;
 
         try {
+            setIsRefreshing(true);
             const menus = await ViewModel.fetchNearbyMenus(
                 location.lat,
                 location.lng
@@ -56,17 +63,20 @@ const HomeScreen = ({ }) => {
             });
         } catch (err) {
             setError(err)
+        } finally {
+            setIsRefreshing(false);
         }
     };
 
     const onRefresh = useCallback(() => {
         setIsRefreshing(true);
         fetchMenus().then(() => setIsRefreshing(false));
-    }, []);
-
+    }, [
+        locationState.lastKnownLocation?.lat,
+        locationState.lastKnownLocation?.lng
+    ]);
 
     useEffect(() => {
-
         fetchMenus();
     }, [
         locationState.lastKnownLocation?.lat,
@@ -77,7 +87,6 @@ const HomeScreen = ({ }) => {
     if (appState.isLoading || !nearestMenus) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <MyLogo />
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
@@ -96,9 +105,22 @@ const HomeScreen = ({ }) => {
 
                 <Header user={userState.user} />
 
-                <MenusMap nearestMenus={nearestMenus} />
+                {/* <MenusMap nearestMenus={nearestMenus} /> */}
 
-                <MenusList nearestMenus={nearestMenus} onItemClick={(menuId) => navigateToMenuDetails(menuId)} />
+                <MenusList
+                    nearestMenus={nearestMenus}
+                    locationData={locationState}
+                    onItemClick={(menuId) => navigateToMenuDetails(menuId)}
+                    onEnableLocationClick={() => {
+                        setError(new MyError(
+                            "POSITION_UNALLOWED",
+                            "We need your Location",
+                            "This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
+                            "I'll do it"
+                        ));
+                        console.log("Error is now: ", appState.error);
+                    }}
+                />
 
                 <StatusBar style="auto" />
             </ScrollView>
@@ -107,7 +129,7 @@ const HomeScreen = ({ }) => {
 }
 
 const Header = ({ user }) => (
-    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginTop: 22 }]}>
+    <View style={[globalStyles.insetContainer, globalStyles.flexBetween, { marginHorizontal: 10, marginTop: 22, marginBottom: 10 }]}>
         <View>
             <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
                 Welcome Back{(user) ? ", " + user.firstName : ""}
@@ -125,6 +147,13 @@ const Header = ({ user }) => (
 const MenusMap = ({
     nearestMenus
 }) => {
+
+    const initialRegion = {
+        latitude: nearestMenus?.[0]?.menu?.location?.lat || 37.78825, // Default latitude
+        longitude: nearestMenus?.[0]?.menu?.location?.lng || -122.4324, // Default longitude
+        latitudeDelta: 0.2922, // Controls zoom level for latitude
+        longitudeDelta: 0.2421, // Controls zoom level for longitude
+    };
     
     return (
         <MapView
@@ -137,19 +166,20 @@ const MenusMap = ({
             loadingEnabled={true}
             showsMyLocationButton={true}
             scrollEnabled={false}
-            rotateEnabled={false} 
+            rotateEnabled={false}
             pitchEnabled={false}
             zoomEnabled={true}
+            initialRegion={initialRegion}
         >
             {nearestMenus?.map((menu, index) => (<Marker
-                    key={menu.menu.mid}
-                    coordinate={{
-                        latitude: menu.menu.location.lat,
-                        longitude: menu.menu.location.lng,
-                    }}
-                    title={menu.menu.name}
-                    description={menu.menu.description}
-                />
+                key={menu.menu.mid}
+                coordinate={{
+                    latitude: menu.menu.location.lat,
+                    longitude: menu.menu.location.lng,
+                }}
+                title={menu.menu.name}
+                description={menu.menu.description}
+            />
             ))}
 
         </MapView>
@@ -158,14 +188,31 @@ const MenusMap = ({
 
 const MenusList = ({
     nearestMenus,
-    onItemClick
+    locationData,
+    onItemClick,
+    onEnableLocationClick
 }) => (
     <View style={[globalStyles.insetContainer, styles.afterMap, { flex: 1 }]}>
 
         <View style={[globalStyles.flexCenter, { marginVertical: 20 }]}>
-            <Text style={[globalStyles.textBlack, globalStyles.textSubtitleBold]}>
-                Menus Around You
-            </Text>
+            {(locationData.lastKnownLocation)
+                ?
+                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleBold]}>
+                    Menus Around You
+                </Text>
+                :
+                <View style={{alignItems: 'center'}}>
+                    <Text style={[globalStyles.textBlack, globalStyles.textSubtitleBold, {marginBottom: 10}]}>
+                        Menus in {ViewModel.DEFAULT_LOCATION.address}
+                    </Text>
+                    <Text style={[globalStyles.textDarkGray, globalStyles.textNormalRegular]}>
+                        Want localized results? 
+                    </Text>
+                    <View>
+                        <MinimalistButton text="ALLOW LOCATION" onPress={onEnableLocationClick} />
+                    </View>
+                </View>
+            }
         </View>
 
         {nearestMenus && <FlatList

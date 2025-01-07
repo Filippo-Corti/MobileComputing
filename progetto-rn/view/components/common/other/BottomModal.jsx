@@ -39,7 +39,8 @@ export function handleErrorByType(
 *  	text: string,
 *  	confirmText: string?,
 * 	dismissText: string,
-* 	onConfirm: Function?
+* 	onConfirm: Function?,
+* 	onDismiss: Function
 * }} props 
 * @returns {JSX.Element}
 */
@@ -48,7 +49,8 @@ const BottomModal = ({
 	text,
 	confirmText, 
 	dismissText,
-	onConfirm
+	onConfirm,
+	onDismiss
 }) => {
 
 	const [isModalVisible, setModalVisible] = useState(false);
@@ -73,8 +75,8 @@ const BottomModal = ({
 						<Text style={styles.modalText}>{text}</Text>
 					</View>
 					<View style={styles.buttons}>
-						{ confirmText && <LargeButton text={confirmText} onPress={() => { toggleModal(); onConfirm() }} /> }
-						<LargeButton text={dismissText} gray={true} onPress={toggleModal} />
+						{ confirmText && <LargeButton text={confirmText} onPress={() => { toggleModal(); onConfirm(); }} /> }
+						<LargeButton text={dismissText} gray={true} onPress={() => {toggleModal(); onDismiss();}} />
 					</View>
 				</View>
 			</Modal>

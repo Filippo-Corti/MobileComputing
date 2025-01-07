@@ -15,6 +15,7 @@ import { AppStateContext } from '../../context/AppStateContext';
 import MyLogo from '../common/icons/MyLogo';
 import colors from '../../../styles/colors';
 import AccountFormViewModel from '../../../viewmodel/AccountFormViewModel';
+import SplashScreen from '../common/other/SplashScreen';
 
 /**
  * @param {{
@@ -72,7 +73,6 @@ const AddEditAccountScreen = ({
     if (appState.isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <MyLogo />
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );

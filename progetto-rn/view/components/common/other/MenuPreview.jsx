@@ -24,19 +24,24 @@ const MenuPreview = ({
 
     const {locationState} = useContext(AppStateContext);
     
-    const distanceFromYou = PositionViewModel.coordinatesDistanceInKm(locationState.lastKnownLocation, menu.menu.location).toFixed(1);
+    const distanceFromYou = (locationState.lastKnownLocation) 
+        ? PositionViewModel.coordinatesDistanceInKm(locationState.lastKnownLocation, menu.menu.location).toFixed(1)
+        : null;
 
+    const deliveryTime = (menu.menu.deliveryTime > 0) ? menu.menu.deliveryTime : "<1";
+
+    const price = menu.menu.price.toFixed(2);
 
     return (
         <TouchableOpacity style={[styles.container, style]} onPress={() => onPress()}>
             <View style={styles.textContainer}>
                 <View>
                     <Text style={styles.title}>{menu.menu.name}</Text>
-                    <Text style={styles.price}>€{menu.menu.price}</Text>
+                    <Text style={styles.price}>€{price}</Text>
                     <Text style={styles.description}>{menu.menu.shortDescription}</Text>
                 </View>
                 <View>
-                    {locationState.lastKnownLocation && <Text style={styles.otherInfo}>{menu.menu.deliveryTime}min • {distanceFromYou}km from you</Text>}
+                    {distanceFromYou && <Text style={styles.otherInfo}>{deliveryTime}min • {distanceFromYou}km from you</Text>}
                 </View>
             </View>
             <View style={styles.imageContainer}>

@@ -6,6 +6,12 @@ import PositionViewModel from "./PositionViewModel";
 
 export default class ViewModel {
 
+    static DEFAULT_LOCATION = {
+        lat: 45.4642,
+        lng: 9.19,
+        address: "Milan, Italy"
+    };
+
     static sid = null;
     static uid = null;
 

@@ -1,4 +1,4 @@
-import { View, ScrollView, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Text, StyleSheet, Dimensions, ActivityIndicator, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../../../styles/global';
@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProgressBar from '../common/other/ProgressBar';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import ViewModel from '../../../viewmodel/ViewModel';
 import MenuSmallPreview from '../common/other/MenuSmallPreview';
@@ -16,6 +16,9 @@ import Separator from '../common/other/Separator';
 import colors from '../../../styles/colors';
 import { AppStateContext } from '../../context/AppStateContext';
 import MyLogo from '../common/icons/MyLogo';
+import SplashScreen from '../common/other/SplashScreen';
+import { set } from 'react-hook-form';
+import MyIcon, { IconNames } from '../common/icons/MyIcon';
 
 const { height } = Dimensions.get('window');
 
@@ -28,9 +31,13 @@ const LastOrderScreen = ({ }) => {
 
     const { userState, orderState, setOrderState } = useContext(UserContext);
     const { appState, locationState, setError } = useContext(AppStateContext);
+    const [isFetching, setIsFetching] = useState(false);
 
     const fetchLastOrder = async () => {
-        if (!userState.user.lastOid) return;
+        if (!userState.user?.lastOid) {
+            setIsFetching(false);
+            return;
+        }
         try {
             const order = await ViewModel.fetchOrderDetails(userState.user.lastOid);
             const orderedMenu = await ViewModel.fetchMenuDetails(
@@ -44,6 +51,8 @@ const LastOrderScreen = ({ }) => {
             });
         } catch (err) {
             setError(err);
+        } finally {
+            setIsFetching(false);
         }
     }
 
@@ -54,6 +63,7 @@ const LastOrderScreen = ({ }) => {
     useEffect(() => {
         if (isFocused) {
             console.log("Screen is focused, starting timer");
+            setIsFetching(true);
             fetchLastOrder();
             intervalId.current = setInterval(fetchLastOrder, 5000);
         } else {
@@ -73,10 +83,9 @@ const LastOrderScreen = ({ }) => {
         };
     }, [isFocused]);
 
-    if (appState.isLoading) {
+    if (appState.isLoading || isFetching) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <MyLogo />
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
@@ -181,6 +190,7 @@ const ShowOrderState = ({
     const userLocation = locationData.lastKnownLocation
     const droneLocation = orderData.currentPosition
     const deliveryLocation = orderData.deliveryLocation
+    const menuStartLocation = menuData.menu.location
 
     const map = useRef(null);
 
@@ -191,16 +201,15 @@ const ShowOrderState = ({
                 { latitude: userLocation.lat, longitude: userLocation.lng },
                 { latitude: droneLocation.lat, longitude: droneLocation.lng },
                 { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
+                { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
             ];
 
             map.current.fitToCoordinates(coords, {
-                edgePadding: { top: 100, right: 100, bottom: 100, left: 100 }
+                edgePadding: { top: 150, right: 100, bottom: 150, left: 100 }
             });
 
         }
     }
-
-    console.log("Drone Location", droneLocation);
 
     return (
         <>
@@ -218,14 +227,6 @@ const ShowOrderState = ({
                     showsMyLocationButton={true}
                     onMapReady={loadMap}
                 >
-                    <Marker
-                        coordinate={{
-                            latitude: deliveryLocation.lat,
-                            longitude: deliveryLocation.lng,
-                        }}
-                        title="Delivery Place"
-                        description="The Location where the drone will deliver the order"
-                    />
 
                     <Marker
                         coordinate={{
@@ -234,7 +235,42 @@ const ShowOrderState = ({
                         }}
                         title="Drone Location"
                         description="The current location of the drone"
-                    />
+                        zIndex={1}
+                        >
+                        <Image 
+                            // @ts-ignore
+                            source={require('../../../assets/drone.png')}
+                            style={{ width: 30, height: 30 }}
+                        />
+                    </Marker>
+                    
+                    <Marker
+                        coordinate={{
+                            latitude: deliveryLocation.lat,
+                            longitude: deliveryLocation.lng,
+                        }}
+                        title="Delivery Place"
+                        description="The Location where the drone will deliver the order"
+                        zIndex={2}
+                    >
+                        <View style={{width: 40, height: 40, borderRadius: 20, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center'}}>
+                            <MyIcon name={IconNames.HOME} size={30} color={colors.black} />
+                        </View>
+                    </Marker>
+
+                    <Marker
+                        coordinate={{
+                            latitude: menuStartLocation.lat,
+                            longitude: menuStartLocation.lng,
+                        }}
+                        title="Restaurant Location"
+                        description="The starting location of the menu you ordered"
+                        zIndex={0}
+                        >
+                        <View style={{width: 40, height: 40, borderRadius: 20, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center'}}>
+                            <MyIcon name={IconNames.FOOD} size={30} color={colors.black} />
+                        </View>
+                    </Marker>
 
                 </MapView>
             }
@@ -282,7 +318,7 @@ const styles = StyleSheet.create({
 
     map: {
         width: '100%',
-        height: height * 0.20,
+        height: height * 0.24,
     },
 
 });

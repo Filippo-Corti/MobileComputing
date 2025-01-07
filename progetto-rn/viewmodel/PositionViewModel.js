@@ -35,12 +35,16 @@ export default class PositionViewModel {
     }
 
     /**
-     * @returns {Promise<boolean>}
+     * @returns {Promise<{ status: boolean, canAskAgain: boolean }>}
      */
     static async requestPermission() {
-        if (await this.checkLocationPermission()) return true;
+        if (await this.checkLocationPermission()) return {status: true, canAskAgain: true};
         const permissionResponse = await Location.requestForegroundPermissionsAsync()
-        return permissionResponse.status === "granted"
+        console.log("PermissionResponse", permissionResponse);
+        return {
+            status: permissionResponse.status === "granted",
+            canAskAgain: permissionResponse.canAskAgain
+        }
     }
 
     /**
@@ -71,9 +75,12 @@ export default class PositionViewModel {
                 },
                 (location) => {
                     console.log("Fetched a new Current Location", location);
-                    callback({
-                        lat: location.coords.latitude,
-                        lng: location.coords.longitude,
+                    PositionViewModel.getAddressFromCoordinates(location.coords.latitude, location.coords.longitude).then(address => {
+                        callback({
+                            lat: location.coords.latitude,
+                            lng: location.coords.longitude,
+                            address: address
+                        });
                     });
                 }
             );

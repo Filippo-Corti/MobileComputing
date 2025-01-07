@@ -5,6 +5,7 @@ import { ActivityIndicator, AppState, View } from "react-native";
 import ViewModel from "../../../viewmodel/ViewModel";
 import MyLogo from "../common/icons/MyLogo";
 import colors from "../../../styles/colors";
+import SplashScreen from "../common/other/SplashScreen";
 
 /**
  * @param {{
@@ -63,10 +64,7 @@ const NavigationPersistence = ({
 
     if (!isReady) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <MyLogo />
-                <ActivityIndicator size="large" color={colors.primary} />
-            </View>
+            <SplashScreen />
         );
     }
 

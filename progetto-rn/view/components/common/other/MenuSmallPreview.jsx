@@ -1,6 +1,7 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { globalStyles } from '../../../../styles/global';
 import MyIcon, { IconNames } from '../icons/MyIcon';
+import colors from '../../../../styles/colors';
 
 
 export default MenuSmallPreview = ({image, title, price }) => {

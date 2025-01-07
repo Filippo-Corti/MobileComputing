@@ -24,7 +24,19 @@ export const IconNames = {
     VISA                    : 'visa',
 }
 
-export default MyIcon = ({name, size, color}) => {
+/**
+ * @param {{
+ * name : string,
+ * size: number,
+ * color: import('react-native').ColorValue
+ * }} props 
+ * @returns {JSX.Element}
+ */
+const MyIcon = ({
+    name, 
+    size, 
+    color
+}) => {
 
     switch(name) {
         case IconNames.HOME: 
@@ -57,3 +69,5 @@ export default MyIcon = ({name, size, color}) => {
             return (<FontAwesome name="cc-visa" size={size} color={color} />)
     }
 }
+
+export default MyIcon;

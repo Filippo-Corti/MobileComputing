@@ -14,6 +14,7 @@ import MyLogo from '../common/icons/MyLogo';
 import colors from '../../../styles/colors';
 import React from 'react';
 import MenuPreview from '../common/other/MenuPreview';
+import SplashScreen from '../common/other/SplashScreen';
 
 /**
  * @returns {JSX.Element} 
@@ -48,9 +49,8 @@ const AccountScreen = ({ }) => {
     }, []);
 
     if (appState.isLoading) {
-        return (
+         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <MyLogo />
                 <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );

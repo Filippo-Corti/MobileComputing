@@ -40,9 +40,12 @@ const MenuDetailsScreen = ({
     useEffect(() => {
         const fetchMenuDetails = async () => {
             if (menuDetails && menuDetails.menu.mid === menuId) return;
+
+            const location = locationState.lastKnownLocation || ViewModel.DEFAULT_LOCATION;
+
             const menu = await ViewModel.fetchMenuDetails(
-                locationState.lastKnownLocation.lat,
-                locationState.lastKnownLocation.lng,
+                location.lat,
+                location.lng,
                 menuId
             );
             setMenuDetails(menu);
@@ -59,6 +62,10 @@ const MenuDetailsScreen = ({
             </View>
         );
     }
+
+    const price = menuDetails.menu.price.toFixed(2);
+    const deliveryTime = (menuDetails.menu.deliveryTime > 0) ? menuDetails.menu.deliveryTime : "<1";
+
 
     return (
         <SafeAreaView style={[globalStyles.container, { flex: 1 }]}>
@@ -83,7 +90,7 @@ const MenuDetailsScreen = ({
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-start', gap: 5, marginBottom: 10 }}>
                             <MyIcon name={IconNames.PRICE_TAG} size={22} color={colors.primary} />
                             <Text style={[globalStyles.textDarkGray, globalStyles.textSubtitleMedium]}>
-                                €{menuDetails.menu.price}
+                                €{price}
                             </Text>
                         </View>
 
@@ -93,25 +100,27 @@ const MenuDetailsScreen = ({
                     </View>
 
                     <Separator size={10} color={colors.lightGray} />
-                    <InfoTextBox
-                        iconName={IconNames.MARKER}
-                        label={"Menu Location"}
-                        text={menuDetails.menu.location.address}
-                    />
+                    
                     {locationState.lastKnownLocation &&
                         <>
+                            <InfoTextBox
+                                iconName={IconNames.MARKER}
+                                label={"Menu Location"}
+                                text={menuDetails.menu.location.address}
+                            />
                             <Separator size={10} color={colors.lightGray} />
                             <InfoTextBox
                                 iconName={IconNames.CLOCK}
-                                text={"Approximately " + menuDetails.menu.deliveryTime + " min(s)"}
+                                text={"Approximately " + deliveryTime + " min(s)"}
                             />
                             <Separator size={1} color={colors.lightGray} />
-                        </>}
+                        </>
+                    }
                 </View>
 
                 <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
                     <LargeButton
-                        text={"Order • €" + menuDetails.menu.price}
+                        text={"Order • €" + price}
                         onPress={navigateToConfirmOrder}
                     />
                 </View>

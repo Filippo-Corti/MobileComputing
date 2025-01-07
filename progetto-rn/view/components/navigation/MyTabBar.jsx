@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import MyIcon, { IconNames } from '../common/icons/MyIcon';
 import { globalStyles } from '../../../styles/global';
 import colors from '../../../styles/colors';
@@ -31,24 +31,37 @@ const MyTabBar = ({
             },
             () => {
                 PositionViewModel.requestPermission().then (
-                    (permissionOk) => {
-                        if (permissionOk) {
+                    ({status, canAskAgain}) => {
+                        if (status) {
                             // Get the current location
                             PositionViewModel.getCurrentLocation().then(newLocation => {;
-                            setLocationState(prevState => ({
-                                ...prevState,
-                                hasCheckedPermission: true,
-                                lastKnownLocation: newLocation,
-                                isLocationAllowed: true,
-                            }));
-                            // Subscribe to location updates
-                            PositionViewModel.subscribeToLocationUpdates((location) => {
                                 setLocationState(prevState => ({
                                     ...prevState,
-                                    lastKnownLocation: location,
+                                    hasCheckedPermission: true,
+                                    lastKnownLocation: newLocation,
+                                    isLocationAllowed: true,
                                 }));
-                            });
-                        })}
+                                // Subscribe to location updates
+                                PositionViewModel.subscribeToLocationUpdates((location) => {
+                                    setLocationState(prevState => ({
+                                        ...prevState,
+                                        lastKnownLocation: location,
+                                    }));
+                                });
+                            })
+                        } else if(!canAskAgain) {
+                            Alert.alert(
+                                "We need your Location",
+                                "It looks like you denied the permission to access your location. Please enable it in the settings.",
+                                [
+                                    { text: "Cancel", style: "cancel" },
+                                    { 
+                                        text: "Open Settings", 
+                                        onPress: () => Linking.openSettings() 
+                                    }
+                                ]
+                            );
+                        }
                     }
                 )
             }
@@ -66,6 +79,7 @@ const MyTabBar = ({
                     confirmText={appState.error.actionText}
                     dismissText={appState.error.dismissText}
                     onConfirm={() => handleError(appState.error)}
+                    onDismiss={() => setError(null)}
                 />
             }
 

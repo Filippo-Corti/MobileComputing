@@ -14,6 +14,7 @@ import { UserContext } from '../../context/UserContext';
 import React from 'react';
 import MyError from '../../../model/types/MyError';
 import ViewModel from '../../../viewmodel/ViewModel';
+import SplashScreen from '../common/other/SplashScreen';
 
 /**
  * @param {{
@@ -91,6 +92,8 @@ const ConfirmOrderScreen = ({
         );
     }
 
+    const price = menuDetails.menu.price.toFixed(2);
+    const deliveryTime = (menuDetails.menu.deliveryTime > 0) ? menuDetails.menu.deliveryTime : "<1";
     const cardLast4 = userState?.user?.cardNumber?.slice(-4);
 
     return (
@@ -109,36 +112,37 @@ const ConfirmOrderScreen = ({
                             </Text>
                         </View>
 
-                        <InfoTextBox
-                            iconName={IconNames.MARKER}
-                            label={"Menu Location"}
-                            text={menuDetails.menu.location.address}
-                        />
+                        
                         {locationState.lastKnownLocation && locationState.lastKnownLocation.address &&
                             <>
+                                <InfoTextBox
+                                    iconName={IconNames.MARKER}
+                                    label={"Menu Location"}
+                                    text={menuDetails.menu.location.address}
+                                />
                                 <Separator size={1} color={colors.lightGray} />
                                 <InfoTextBox
                                     iconName={IconNames.HOME}
                                     label={"Your Location"}
                                     text={locationState.lastKnownLocation?.address}
                                 />
+                                <Separator size={10} color={colors.lightGray} />
+                                <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginVertical: 20 }]}>
+                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
+                                        Delivery Time
+                                    </Text>
+                                    <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
+                                        {deliveryTime} min(s)
+                                    </Text>
+                                </View>
+                                <Separator size={10} color={colors.lightGray} />
                             </>
                         }
-                        <Separator size={10} color={colors.lightGray} />
-                        <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginVertical: 20 }]}>
-                            <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                Delivery Time
-                            </Text>
-                            <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                {menuDetails.menu.deliveryTime} min(s)
-                            </Text>
-                        </View>
-                        <Separator size={10} color={colors.lightGray} />
 
                         <MenuSmallPreview
                             image={menuDetails.image.base64}
                             title={menuDetails.menu.name}
-                            price={menuDetails.menu.price}
+                            price={price}
                         />
                         <Separator size={1} color={colors.lightGray} />
                         <View style={[globalStyles.flexBetween, globalStyles.insetContainer, { marginVertical: 20 }]}>
@@ -146,7 +150,7 @@ const ConfirmOrderScreen = ({
                                 Total
                             </Text>
                             <Text style={[globalStyles.textBlack, globalStyles.textNormalMedium]}>
-                                {"€" + menuDetails.menu.price}
+                                {"€" + price}
                             </Text>
                         </View>
                         <Separator size={1} color={colors.lightGray} />
