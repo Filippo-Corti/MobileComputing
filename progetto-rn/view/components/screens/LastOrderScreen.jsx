@@ -197,9 +197,15 @@ const ShowOrderState = ({
     const loadMap = () => {
         console.log("Map is ready, fitting to coordinates");
         if (map.current && showMap) {
-            const coords = [
+            const coords = (orderData.status === "ON_DELIVERY")
+            ? [
                 { latitude: userLocation.lat, longitude: userLocation.lng },
                 { latitude: droneLocation.lat, longitude: droneLocation.lng },
+                { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
+                { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
+            ]
+            : [
+                { latitude: userLocation.lat, longitude: userLocation.lng },
                 { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
                 { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
             ];
@@ -228,7 +234,7 @@ const ShowOrderState = ({
                     onMapReady={loadMap}
                 >
 
-                    <Marker
+                    {(orderData.status === "ON_DELIVERY") && <Marker
                         coordinate={{
                             latitude: droneLocation.lat,
                             longitude: droneLocation.lng,
@@ -242,7 +248,7 @@ const ShowOrderState = ({
                             source={require('../../../assets/drone.png')}
                             style={{ width: 30, height: 30 }}
                         />
-                    </Marker>
+                    </Marker>}
                     
                     <Marker
                         coordinate={{
