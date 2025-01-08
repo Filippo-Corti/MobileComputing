@@ -1,4 +1,4 @@
-package com.example.progetto_kt.view.navigation.navhosts
+package com.example.progetto_kt.view.components.navigation.navhosts
 
 import android.util.Log
 import androidx.compose.animation.core.tween
@@ -12,7 +12,7 @@ import androidx.navigation.compose.navigation
 import com.example.progetto_kt.view.components.screens.ConfirmOrderScreen
 import com.example.progetto_kt.view.components.screens.HomeScreen
 import com.example.progetto_kt.view.components.screens.MenuDetailsScreen
-import com.example.progetto_kt.view.navigation.AppScreen
+import com.example.progetto_kt.view.components.navigation.AppScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

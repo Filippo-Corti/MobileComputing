@@ -1,11 +1,11 @@
-package com.example.progetto_kt.view.navigation.navhosts
+package com.example.progetto_kt.view.components.navigation.navhosts
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.progetto_kt.view.components.screens.LastOrderScreen
-import com.example.progetto_kt.view.navigation.AppScreen
+import com.example.progetto_kt.view.components.navigation.AppScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 fun NavGraphBuilder.lastOrderNavHost(

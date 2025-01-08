@@ -14,7 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import com.example.progetto_kt.model.dataclasses.Error
 import com.example.progetto_kt.model.dataclasses.ErrorType
-import com.example.progetto_kt.view.navigation.AppScreen
+import com.example.progetto_kt.view.components.navigation.AppScreen
 import kotlinx.coroutines.launch
 
 val TAG = "ErrorModalHandler"

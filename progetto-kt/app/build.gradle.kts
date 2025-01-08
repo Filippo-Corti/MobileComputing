@@ -97,5 +97,8 @@ dependencies {
     // Pull Refresh
     implementation(libs.material3)
 
+    //Icons
+    implementation(libs.androidx.material.icons.extended)
+
 
 }

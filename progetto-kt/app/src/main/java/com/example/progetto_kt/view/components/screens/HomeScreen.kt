@@ -36,17 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.layout.LocalPinnableContainer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import com.example.progetto_kt.R
 import com.example.progetto_kt.model.dataclasses.toPoint
+import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.progetto_kt.viewmodel.util.CustomMarkerBuilder
 import com.mapbox.maps.extension.compose.MapEffect
@@ -54,20 +50,14 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
 import com.mapbox.maps.extension.compose.annotation.rememberIconImage
-import com.mapbox.maps.extension.compose.rememberMapState
 import com.mapbox.maps.plugin.PuckBearing
-import com.mapbox.maps.plugin.gestures.generated.GesturesSettings
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.viewport.data.FollowPuckViewportStateOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-
 
 
 @Suppress("Deprecation")
@@ -126,7 +116,8 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 100.dp),
+                .defaultMinSize(minHeight = 100.dp)
+                .background(Colors.WHITE),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = listState
         ) {
@@ -168,67 +159,67 @@ fun HomeScreen(
                     }
                 }
 
-                MapboxMap(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-
-                    mapViewportState = mapViewportState,
-                ) {
-
-                    if (locationState.isLocationAllowed) {
-                        MapEffect(Unit) { mapView ->
-                            mapView.gestures.updateSettings {
-                                scrollEnabled = false
-                                pitchEnabled = false
-                                rotateEnabled = false
-                            }
-
-                            mapView.location.updateSettings {
-                                locationPuck = createDefault2DPuck(withBearing = true)
-                                puckBearingEnabled = true
-                                puckBearing = PuckBearing.HEADING
-                                enabled = true
-                            }
-                            mapViewportState.transitionToFollowPuckState(
-                                FollowPuckViewportStateOptions.Builder()
-                                    .zoom(11.0)
-                                    .pitch(0.0)
-                                    .build()
-                            )
-                        }
-                    }
-
-                    menusState.nearbyMenus.forEachIndexed { idx, menu ->
-                        if (menu.image != null) {
-                            val markerBitmap = CustomMarkerBuilder.getCustomMarker(
-                                context = LocalContext.current,
-                                menu = menu
-                            )
-
-                            val marker = rememberIconImage(
-                                key = menu.menu.id,
-                                painter = BitmapPainter(markerBitmap.asImageBitmap())
-                            )
-
-                            PointAnnotation(
-                                point = menu.menu.location.toPoint(),
-                                init = {
-                                    iconImage = marker
-                                    iconSize = 1.2
-                                },
-                                onClick = {
-                                    coroutineScope.launch {
-                                        scrolledToId = menu.menu.id
-                                        listState.animateScrollToItem(idx + 2, -250)
-                                    }
-                                    true
-                                }
-                            )
-                        }
-                    }
-
-                }
+//                MapboxMap(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(250.dp),
+//
+//                    mapViewportState = mapViewportState,
+//                ) {
+//
+//                    if (locationState.isLocationAllowed) {
+//                        MapEffect(Unit) { mapView ->
+//                            mapView.gestures.updateSettings {
+//                                scrollEnabled = false
+//                                pitchEnabled = false
+//                                rotateEnabled = false
+//                            }
+//
+//                            mapView.location.updateSettings {
+//                                locationPuck = createDefault2DPuck(withBearing = true)
+//                                puckBearingEnabled = true
+//                                puckBearing = PuckBearing.HEADING
+//                                enabled = true
+//                            }
+//                            mapViewportState.transitionToFollowPuckState(
+//                                FollowPuckViewportStateOptions.Builder()
+//                                    .zoom(11.0)
+//                                    .pitch(0.0)
+//                                    .build()
+//                            )
+//                        }
+//                    }
+//
+//                    menusState.nearbyMenus.forEachIndexed { idx, menu ->
+//                        if (menu.image != null) {
+//                            val markerBitmap = CustomMarkerBuilder.getCustomMarker(
+//                                context = LocalContext.current,
+//                                menu = menu
+//                            )
+//
+//                            val marker = rememberIconImage(
+//                                key = menu.menu.id,
+//                                painter = BitmapPainter(markerBitmap.asImageBitmap())
+//                            )
+//
+//                            PointAnnotation(
+//                                point = menu.menu.location.toPoint(),
+//                                init = {
+//                                    iconImage = marker
+//                                    iconSize = 1.2
+//                                },
+//                                onClick = {
+//                                    coroutineScope.launch {
+//                                        scrolledToId = menu.menu.id
+//                                        listState.animateScrollToItem(idx + 2, -250)
+//                                    }
+//                                    true
+//                                }
+//                            )
+//                        }
+//                    }
+//
+//                }
             }
 
             items(menusState.nearbyMenus) { menu ->

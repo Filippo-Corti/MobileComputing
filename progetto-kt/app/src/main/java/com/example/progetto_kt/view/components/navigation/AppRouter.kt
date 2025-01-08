@@ -1,14 +1,15 @@
-package com.example.progetto_kt.view.navigation
+package com.example.progetto_kt.view.components.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.progetto_kt.view.components.common.icons.IconNames
 
 data class ScreenParams(
     val route : String,
-    val icon : ImageVector? = null,
+    val iconName : IconNames? = null,
     val title : String,
     val showTabBar : Boolean = true,
     val stackName : String,
@@ -30,7 +31,7 @@ sealed class AppScreen(
     data object Home : AppScreen(
         ScreenParams(
             route = "home",
-            icon = Icons.Rounded.Home,
+            iconName = IconNames.HOME,
             title = "Home",
             stackName = "home_stack"
         )
@@ -66,7 +67,7 @@ sealed class AppScreen(
     data object Account : AppScreen(
         ScreenParams(
             route = "account",
-            icon = Icons.Rounded.AccountCircle,
+            iconName = IconNames.USER,
             title = "Account",
             stackName = "account_stack"
         )
@@ -93,7 +94,7 @@ sealed class AppScreen(
     data object LastOrder : AppScreen(
         ScreenParams(
             route = "last_order",
-            icon = Icons.Rounded.ShoppingCart,
+            iconName = IconNames.SHOPPING_BAG,
             title = "Last Order",
             stackName = "last_order_stack"
         )

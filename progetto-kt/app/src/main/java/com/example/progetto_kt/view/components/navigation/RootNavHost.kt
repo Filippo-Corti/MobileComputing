@@ -1,4 +1,4 @@
-package com.example.progetto_kt.view.navigation
+package com.example.progetto_kt.view.components.navigation
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -20,11 +20,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.progetto_kt.view.components.common.other.ErrorModal
 import com.example.progetto_kt.view.components.common.other.handleErrorByType
-import com.example.progetto_kt.view.navigation.navhosts.accountNavHost
-import com.example.progetto_kt.view.navigation.navhosts.homeNavHost
-import com.example.progetto_kt.view.navigation.navhosts.lastOrderNavHost
-import com.example.progetto_kt.view.navigation.util.MyTabBar
-import com.example.progetto_kt.view.navigation.util.NavigationPersistence
+import com.example.progetto_kt.view.components.navigation.navhosts.accountNavHost
+import com.example.progetto_kt.view.components.navigation.navhosts.homeNavHost
+import com.example.progetto_kt.view.components.navigation.navhosts.lastOrderNavHost
+import com.example.progetto_kt.view.components.navigation.util.MyTabBar
+import com.example.progetto_kt.view.components.navigation.util.NavigationPersistence
 import com.example.progetto_kt.viewmodel.MainViewModel
 
 @SuppressLint("RestrictedAPI")

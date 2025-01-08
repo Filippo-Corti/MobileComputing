@@ -11,7 +11,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,7 +37,8 @@ import com.example.progetto_kt.model.datasources.APIController
 import com.example.progetto_kt.model.datasources.DBController
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
-import com.example.progetto_kt.view.navigation.RootNavHost
+import com.example.progetto_kt.view.components.navigation.RootNavHost
+import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.rprogetto_kt.model.repositories.OrderRepository
 import com.google.android.gms.location.LocationCallback
