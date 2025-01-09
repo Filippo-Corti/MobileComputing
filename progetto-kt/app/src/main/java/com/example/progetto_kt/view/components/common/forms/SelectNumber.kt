@@ -5,11 +5,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -30,11 +32,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import com.example.progetto_kt.view.styles.Colors
+import com.example.progetto_kt.view.styles.Global
 
 @Composable
 fun SelectNumber(
@@ -47,10 +53,6 @@ fun SelectNumber(
 
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     var expanded by remember { mutableStateOf(false) }
-    val icon = if (expanded)
-        Icons.Filled.KeyboardArrowUp
-    else
-        Icons.Filled.KeyboardArrowDown
 
     Box(
         modifier = Modifier
@@ -61,24 +63,39 @@ fun SelectNumber(
             onValueChange = {
                 onValueChange(it)
             },
-            label = {
-                Text(
-                    text = label
-                )
-            },
             modifier = Modifier
                 .fillMaxWidth()
+                .height(50.dp)
                 .onGloballyPositioned { coordinates ->
                     textFieldSize = coordinates.size.toSize()
                 }
+                .border(
+                    width = 1.dp,
+                    color = Color.Black,
+                    shape = RoundedCornerShape(8.dp)
+                )
                 .clickable { expanded = !expanded },
-            trailingIcon = {
-                Icon(icon,null)
-            },
             enabled = false,
             colors = TextFieldDefaults.colors(
-                disabledTextColor = Color.Black
-            )
+                unfocusedContainerColor = Colors.WHITE,
+                focusedContainerColor = Colors.WHITE,
+                disabledContainerColor = Colors.WHITE,
+                unfocusedLabelColor = Colors.DARK_GRAY,
+                focusedLabelColor = Colors.DARK_GRAY,
+                unfocusedTextColor = Colors.BLACK,
+                focusedTextColor = Colors.BLACK,
+                disabledTextColor = Colors.BLACK,
+                disabledIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            textStyle = TextStyle(
+                textAlign = TextAlign.Center,
+                fontFamily = Global.Fonts.Medium,
+                color = Colors.BLACK,
+                fontSize = Global.FontSizes.Normal,
+            ),
+
         )
 
         if (expanded) {

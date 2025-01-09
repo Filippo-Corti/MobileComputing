@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -37,11 +38,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.progetto_kt.R
 import com.example.progetto_kt.model.dataclasses.toPoint
+import com.example.progetto_kt.view.components.common.buttons.ButtonWithArrow
+import com.example.progetto_kt.view.components.common.buttons.LargeButton
+import com.example.progetto_kt.view.components.common.buttons.MinimalistButton
+import com.example.progetto_kt.view.components.common.forms.FormField
+import com.example.progetto_kt.view.components.common.forms.SelectNumber
+import com.example.progetto_kt.view.components.common.icons.IconNames
+import com.example.progetto_kt.view.components.common.other.CardInformation
+import com.example.progetto_kt.view.components.common.other.CreditCard
+import com.example.progetto_kt.view.components.common.other.InfoTextBox
 import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.progetto_kt.viewmodel.util.CustomMarkerBuilder
@@ -107,7 +121,6 @@ fun HomeScreen(
         }
     }
 
-
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         state = refreshState,
@@ -147,6 +160,12 @@ fun HomeScreen(
                             .fillMaxWidth(),
                     )
                 }
+
+                InfoTextBox(
+                    text = "Prova Info ma piuttosto lunga (sarà necessario andare a capo)",
+                    iconName = IconNames.CLOCK
+                )
+
             }
 
             item {

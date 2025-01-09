@@ -18,7 +18,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.progetto_kt.view.components.common.other.ErrorModal
+import com.example.progetto_kt.view.components.common.other.BottomModal
 import com.example.progetto_kt.view.components.common.other.handleErrorByType
 import com.example.progetto_kt.view.components.navigation.navhosts.accountNavHost
 import com.example.progetto_kt.view.components.navigation.navhosts.homeNavHost
@@ -92,7 +92,7 @@ fun RootNavHost(
         val error = appState.error
         if (error != null) {
             Log.d("MainActivity", "With Error!")
-            ErrorModal(
+            BottomModal(
                 error = error,
                 onAction = {
                     handleErrorByType(
