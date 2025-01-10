@@ -56,6 +56,7 @@ import com.example.progetto_kt.view.components.common.icons.IconNames
 import com.example.progetto_kt.view.components.common.other.CardInformation
 import com.example.progetto_kt.view.components.common.other.CreditCard
 import com.example.progetto_kt.view.components.common.other.InfoTextBox
+import com.example.progetto_kt.view.components.common.other.MenuPreview
 import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.progetto_kt.viewmodel.util.CustomMarkerBuilder
@@ -243,43 +244,15 @@ fun HomeScreen(
 
             items(menusState.nearbyMenus) { menu ->
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .clickable {
-                            scrolledToId = menu.menu.id
-                            onMenuClick(menu.menu.id)
-                        }
-                        .background(if (menu.menu.id == scrolledToId) Color.LightGray else Color.Transparent),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-
-                        if (menu.image != null) {
-                            val byteArray = Base64.decode(menu.image.raw)
-                            val bitmap =
-                                BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = menu.menu.name,
-                                modifier = Modifier.size(70.dp, 70.dp)
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(70.dp, 70.dp)
-                                    .background(color = Color.Gray)
-                            )
-                        }
-                        Text(text = menu.menu.name)
+                MenuPreview(
+                    viewModel = viewModel,
+                    menu = menu,
+                    onPress = {
+                        scrolledToId = menu.menu.id
+                        onMenuClick(menu.menu.id)
                     }
-                    Text(text = "${menu.menu.price} €")
-                }
+                )
+
             }
         }
     }

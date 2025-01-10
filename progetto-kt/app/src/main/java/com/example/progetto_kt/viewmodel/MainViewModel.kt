@@ -20,6 +20,7 @@ import com.example.progetto_kt.model.dataclasses.Error
 import com.example.progetto_kt.model.dataclasses.ErrorType
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.dataclasses.toAPILocation
+import com.example.progetto_kt.model.dataclasses.toPoint
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.rprogetto_kt.model.repositories.OrderRepository
@@ -228,6 +229,26 @@ class MainViewModel(
             .build()
 
         locationClient.requestLocationUpdates(locationRequest, locationCallback, null )
+    }
+
+    fun distanceFromUserLocation(
+        location : APILocation
+    ) : Float {
+        if (!_locationState.value.isLocationAllowed || _locationState.value.lastKnownLocation == null) {
+            return -1F
+        }
+
+        val userLocation = _locationState.value.lastKnownLocation!!
+        val startPoint = Location("start").apply {
+            latitude = userLocation.latitude
+            longitude = userLocation.longitude
+        }
+        val endPoint = Location("end").apply {
+            latitude = location.latitude
+            longitude = location.longitude
+        }
+
+        return startPoint.distanceTo(endPoint) / 1000
     }
 
     /*** Data Fetching and Updating ***/
