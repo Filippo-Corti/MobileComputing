@@ -7,16 +7,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.example.progetto_kt.model.dataclasses.MenuDetailsWithImage
 import com.example.progetto_kt.model.dataclasses.MenuWithImage
@@ -79,24 +83,21 @@ fun MenuPreviewBody(
 ) {
     val priceStr = "%.2f".format(price)
     val deliveryTimeStr = if (deliveryTime > 0) deliveryTime.toString() else "<1"
-
+    val distanceStr = "$%.1f".format(distance)
 
     Row(
         modifier =  Modifier
             .fillMaxWidth()
+            .height(150.dp)
             .padding(horizontal = 8.dp, vertical = 15.dp)
-            .border(
-                width = 1.dp,
-                color = Colors.LIGHT_GRAY,
-                shape = CutCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomEnd = 0.dp, bottomStart = 0.dp)
-            )
             .clickable { onPress() },
         horizontalArrangement = Arrangement.spacedBy(15.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.6F),
+                .fillMaxWidth(0.6F)
+                .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -128,10 +129,14 @@ fun MenuPreviewBody(
 
             }
 
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Bottom
+            ) {
                 if (distance != null) {
                     Text(
-                        text = "${deliveryTimeStr}min • ${distance}km from you",
+                        text = "${deliveryTimeStr}min • ${distanceStr}km from you",
                         color = Colors.BLACK,
                         fontFamily = Global.Fonts.Regular,
                         fontSize = Global.FontSizes.Small
@@ -142,7 +147,8 @@ fun MenuPreviewBody(
 
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .height(120.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -155,10 +161,11 @@ fun MenuPreviewBody(
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = title,
-                    modifier = Modifier.size(120.dp, 120.dp)
+                    modifier = Modifier.size(120.dp, 120.dp),
+                    contentScale = ContentScale.Crop
                 )
             } else {
-                
+
                 MyIcon(
                     name = IconNames.FOOD,
                     size = 100,
@@ -169,4 +176,8 @@ fun MenuPreviewBody(
         }
     }
 
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = Colors.LIGHT_GRAY
+    )
 }
