@@ -57,6 +57,10 @@ import com.example.progetto_kt.view.components.common.other.CardInformation
 import com.example.progetto_kt.view.components.common.other.CreditCard
 import com.example.progetto_kt.view.components.common.other.InfoTextBox
 import com.example.progetto_kt.view.components.common.other.MenuPreview
+import com.example.progetto_kt.view.components.common.other.MenuSmallPreview
+import com.example.progetto_kt.view.components.common.other.ProgressBar
+import com.example.progetto_kt.view.components.common.other.Separator
+import com.example.progetto_kt.view.components.common.other.SplashScreen
 import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.progetto_kt.viewmodel.util.CustomMarkerBuilder
@@ -165,6 +169,11 @@ fun HomeScreen(
                 InfoTextBox(
                     text = "Prova Info ma piuttosto lunga (sarà necessario andare a capo)",
                     iconName = IconNames.CLOCK
+                )
+
+                Separator(
+                    size = 10,
+                    color = Colors.GRAY
                 )
 
             }
