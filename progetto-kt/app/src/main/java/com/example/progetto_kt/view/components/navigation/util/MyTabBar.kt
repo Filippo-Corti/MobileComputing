@@ -41,7 +41,7 @@ fun MyTabBar(
 
             NavigationBarItem(
                 selected = currentRoute == item.params.route,
-                modifier = Modifier.padding(0.dp, 15.dp, 0.dp, 0.dp),
+                modifier = Modifier.padding(0.dp, 6.dp, 0.dp, 0.dp),
                 colors = NavigationBarItemColors(
                     selectedIconColor = Colors.BLACK,
                     unselectedIconColor = Colors.GRAY,

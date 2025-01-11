@@ -27,7 +27,7 @@ fun MinimalistButton(
             text = text,
             fontFamily = Global.Fonts.Medium,
             fontSize = Global.FontSizes.Normal,
-            color = Colors.PRIMARY
+            color = Colors.SECONDARY
         )
     }
 }

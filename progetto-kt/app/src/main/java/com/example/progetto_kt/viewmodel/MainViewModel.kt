@@ -74,6 +74,14 @@ class MainViewModel(
     private val locationClient : FusedLocationProviderClient,
 ) : ViewModel() {
 
+    companion object {
+        val DEFAULT_LOCATION = APILocation(
+            latitude = 45.4642,
+            longitude = 9.19,
+            address = "Milan, Italy"
+        )
+    }
+
     private val TAG = MainViewModel::class.simpleName
     private val _sid = MutableStateFlow<String?>(null)
     private val _uid = MutableStateFlow<Int?>(null)
@@ -258,7 +266,7 @@ class MainViewModel(
         block: suspend () -> Unit,
     ) {
         if (checkSid && (_sid.value == null || _uid.value == null)) {
-            Log.d(TAG, "User not logged in, couldn't make the API call")
+            Log.d(TAG, "User Session not Retrieved Yet. Couldn't make the API Call")
             setError(
                 error = Error(
                     type = ErrorType.NETWORK,
@@ -431,14 +439,13 @@ class MainViewModel(
     }
 
     // Fetches Menu Images Asynchronously
-    fun fetchNearbyMenusAsync(onOperationEnd : () -> Unit) {
+    fun fetchNearbyMenusAsync(runBeforeFetchingImages : () -> Unit) {
         viewModelScope.launch {
-            fetchNearbyMenus()
-            onOperationEnd()
+            fetchNearbyMenus(runBeforeFetchingImages)
         }
     }
 
-    suspend fun fetchNearbyMenus() {
+    suspend fun fetchNearbyMenus(runBeforeFetchingImages : () -> Unit = {}) {
         val location = getCurrentAPILocation()
         runWithErrorHandling {
             val menus = menuRepository.getNearbyMenus(
@@ -453,6 +460,8 @@ class MainViewModel(
                 nearbyMenus = menusWithNoImages,
                 reloadMenus = false
             )
+
+            runBeforeFetchingImages()
 
             menus.forEach { menu ->
                 val image = menuRepository.getMenuImage(

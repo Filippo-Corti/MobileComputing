@@ -1,7 +1,12 @@
 package com.example.progetto_kt.view.styles
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.progetto_kt.R
 
@@ -21,6 +26,16 @@ object Global {
         val Subtitle = 20.sp
         val Title = 24.sp
     }
+
+    val Container = Modifier
+        .background(Colors.WHITE)
+        .padding(vertical = 8.dp)
+        .fillMaxWidth()
+
+    val InsetContainer = Modifier
+        .background(Colors.WHITE)
+        .padding(horizontal = 20.dp)
+        .fillMaxWidth()
 
 
 }

@@ -89,7 +89,7 @@ fun MenuPreviewBody(
         modifier =  Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(horizontal = 8.dp, vertical = 15.dp)
+            .padding(horizontal = 30.dp, vertical = 15.dp)
             .clickable { onPress() },
         horizontalArrangement = Arrangement.spacedBy(15.dp),
         verticalAlignment = Alignment.Top

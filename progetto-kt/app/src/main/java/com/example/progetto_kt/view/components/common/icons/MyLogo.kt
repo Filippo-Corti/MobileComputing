@@ -29,7 +29,7 @@ fun MyLogo() {
                 lineHeight = Global.FontSizes.Title,
                 fontFamily = Global.Fonts.Logo
             ),
-            modifier = Modifier.offset(x = 8.dp, y = (-4).dp)
+            modifier = Modifier.offset(x = 8.dp, y = (-8).dp)
         )
     }
 }

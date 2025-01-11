@@ -1,6 +1,8 @@
 package com.example.progetto_kt.view.components.screens
 
+import MyLogo
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +48,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.progetto_kt.R
+import com.example.progetto_kt.model.dataclasses.APILocation
+import com.example.progetto_kt.model.dataclasses.Error
+import com.example.progetto_kt.model.dataclasses.ErrorType
+import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.toPoint
 import com.example.progetto_kt.view.components.common.buttons.ButtonWithArrow
 import com.example.progetto_kt.view.components.common.buttons.LargeButton
@@ -62,6 +68,7 @@ import com.example.progetto_kt.view.components.common.other.ProgressBar
 import com.example.progetto_kt.view.components.common.other.Separator
 import com.example.progetto_kt.view.components.common.other.SplashScreen
 import com.example.progetto_kt.view.styles.Colors
+import com.example.progetto_kt.view.styles.Global
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.progetto_kt.viewmodel.util.CustomMarkerBuilder
 import com.mapbox.maps.extension.compose.MapEffect
@@ -88,24 +95,23 @@ fun HomeScreen(
 ) {
 
     val appState by viewModel.appState.collectAsState()
+    val userState by viewModel.userState.collectAsState()
     val locationState by viewModel.locationState.collectAsState()
     val menusState by viewModel.menusExplorationState.collectAsState()
 
-    val listState = rememberLazyListState()
-    var scrolledToId by remember { mutableIntStateOf(-1) }
-
     // Pull to Refresh
-    val coroutineScope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
     val onRefresh: () -> Unit = {
         isRefreshing = true
+        Log.d("HomeScreen", "Fetching menus onRefresh")
         viewModel.fetchNearbyMenusAsync {
             isRefreshing = false
         }
     }
 
-    LaunchedEffect(menusState.reloadMenus) {
+    LaunchedEffect(menusState.reloadMenus, appState.isLoading) {
+        Log.d("HomeScreen", "Triggered: ${menusState.reloadMenus} ${appState.isLoading}")
         if (menusState.nearbyMenus.isEmpty() && !appState.isLoading || menusState.reloadMenus) {
             isRefreshing = true
             viewModel.fetchNearbyMenusAsync {
@@ -118,7 +124,8 @@ fun HomeScreen(
         return Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .background(Colors.WHITE),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -132,123 +139,31 @@ fun HomeScreen(
         onRefresh = onRefresh
     ) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 100.dp)
-                .background(Colors.WHITE),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            state = listState
+            modifier = Global.Container
+                .defaultMinSize(minHeight = 100.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             item {
-                Text(
-                    text = "Menus around you",
-                    modifier = Modifier
-                        .padding(16.dp, 25.dp)
-                        .fillMaxWidth(),
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight(700),
-                    textAlign = TextAlign.Center,
-                )
-                if (locationState.isLocationAllowed) {
-                    Text(
-                        text = "Location is allowed - Showing menus in ${locationState.lastKnownLocation?.address}",
-                        modifier = Modifier
-                            .padding(16.dp, 25.dp)
-                            .fillMaxWidth(),
-                    )
-                } else {
-                    Text(
-                        text = "Location is not allowed - Showing menus around Milan",
-                        modifier = Modifier
-                            .padding(16.dp, 25.dp)
-                            .fillMaxWidth(),
-                    )
-                }
 
-                InfoTextBox(
-                    text = "Prova Info ma piuttosto lunga (sarà necessario andare a capo)",
-                    iconName = IconNames.CLOCK
-                )
+                Header(user = userState.user)
 
-                Separator(
-                    size = 10,
-                    color = Colors.GRAY
-                )
-
-            }
-
-            item {
-
-                val userLocation = viewModel.getCurrentAPILocation().toPoint()
-                val mapViewportState = rememberMapViewportState {
-                    setCameraOptions {
-                        center(userLocation)
-                        zoom(11.0)
+                MenusListHeader(
+                    location = locationState.lastKnownLocation,
+                    onEnableLocationClick = {
+                        viewModel.setError(
+                            Error(
+                                type = ErrorType.POSITION_UNALLOWED,
+                                title = "We need your Location",
+                                message = "This app requires your location to work properly. \nIn case you deny the permission, some features may not work as expected.",
+                                actionText = "I'll do it"
+                            )
+                        )
                     }
-                }
+                )
 
-//                MapboxMap(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(250.dp),
-//
-//                    mapViewportState = mapViewportState,
-//                ) {
-//
-//                    if (locationState.isLocationAllowed) {
-//                        MapEffect(Unit) { mapView ->
-//                            mapView.gestures.updateSettings {
-//                                scrollEnabled = false
-//                                pitchEnabled = false
-//                                rotateEnabled = false
-//                            }
-//
-//                            mapView.location.updateSettings {
-//                                locationPuck = createDefault2DPuck(withBearing = true)
-//                                puckBearingEnabled = true
-//                                puckBearing = PuckBearing.HEADING
-//                                enabled = true
-//                            }
-//                            mapViewportState.transitionToFollowPuckState(
-//                                FollowPuckViewportStateOptions.Builder()
-//                                    .zoom(11.0)
-//                                    .pitch(0.0)
-//                                    .build()
-//                            )
-//                        }
-//                    }
-//
-//                    menusState.nearbyMenus.forEachIndexed { idx, menu ->
-//                        if (menu.image != null) {
-//                            val markerBitmap = CustomMarkerBuilder.getCustomMarker(
-//                                context = LocalContext.current,
-//                                menu = menu
-//                            )
-//
-//                            val marker = rememberIconImage(
-//                                key = menu.menu.id,
-//                                painter = BitmapPainter(markerBitmap.asImageBitmap())
-//                            )
-//
-//                            PointAnnotation(
-//                                point = menu.menu.location.toPoint(),
-//                                init = {
-//                                    iconImage = marker
-//                                    iconSize = 1.2
-//                                },
-//                                onClick = {
-//                                    coroutineScope.launch {
-//                                        scrolledToId = menu.menu.id
-//                                        listState.animateScrollToItem(idx + 2, -250)
-//                                    }
-//                                    true
-//                                }
-//                            )
-//                        }
-//                    }
-//
-//                }
+                Separator(size = 1, color = Colors.LIGHT_GRAY)
+
             }
 
             items(menusState.nearbyMenus) { menu ->
@@ -257,12 +172,90 @@ fun HomeScreen(
                     viewModel = viewModel,
                     menu = menu,
                     onPress = {
-                        scrolledToId = menu.menu.id
                         onMenuClick(menu.menu.id)
                     }
                 )
 
             }
+        }
+    }
+}
+
+@Composable
+fun Header(
+    user: User?
+) {
+    val userName = if (user != null) ",${user.firstName}" else ""
+
+    Row(
+        modifier = Global.InsetContainer
+            .padding(top = 22.dp, bottom = 10.dp)
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = "Welcome back $userName",
+                color = Colors.BLACK,
+                fontFamily = Global.Fonts.Medium,
+                fontSize = Global.FontSizes.Subtitle
+            )
+
+            Text(
+                text = "What are you craving?",
+                color = Colors.DARK_GRAY,
+                fontFamily = Global.Fonts.Regular,
+                fontSize = Global.FontSizes.Normal
+            )
+        }
+
+        Column {
+            MyLogo()
+        }
+    }
+}
+
+@Composable
+fun MenusListHeader(
+    location: APILocation?,
+    onEnableLocationClick: () -> Unit
+) {
+
+    Column(
+        modifier = Global.InsetContainer
+            .padding(top = 10.dp, bottom = 15.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        if (location == null) {
+            Text(
+                text = "Menus in ${MainViewModel.DEFAULT_LOCATION.address}",
+                color = Colors.BLACK,
+                fontFamily = Global.Fonts.Bold,
+                fontSize = Global.FontSizes.Subtitle,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+
+            Text(
+                text = "Want localized results?",
+                color = Colors.DARK_GRAY,
+                fontFamily = Global.Fonts.Regular,
+                fontSize = Global.FontSizes.Normal
+            )
+
+            MinimalistButton(
+                text = "ALLOW LOCATION"
+            ) { onEnableLocationClick() }
+
+        } else {
+            Text(
+                text = "Menus around you",
+                color = Colors.BLACK,
+                fontFamily = Global.Fonts.Bold,
+                fontSize = Global.FontSizes.Subtitle,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
         }
     }
 

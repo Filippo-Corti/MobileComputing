@@ -3,8 +3,14 @@ package com.example.progetto_kt
 import android.content.Context
 import android.os.Bundle
 import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
 import android.location.Geocoder
+import android.media.audiofx.BassBoost
+import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -25,8 +31,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -37,6 +46,7 @@ import com.example.progetto_kt.model.datasources.APIController
 import com.example.progetto_kt.model.datasources.DBController
 import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
+import com.example.progetto_kt.view.components.common.other.SplashScreen
 import com.example.progetto_kt.view.components.navigation.RootNavHost
 import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
@@ -108,19 +118,12 @@ fun MangiaEBasta(
     val TAG = "MangiaEBasta"
 
     val appState by viewModel.appState.collectAsState()
-    val locationState by viewModel.locationState.collectAsState()
 
     if (appState.isLoading) {
-        return Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator()
-        }
+        return SplashScreen()
     }
+
+    val locationState by viewModel.locationState.collectAsState()
 
     val context = LocalContext.current
 
@@ -179,12 +182,25 @@ fun MangiaEBasta(
         viewModel.setCheckedPermissions(true)
     }
 
-    Log.d("MainActivity", "Loaded!")
-
     RootNavHost(
         viewModel = viewModel,
         onAskLocationPermission = {
-            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                    context as Activity,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            ) {
+                permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            } else {
+                Toast.makeText(
+                    context,
+                    "It looks like you denied the permission to access your location. Please enable it in the settings.",
+                    Toast.LENGTH_LONG
+                ).show()
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                ContextCompat.startActivity(context, intent, null)
+            }
         }
     )
 
