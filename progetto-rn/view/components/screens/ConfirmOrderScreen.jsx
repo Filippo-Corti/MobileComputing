@@ -179,9 +179,9 @@ const ConfirmOrderScreen = ({
 
                     <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
                         <Text style={[globalStyles.textBlack, globalStyles.textSmallRegular, { marginVertical: 15, }]}>
-                            If you’re not around when the courier arrives, they’ll leave
+                            If you’re not around when the drone arrives, they’ll leave
                             your order at the door. By placing your order, you agree
-                            to take full responsibilty for it once it’s delivered.
+                            to take full responsibility for it once it’s delivered.
                         </Text>
                         <LargeButton text="Confirm and Pay" onPress={onConfirmOrder} />
                     </View>
