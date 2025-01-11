@@ -27,7 +27,7 @@ fun InfoTextBox(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 20.dp, horizontal = 30.dp),
+            .padding(vertical = 18.dp, horizontal = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 

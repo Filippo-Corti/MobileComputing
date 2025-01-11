@@ -40,14 +40,14 @@ fun Location.toAPILocation(): APILocation {
 object Timestamps {
 
     fun Timestamp.toMillis(): Long {
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
         return format.parse(this)?.time ?: 0L
     }
 
-    fun Timestamp.formatTimestamp(prettyPattern: String): String {
-        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+    fun Timestamp.formatTimestamp() : String {
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
         val date = format.parse(this) ?: return this
-        val prettyFormat = SimpleDateFormat(prettyPattern, Locale.getDefault())
+        val prettyFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
         return prettyFormat.format(date)
     }
 }

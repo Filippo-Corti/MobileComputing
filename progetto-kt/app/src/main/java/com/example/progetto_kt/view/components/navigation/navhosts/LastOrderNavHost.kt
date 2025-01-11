@@ -22,7 +22,10 @@ fun NavGraphBuilder.lastOrderNavHost(
             route = AppScreen.LastOrder.params.route
         ) {
             LastOrderScreen(
-                viewModel = viewModel
+                viewModel = viewModel,
+                onExploreMenusClick = {
+                    navController.navigate(AppScreen.Home.params.route)
+                }
             )
         }
     }
