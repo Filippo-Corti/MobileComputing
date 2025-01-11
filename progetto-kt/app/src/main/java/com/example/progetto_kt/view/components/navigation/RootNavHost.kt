@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +47,13 @@ fun RootNavHost(
 
     currentRoute = navBackStackEntry?.destination?.route
 
-    showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
+    LaunchedEffect(navBackStackEntry) {
+        // Wait for the navigation animation to finish before updating showTabBar
+        navController.currentBackStackEntry?.let { backStackEntry ->
+            currentRoute = backStackEntry.destination.route
+            showTabBar = AppScreen.values().firstOrNull { it.params.route == currentRoute }?.params?.showTabBar ?: true
+        }
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 

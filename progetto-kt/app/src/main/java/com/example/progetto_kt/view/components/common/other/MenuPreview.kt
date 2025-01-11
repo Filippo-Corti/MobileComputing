@@ -7,10 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CutCornerShape
@@ -88,7 +90,7 @@ fun MenuPreviewBody(
     Row(
         modifier =  Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .heightIn(min = 150.dp)
             .padding(horizontal = 30.dp, vertical = 15.dp)
             .clickable { onPress() },
         horizontalArrangement = Arrangement.spacedBy(15.dp),
@@ -97,6 +99,7 @@ fun MenuPreviewBody(
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.6F)
+                .heightIn(min = 120.dp)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -131,7 +134,8 @@ fun MenuPreviewBody(
 
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
                 verticalArrangement = Arrangement.Bottom
             ) {
                 if (distance != null) {

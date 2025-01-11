@@ -32,7 +32,7 @@ fun InfoTextBox(
     ) {
 
         if (iconName != null) {
-            MyIcon(name = iconName, size = 32, color = Colors.BLACK)
+            MyIcon(name = iconName, size = 35, color = Colors.BLACK)
             Spacer(modifier = Modifier.width(20.dp))
         }
 

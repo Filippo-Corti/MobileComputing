@@ -83,7 +83,7 @@ fun MenuSmallPreview(
                 text = title,
                 color = Colors.BLACK,
                 fontFamily = Global.Fonts.Medium,
-                fontSize = Global.FontSizes.Normal
+                fontSize = Global.FontSizes.Subtitle
             )
 
             Text(
