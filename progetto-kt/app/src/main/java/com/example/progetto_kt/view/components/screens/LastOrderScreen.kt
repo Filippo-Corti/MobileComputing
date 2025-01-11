@@ -101,7 +101,7 @@ fun LastOrderScreen(
         )
 
         Text(
-            text = "The Order was a : ${lastOrderedMenu.name}",
+            text = "The Order was a : ${lastOrderedMenu.menuDetails.name}",
         )
 
         Text(

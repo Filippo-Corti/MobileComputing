@@ -129,7 +129,7 @@ fun HomeScreen(
 fun Header(
     user: User?
 ) {
-    val userName = if (user != null) ",${user.firstName}" else ""
+    val userName = if (user != null) ", ${user.firstName}" else ""
 
     Row(
         modifier = Global.InsetContainer
@@ -139,7 +139,7 @@ fun Header(
     ) {
         Column {
             Text(
-                text = "Welcome back $userName",
+                text = "Welcome back$userName",
                 color = Colors.BLACK,
                 fontFamily = Global.Fonts.Medium,
                 fontSize = Global.FontSizes.Subtitle

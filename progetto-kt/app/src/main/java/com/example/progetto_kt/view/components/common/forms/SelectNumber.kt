@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -47,7 +50,6 @@ fun SelectNumber(
     min: Int,
     max : Int,
     value : String,
-    label : String,
     onValueChange : (String) -> Boolean,
 ) {
 
@@ -58,14 +60,14 @@ fun SelectNumber(
         modifier = Modifier
             .padding(16.dp)
     ) {
-        TextField(
+        BasicTextField(
             value = value,
             onValueChange = {
                 onValueChange(it)
             },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+                .width(100.dp)
+                .height(30.dp)
                 .onGloballyPositioned { coordinates ->
                     textFieldSize = coordinates.size.toSize()
                 }
@@ -76,26 +78,19 @@ fun SelectNumber(
                 )
                 .clickable { expanded = !expanded },
             enabled = false,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Colors.WHITE,
-                focusedContainerColor = Colors.WHITE,
-                disabledContainerColor = Colors.WHITE,
-                unfocusedLabelColor = Colors.DARK_GRAY,
-                focusedLabelColor = Colors.DARK_GRAY,
-                unfocusedTextColor = Colors.BLACK,
-                focusedTextColor = Colors.BLACK,
-                disabledTextColor = Colors.BLACK,
-                disabledIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
             textStyle = TextStyle(
                 textAlign = TextAlign.Center,
                 fontFamily = Global.Fonts.Medium,
                 color = Colors.BLACK,
                 fontSize = Global.FontSizes.Normal,
             ),
-
+            decorationBox = { innerTextField ->
+                Row (
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    innerTextField()
+                }
+            }
         )
 
         if (expanded) {

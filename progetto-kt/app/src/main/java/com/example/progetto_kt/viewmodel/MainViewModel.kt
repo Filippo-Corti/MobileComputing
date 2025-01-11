@@ -39,31 +39,31 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 data class UserState(
-    val user : User? = null,
-    val isUserRegistered : Boolean = false,
+    val user: User? = null,
+    val isUserRegistered: Boolean = false,
 )
 
 data class LastOrderState(
-    val lastOrder : Order? = null,
-    val lastOrderMenu : MenuDetails? = null,
+    val lastOrder: Order? = null,
+    val lastOrderMenu: MenuDetailsWithImage? = null,
 )
 
 data class LocationState(
-    val lastKnownLocation : APILocation? = null,
-    val isLocationAllowed : Boolean = false,
-    val hasCheckedPermissions : Boolean = false,
+    val lastKnownLocation: APILocation? = null,
+    val isLocationAllowed: Boolean = false,
+    val hasCheckedPermissions: Boolean = false,
 )
 
 data class MenusExplorationState(
-    val nearbyMenus : List<MenuWithImage> = emptyList(),
-    val selectedMenu : MenuDetailsWithImage? = null,
-    val reloadMenus : Boolean = false,
+    val nearbyMenus: List<MenuWithImage> = emptyList(),
+    val selectedMenu: MenuDetailsWithImage? = null,
+    val reloadMenus: Boolean = false,
 )
 
 data class AppState(
     val isLoading: Boolean = true,
-    val isFirstLaunch : Boolean = true,
-    val error : Error? = null
+    val isFirstLaunch: Boolean = true,
+    val error: Error? = null
 )
 
 class MainViewModel(
@@ -71,7 +71,7 @@ class MainViewModel(
     private val menuRepository: MenuRepository,
     private val orderRepository: OrderRepository,
     private val geocoder: Geocoder,
-    private val locationClient : FusedLocationProviderClient,
+    private val locationClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
     companion object {
@@ -113,15 +113,16 @@ class MainViewModel(
         }
     }
 
-    fun setLoading(isLoading : Boolean) {
+    fun setLoading(isLoading: Boolean) {
         _appState.value = _appState.value.copy(isLoading = isLoading)
     }
 
-    fun setCheckedPermissions(hasCheckedPermissions : Boolean) {
-        _locationState.value = _locationState.value.copy(hasCheckedPermissions = hasCheckedPermissions)
+    fun setCheckedPermissions(hasCheckedPermissions: Boolean) {
+        _locationState.value =
+            _locationState.value.copy(hasCheckedPermissions = hasCheckedPermissions)
     }
 
-    fun setError(error : Error) {
+    fun setError(error: Error) {
         if (_appState.value.error != null) return
         _appState.value = _appState.value.copy(error = error)
     }
@@ -130,15 +131,15 @@ class MainViewModel(
         _appState.value = _appState.value.copy(error = null)
     }
 
-    suspend fun saveNavigationStack(screen : String) {
+    suspend fun saveNavigationStack(screen: String) {
         userRepository.saveNavigationStack(screen)
     }
 
-    suspend fun getLastNavigationStack() : String? {
+    suspend fun getLastNavigationStack(): String? {
         return userRepository.getLastNavigationStack()
     }
 
-    fun getUserRepository() : UserRepository {
+    fun getUserRepository(): UserRepository {
         return userRepository
     }
 
@@ -148,7 +149,7 @@ class MainViewModel(
         _locationState.value = _locationState.value.copy(isLocationAllowed = false)
     }
 
-    fun allowLocation(location : Location) {
+    fun allowLocation(location: Location) {
         setLastKnownLocation(location)
         if (_locationState.value.isLocationAllowed) return
         _locationState.value = _locationState.value.copy(
@@ -161,14 +162,16 @@ class MainViewModel(
 
     private fun setLastKnownLocation(location: Location) {
         val loc = location.toAPILocation()
-        _locationState.value = _locationState.value.copy(lastKnownLocation = loc) // Quick update, synchronously
+        _locationState.value =
+            _locationState.value.copy(lastKnownLocation = loc) // Quick update, synchronously
         viewModelScope.launch {
             loc.address = getAddressFromLocation(loc)
-            _locationState.value = _locationState.value.copy(lastKnownLocation = loc) // Slow update, asynchronously
+            _locationState.value =
+                _locationState.value.copy(lastKnownLocation = loc) // Slow update, asynchronously
         }
     }
 
-    fun getCurrentAPILocation() : APILocation {
+    fun getCurrentAPILocation(): APILocation {
         val location = _locationState.value.lastKnownLocation
         if (location != null && _locationState.value.isLocationAllowed) {
             return APILocation(
@@ -191,8 +194,10 @@ class MainViewModel(
                 if (addresses.isNullOrEmpty()) return@withContext "";
 
                 val address = addresses[0]
-                val thoroughfare = if (address.thoroughfare != null) "${address.thoroughfare}," else ""
-                val subThoroughfare = if (address.subThoroughfare != null) "${address.subThoroughfare}," else ""
+                val thoroughfare =
+                    if (address.thoroughfare != null) "${address.thoroughfare}," else ""
+                val subThoroughfare =
+                    if (address.subThoroughfare != null) "${address.subThoroughfare}," else ""
                 val postalCode = if (address.postalCode != null) "(${address.postalCode})" else ""
                 val locality = address.locality ?: ""
 
@@ -214,7 +219,10 @@ class MainViewModel(
 
     @SuppressLint("MissingPermission")
     fun getCurrentLocation() {
-        val locationTask = locationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+        val locationTask = locationClient.getCurrentLocation(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            CancellationTokenSource().token
+        )
         try {
             viewModelScope.launch {
                 val location = locationTask.await()
@@ -236,12 +244,12 @@ class MainViewModel(
             .setMinUpdateDistanceMeters(10.0F) // Minimum distance between updates
             .build()
 
-        locationClient.requestLocationUpdates(locationRequest, locationCallback, null )
+        locationClient.requestLocationUpdates(locationRequest, locationCallback, null)
     }
 
     fun distanceFromUserLocation(
-        location : APILocation
-    ) : Float {
+        location: APILocation
+    ): Float {
         if (!_locationState.value.isLocationAllowed || _locationState.value.lastKnownLocation == null) {
             return -1F
         }
@@ -283,9 +291,9 @@ class MainViewModel(
         } catch (e: Error) {
             Log.e(TAG, "Error: ${e.message}")
             setError(e)
-        } catch (e : CancellationException) {
+        } catch (e: CancellationException) {
             Log.w(TAG, "Error: $e")
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error: $e")
             setError(
                 error = Error(
@@ -324,7 +332,7 @@ class MainViewModel(
         }
     }
 
-    suspend fun updateUserData(newData : UserUpdateParams) : Boolean {
+    suspend fun updateUserData(newData: UserUpdateParams): Boolean {
         val newUserData = newData.copy(sid = _sid.value!!)
 
         runWithErrorHandling {
@@ -371,7 +379,7 @@ class MainViewModel(
     }
 
     suspend fun orderMenu(menuId: Int): Boolean {
-        if(!_userState.value.isUserRegistered) {
+        if (!_userState.value.isUserRegistered) {
             setError(
                 error = Error(
                     type = ErrorType.ACCOUNT_DETAILS,
@@ -426,26 +434,34 @@ class MainViewModel(
             return
 
         val location = getCurrentAPILocation()
+        val menuId = _lastOrderState.value.lastOrder?.menuId!!
         runWithErrorHandling {
             val menu = menuRepository.getMenuDetails(
                 sid = _sid.value!!,
                 latitude = location.latitude,
                 longitude = location.longitude,
-                menuId = _lastOrderState.value.lastOrder?.menuId!!
+                menuId = menuId
             )
             menu.location.address = getAddressFromLocation(menu.location)
-            _lastOrderState.value = _lastOrderState.value.copy(lastOrderMenu = menu)
+            val image = menuRepository.getMenuImage(
+                sid = _sid.value!!,
+                menuId = menuId,
+                imageVersion = menu.imageVersion
+            )
+            _lastOrderState.value = _lastOrderState.value.copy(
+                lastOrderMenu = MenuDetailsWithImage(menu, image)
+            )
         }
     }
 
     // Fetches Menu Images Asynchronously
-    fun fetchNearbyMenusAsync(runBeforeFetchingImages : () -> Unit) {
+    fun fetchNearbyMenusAsync(runBeforeFetchingImages: () -> Unit) {
         viewModelScope.launch {
             fetchNearbyMenus(runBeforeFetchingImages)
         }
     }
 
-    suspend fun fetchNearbyMenus(runBeforeFetchingImages : () -> Unit = {}) {
+    suspend fun fetchNearbyMenus(runBeforeFetchingImages: () -> Unit = {}) {
         val location = getCurrentAPILocation()
         runWithErrorHandling {
             val menus = menuRepository.getNearbyMenus(
