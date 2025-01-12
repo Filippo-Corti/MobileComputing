@@ -9,18 +9,40 @@ import SplashScreen from "../common/other/SplashScreen";
 
 /**
  * @param {{
-*  children: React.ReactNode
-* }} props 
-* @returns {JSX.Element}
-*/
+ *  children: React.ReactNode
+ * }} props 
+ * @returns {JSX.Element}
+ */
 const NavigationPersistence = ({
     children
 }) => {
-
     const navigationRef = useRef(null);
     const appState = useRef(AppState.currentState);
     const [isReady, setIsReady] = useState(false);
     const [initialState, setInitialState] = useState(null);
+    const isSaving = useRef(false);
+
+    // Safe save function with locking
+    const safeSaveNavigation = async () => {
+        if (isSaving.current) {
+            console.log('Save already in progress, skipping');
+            return;
+        }
+        
+        try {
+            isSaving.current = true;
+            const currentState = navigationRef.current?.getRootState();
+            
+            if (currentState) {
+                await ViewModel.saveNavigationStack(currentState);
+                console.log('Navigation state saved:', currentState);
+            }
+        } catch (err) {
+            console.warn('Failed to save navigation state:', err);
+        } finally {
+            isSaving.current = false;
+        }
+    };
 
     // Restore the previous navigation state on first composition
     useEffect(() => {
@@ -30,7 +52,7 @@ const NavigationPersistence = ({
                 console.log('Loaded navigation state:', navStack);
                 setInitialState(navStack);
             } catch (err) {
-                console.log('Failed to load navigation state:', err);
+                console.warn('Failed to load navigation state:', err);
             } finally {
                 setIsReady(true);
             }
@@ -41,17 +63,9 @@ const NavigationPersistence = ({
 
     // Save the current navigation state on ON_STOP event
     useEffect(() => {
-        const subscription = AppState.addEventListener('change', async (nextAppState) => {
-            if (appState.current.match(/active|foreground/) && nextAppState === 'background') { // Detects ON_STOP event
-                try {
-                    const currentState = navigationRef.current ? navigationRef.current.getRootState() : null;
-                    if (currentState) {
-                        await ViewModel.saveNavigationStack(currentState);
-                        console.log('Navigation state saved:', currentState);
-                    }
-                } catch (err) {
-                    console.log('Failed to save navigation state:', err);
-                }
+        const subscription = AppState.addEventListener('change', (nextAppState) => {
+            if (appState.current.match(/active|foreground/) && (nextAppState === 'background' || nextAppState === 'inactive') || true) {
+                safeSaveNavigation();
             }
 
             appState.current = nextAppState;
@@ -63,9 +77,7 @@ const NavigationPersistence = ({
     }, []);
 
     if (!isReady) {
-        return (
-            <SplashScreen />
-        );
+        return <SplashScreen />;
     }
 
     return (
@@ -76,7 +88,6 @@ const NavigationPersistence = ({
             {children}
         </NavigationContainer>
     );
-
-}
+};
 
 export default NavigationPersistence;

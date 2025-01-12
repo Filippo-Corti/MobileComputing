@@ -31,28 +31,48 @@ const LastOrderScreen = ({ }) => {
 
     const { userState, orderState, setOrderState } = useContext(UserContext);
     const { appState, locationState, setError } = useContext(AppStateContext);
+    const [isLoading, setIsLoading] = useState(true);
     const [isFetching, setIsFetching] = useState(false);
+    const previousMenuIdRef = useRef(orderState.lastOrderMenu?.menu?.mid);
+
+    useEffect(() => {
+        previousMenuIdRef.current = orderState.lastOrderMenu?.menu?.mid;
+    }, [orderState.lastOrderMenu]);
 
     const fetchLastOrder = async () => {
+        if (isFetching) { // Prevent multiple fetches at the same time
+            return
+        }
+        setIsFetching(true);
+
         if (!userState.user?.lastOid) {
+            setIsLoading(false);
             setIsFetching(false);
             return;
         }
         try {
             const order = await ViewModel.fetchOrderDetails(userState.user.lastOid);
-            const orderedMenu = await ViewModel.fetchMenuDetails(
-                locationState.lastKnownLocation.lat,
-                locationState.lastKnownLocation.lng,
-                order.mid
-            );
-            setOrderState({
-                lastOrder: order,
-                lastOrderMenu: orderedMenu,
-            });
+            if (previousMenuIdRef.current != order.mid) {
+                const orderedMenu = await ViewModel.fetchMenuDetails(
+                    locationState.lastKnownLocation.lat,
+                    locationState.lastKnownLocation.lng,
+                    order.mid
+                );
+                setOrderState({
+                    lastOrder: order,
+                    lastOrderMenu: orderedMenu,
+                });
+            } else {
+                setOrderState(prevState => ({
+                    ...prevState,
+                    lastOrder: order
+                }));
+            }
         } catch (err) {
             setError(err);
         } finally {
             setIsFetching(false);
+            setIsLoading(false);
         }
     }
 
@@ -63,7 +83,6 @@ const LastOrderScreen = ({ }) => {
     useEffect(() => {
         if (isFocused) {
             console.log("Screen is focused, starting timer");
-            setIsFetching(true);
             fetchLastOrder();
             intervalId.current = setInterval(fetchLastOrder, 5000);
         } else {
@@ -83,7 +102,7 @@ const LastOrderScreen = ({ }) => {
         };
     }, [isFocused]);
 
-    if (appState.isLoading || isFetching) {
+    if (appState.isLoading || isLoading) {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color={colors.primary} />
@@ -195,26 +214,27 @@ const ShowOrderState = ({
     const map = useRef(null);
 
     const loadMap = () => {
-        console.log("Map is ready, fitting to coordinates");
-        if (map.current && showMap) {
-            const coords = (orderData.status === "ON_DELIVERY")
-            ? [
-                { latitude: userLocation.lat, longitude: userLocation.lng },
-                { latitude: droneLocation.lat, longitude: droneLocation.lng },
-                { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
-                { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
-            ]
-            : [
-                { latitude: userLocation.lat, longitude: userLocation.lng },
-                { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
-                { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
-            ];
+        setTimeout(() => {
+            if (map.current && showMap) {
+                console.log("Map is ready, fitting to coordinates");
+                const coords = (orderData.status === "ON_DELIVERY")
+                    ? [
+                        { latitude: userLocation.lat, longitude: userLocation.lng },
+                        { latitude: droneLocation.lat, longitude: droneLocation.lng },
+                        { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
+                        { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
+                    ]
+                    : [
+                        { latitude: userLocation.lat, longitude: userLocation.lng },
+                        { latitude: deliveryLocation.lat, longitude: deliveryLocation.lng },
+                        { latitude: menuStartLocation.lat, longitude: menuStartLocation.lng },
+                    ];
 
-            map.current.fitToCoordinates(coords, {
-                edgePadding: { top: 150, right: 100, bottom: 150, left: 100 }
-            });
-
-        }
+                map.current.fitToCoordinates(coords, {
+                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }
+                });
+            }
+        }, 100);
     }
 
     return (
@@ -232,6 +252,13 @@ const ShowOrderState = ({
                     loadingEnabled={true}
                     showsMyLocationButton={true}
                     onMapReady={loadMap}
+                    onLayout={loadMap}
+                    initialRegion={{
+                        latitude: userLocation.lat,
+                        longitude: userLocation.lng,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
                 >
 
                     {(orderData.status === "ON_DELIVERY") && <Marker
@@ -241,15 +268,15 @@ const ShowOrderState = ({
                         }}
                         title="Drone Location"
                         description="The current location of the drone"
-                        zIndex={1}
-                        >
-                        <Image 
+                        zIndex={2}
+                    >
+                        <Image
                             // @ts-ignore
                             source={require('../../../assets/drone.png')}
                             style={{ width: 30, height: 30 }}
                         />
                     </Marker>}
-                    
+
                     <Marker
                         coordinate={{
                             latitude: deliveryLocation.lat,
@@ -257,9 +284,9 @@ const ShowOrderState = ({
                         }}
                         title="Delivery Place"
                         description="The Location where the drone will deliver the order"
-                        zIndex={2}
+                        zIndex={1}
                     >
-                        <View style={{width: 40, height: 40, borderRadius: 20, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center'}}>
+                        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center' }}>
                             <MyIcon name={IconNames.HOME} size={30} color={colors.black} />
                         </View>
                     </Marker>
@@ -272,8 +299,8 @@ const ShowOrderState = ({
                         title="Restaurant Location"
                         description="The starting location of the menu you ordered"
                         zIndex={0}
-                        >
-                        <View style={{width: 40, height: 40, borderRadius: 20, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center'}}>
+                    >
+                        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.lightGray, justifyContent: 'center', alignItems: 'center' }}>
                             <MyIcon name={IconNames.FOOD} size={30} color={colors.black} />
                         </View>
                     </Marker>
@@ -312,7 +339,7 @@ const ShowOrderState = ({
             <MenuSmallPreview
                 image={menuData.image.base64}
                 title={"1x " + menuData.menu.name}
-                price={menuData.menu.price}
+                price={menuData.menu.price.toFixed(2)}
             />
         </>
     )
@@ -324,7 +351,7 @@ const styles = StyleSheet.create({
 
     map: {
         width: '100%',
-        height: height * 0.24,
+        height: 250,
     },
 
 });

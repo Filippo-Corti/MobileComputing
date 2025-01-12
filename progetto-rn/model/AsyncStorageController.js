@@ -25,7 +25,11 @@ export default class AsyncStorageController {
      * @param {any} value 
      */
     static async set(key, value) {
-        await AsyncStorage.setItem(key, JSON.stringify(value))
+        await AsyncStorage.setItem(key, JSON.stringify(value), (result) => {
+            if (result) {
+                console.warn("Failed to set item into AsyncStorage:", result);
+            }
+        })
     }
 
     /**
