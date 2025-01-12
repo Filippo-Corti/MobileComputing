@@ -19,6 +19,7 @@ import MyLogo from '../common/icons/MyLogo';
 import SplashScreen from '../common/other/SplashScreen';
 import { set } from 'react-hook-form';
 import MyIcon, { IconNames } from '../common/icons/MyIcon';
+import { debounce } from 'lodash';
 
 const { height } = Dimensions.get('window');
 
@@ -77,6 +78,7 @@ const LastOrderScreen = ({ }) => {
     }
 
     // Auto - Reload every 5 seconds
+    const debounceFetchLastOrder = useRef(debounce(fetchLastOrder, 3000)).current;
     const isFocused = useIsFocused(); // Tracks if the screen is currently focused
     const intervalId = useRef(null);
 
@@ -84,7 +86,7 @@ const LastOrderScreen = ({ }) => {
         if (isFocused) {
             console.log("Screen is focused, starting timer");
             fetchLastOrder();
-            intervalId.current = setInterval(fetchLastOrder, 5000);
+            intervalId.current = setInterval(debounceFetchLastOrder, 5000);
         } else {
             console.log("Screen is not focused, stopping timer");
             if (intervalId.current) {
@@ -93,7 +95,6 @@ const LastOrderScreen = ({ }) => {
             }
         }
 
-        // Cleanup function to stop the timer when the component unmounts
         return () => {
             if (intervalId.current) {
                 clearInterval(intervalId.current);
@@ -252,7 +253,6 @@ const ShowOrderState = ({
                     loadingEnabled={true}
                     showsMyLocationButton={true}
                     onMapReady={loadMap}
-                    onLayout={loadMap}
                     initialRegion={{
                         latitude: userLocation.lat,
                         longitude: userLocation.lng,

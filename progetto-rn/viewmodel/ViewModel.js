@@ -39,7 +39,7 @@ export default class ViewModel {
     /**
      * @returns {Promise<boolean>}
      */
-    static async isRegistered() {
+    static async isRegistered() {;
         return await AsyncStorageController.get(KEYS.IS_REGISTERED) || false;
     }
 
@@ -61,9 +61,7 @@ export default class ViewModel {
      * @returns {Promise<UserSession>}
      */
     static async getUserSession() {
-        if (!ViewModel.sid || !ViewModel.uid) {
-            await ViewModel.fetchUserSession();
-        }
+        await ViewModel.fetchUserSession();
         return {
             sid: ViewModel.sid,
             uid: ViewModel.uid
@@ -87,6 +85,7 @@ export default class ViewModel {
             ViewModel.uid = sessionData.uid;
             await AsyncStorageController.memorizeSessionKeys(ViewModel.sid, ViewModel.uid);
         }
+        console.log("SID is ", ViewModel.sid, "UID is ", ViewModel.uid);
     }
 
     /**

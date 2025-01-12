@@ -31,6 +31,7 @@ export const AppStateContextProvider = ({
     const [appState, setAppState] = useState(appStateInit);
 
     const setError = (error) => {
+        console.log("A new error is trying to pop up:", error);
         if (appState.error && error != null) return
         setAppState(prevState => ({
             ...prevState,

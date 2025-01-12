@@ -24,7 +24,7 @@ export function handleErrorByType(
 			break;
 		case "ACCOUNT_DETAILS":
 			console.log("AccountDetails error");
-			onNavigateTo("AccountStack", {screen: "AccountScreen"});
+			onNavigateTo("AccountStack", {screen: "EditAccount"});
 			break;
 		case "POSITION_UNALLOWED":
 			console.log("Position error");
@@ -66,7 +66,7 @@ const BottomModal = ({
 		<View style={styles.container}>
 			<Modal
 				isVisible={isModalVisible}
-				onBackdropPress={toggleModal}
+				onBackdropPress={() => {toggleModal(); onDismiss();}}
 				style={styles.bottomModal}
 			>
 				<View style={styles.modalContent}>

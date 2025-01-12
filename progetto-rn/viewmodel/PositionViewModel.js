@@ -7,7 +7,11 @@ export default class PositionViewModel {
      * @returns {Promise<string>}
      */
     static async getAddressFromLocation(location) {
-        return await this.getAddressFromCoordinates(location.lat, location.lng);
+        try {
+            return await this.getAddressFromCoordinates(location.lat, location.lng);
+        } catch (err) {
+            console.log("Error in getAddressFromLocation", err)
+        }
     }
 
     /**
@@ -38,7 +42,7 @@ export default class PositionViewModel {
      * @returns {Promise<{ status: boolean, canAskAgain: boolean }>}
      */
     static async requestPermission() {
-        if (await this.checkLocationPermission()) return {status: true, canAskAgain: true};
+        if (await this.checkLocationPermission()) return { status: true, canAskAgain: true };
         const permissionResponse = await Location.requestForegroundPermissionsAsync()
         console.log("PermissionResponse", permissionResponse);
         return {

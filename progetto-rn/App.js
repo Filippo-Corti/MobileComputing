@@ -47,6 +47,7 @@ export default function App() {
 
 	const initalizeUserContext = async () => {
 		const isRegistered = await ViewModel.isRegistered();
+		console.log("User is registered:", isRegistered);
 		const user = (isRegistered)
 			? await ViewModel.fetchUserDetails()
 			: null;
