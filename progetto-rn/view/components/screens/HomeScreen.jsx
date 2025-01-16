@@ -1,5 +1,4 @@
 import { View, ScrollView, Text, FlatList, StyleSheet, Dimensions, ActivityIndicator, RefreshControl } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { globalStyles } from '../../../styles/global';
 import { StatusBar } from 'expo-status-bar';
@@ -12,10 +11,8 @@ import { AppStateContext } from '../../context/AppStateContext';
 import ViewModel from '../../../viewmodel/ViewModel';
 import colors from '../../../styles/colors';
 import React from 'react';
-import ButtonWithArrow from '../common/buttons/ButtonWithArrow';
 import MinimalistButton from '../common/buttons/MinimalistButton';
 import MyError from '../../../model/types/MyError';
-import SplashScreen from '../common/other/SplashScreen';
 
 const { height } = Dimensions.get('window');
 
@@ -105,8 +102,6 @@ const HomeScreen = ({ }) => {
 
                 <Header user={userState.user} />
 
-                {/* <MenusMap nearestMenus={nearestMenus} /> */}
-
                 <MenusList
                     nearestMenus={nearestMenus}
                     locationData={locationState}
@@ -143,48 +138,6 @@ const Header = ({ user }) => (
         </View>
     </View>
 );
-
-const MenusMap = ({
-    nearestMenus
-}) => {
-
-    const initialRegion = {
-        latitude: nearestMenus?.[0]?.menu?.location?.lat || 37.78825, // Default latitude
-        longitude: nearestMenus?.[0]?.menu?.location?.lng || -122.4324, // Default longitude
-        latitudeDelta: 0.2922, // Controls zoom level for latitude
-        longitudeDelta: 0.2421, // Controls zoom level for longitude
-    };
-    
-    return (
-        <MapView
-            key={"menus-map"}
-            style={styles.map}
-            showsCompass={true}
-            showsPointsOfInterest={false}
-            showsUserLocation={true}
-            followsUserLocation={true}
-            loadingEnabled={true}
-            showsMyLocationButton={true}
-            scrollEnabled={false}
-            rotateEnabled={false}
-            pitchEnabled={false}
-            zoomEnabled={true}
-            initialRegion={initialRegion}
-        >
-            {nearestMenus?.map((menu, index) => (<Marker
-                key={menu.menu.mid}
-                coordinate={{
-                    latitude: menu.menu.location.lat,
-                    longitude: menu.menu.location.lng,
-                }}
-                title={menu.menu.name}
-                description={menu.menu.description}
-            />
-            ))}
-
-        </MapView>
-    )
-}
 
 const MenusList = ({
     nearestMenus,

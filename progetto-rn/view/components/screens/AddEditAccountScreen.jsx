@@ -31,7 +31,7 @@ const AddEditAccountScreen = ({
     const { userState, setUserState } = useContext(UserContext);
     const {appState, setError} = useContext(AppStateContext);
 
-    const { control, handleSubmit, formState: { errors }, } = useForm((!newAccount && userState.user) ? {
+    const { control, handleSubmit, formState: { errors }, getValues } = useForm((!newAccount && userState.user) ? {
         defaultValues: {
             firstName: userState.user.firstName,
             lastName: userState.user.lastName,
@@ -161,7 +161,7 @@ const AddEditAccountScreen = ({
                                         max={12}
                                         control={control}
                                         error={errors.cardExpireMonth}
-                                        validate={(v) => AccountFormViewModel.validateCardExpireMonth(v) || "Month must be a number between 1 and 12"} //This should never show
+                                        validate={(v) => AccountFormViewModel.validateCardExpireDate(v, getValues("cardExpireYear")) || "Expiry date must not be in the past"} 
                                         style={{ width: '30%', marginRight: 10 }}
                                     />
                                     <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>/</Text>
@@ -171,10 +171,11 @@ const AddEditAccountScreen = ({
                                         max={2035}
                                         control={control}
                                         error={errors.cardExpireYear}
-                                        validate={(v) => AccountFormViewModel.validateCardExpireYear(v)  || "Year must be a number between 2025 and 2035"} //This should never show
+                                        validate={(v) => AccountFormViewModel.validateCardExpireDate(getValues("cardExpireMonth"), v)  || "Expiry date must not be in the past"} 
                                         style={{ width: '30%', marginLeft: 10 }}
                                     />
                                 </View>
+                                
                             </View>
 
                             <FormField

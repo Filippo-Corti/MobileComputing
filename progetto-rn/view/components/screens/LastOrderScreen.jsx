@@ -308,27 +308,29 @@ const ShowOrderState = ({
                 </MapView>
             }
 
-            <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
-                <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
-                    Delivery details
-                </Text>
-                <View style={{ marginVertical: 5 }}>
-                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                        Pick it up at
+            {orderData.deliveryLocation.address && orderData.currentPosition.address &&
+                <View style={[globalStyles.insetContainer, { paddingVertical: 25 }]}>
+                    <Text style={[globalStyles.textBlack, globalStyles.textSubtitleMedium]}>
+                        Delivery details
                     </Text>
-                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                        {orderData.deliveryLocation.address}
-                    </Text>
+                    <View style={{ marginVertical: 5 }}>
+                        <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                            Pick it up at
+                        </Text>
+                        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                            {orderData.deliveryLocation.address}
+                        </Text>
+                    </View>
+                    <View style={{ marginVertical: 5 }}>
+                        <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
+                            Drone is currently at
+                        </Text>
+                        <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
+                            {orderData.currentPosition.address}
+                        </Text>
+                    </View>
                 </View>
-                <View style={{ marginVertical: 5 }}>
-                    <Text style={[globalStyles.textDarkGray, globalStyles.textSmallRegular, { marginTop: 15 }]}>
-                        Drone is currently at
-                    </Text>
-                    <Text style={[globalStyles.textBlack, globalStyles.textNormalRegular]}>
-                        {orderData.currentPosition.address}
-                    </Text>
-                </View>
-            </View>
+            }
             <Separator size={10} color={colors.lightGray} />
 
             <View style={[globalStyles.insetContainer, { marginTop: 20 }]}>

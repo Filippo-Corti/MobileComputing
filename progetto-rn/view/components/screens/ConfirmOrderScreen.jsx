@@ -14,8 +14,6 @@ import { UserContext } from '../../context/UserContext';
 import React from 'react';
 import MyError from '../../../model/types/MyError';
 import ViewModel from '../../../viewmodel/ViewModel';
-import SplashScreen from '../common/other/SplashScreen';
-
 /**
  * @param {{
 *  route: { params: { menu: MenuDetailsWithImage } }
@@ -60,8 +58,8 @@ const ConfirmOrderScreen = ({
         try {
             const order = await ViewModel.orderMenu(menuDetails.menu.mid, locationState.lastKnownLocation);
             const orderedMenu = await ViewModel.fetchMenuDetails(
-                locationState.lastKnownLocation.lat, 
-                locationState.lastKnownLocation.lng, 
+                locationState.lastKnownLocation.lat,
+                locationState.lastKnownLocation.lng,
                 order.mid
             );
             setOrderState({
@@ -104,7 +102,12 @@ const ConfirmOrderScreen = ({
                     <View style={{ flex: 1 }}>
 
                         <View style={{ flexDirection: 'row', marginHorizontal: 15, marginVertical: 25, }}>
-                            <TouchableOpacity onPress={() => navigation.goBack()} >
+                            <TouchableOpacity onPress={() => {
+                                try {
+                                    navigation.goBack() 
+                                } catch (e) {  // @ts-ignore
+                                    navigation.navigate("Home") 
+                                }}} >
                                 <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                             </TouchableOpacity>
                             <Text style={[globalStyles.textBlack, globalStyles.textTitleRegular, { flex: 1, textAlign: 'center', marginEnd: 20 }]}>
@@ -112,8 +115,7 @@ const ConfirmOrderScreen = ({
                             </Text>
                         </View>
 
-                        
-                        {locationState.lastKnownLocation && locationState.lastKnownLocation.address &&
+                        {menuDetails.menu.location.address &&
                             <>
                                 <InfoTextBox
                                     iconName={IconNames.MARKER}
@@ -121,6 +123,11 @@ const ConfirmOrderScreen = ({
                                     text={menuDetails.menu.location.address}
                                 />
                                 <Separator size={1} color={colors.lightGray} />
+                            </>
+                        }
+
+                        {locationState.lastKnownLocation && locationState.lastKnownLocation.address &&
+                            <>
                                 <InfoTextBox
                                     iconName={IconNames.HOME}
                                     label={"Your Location"}

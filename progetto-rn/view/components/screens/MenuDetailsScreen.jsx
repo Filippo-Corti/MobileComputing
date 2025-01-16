@@ -77,7 +77,12 @@ const MenuDetailsScreen = ({
                         {!menuDetails.image && <View style={styles.iconContainer}>
                             <MyIcon name={IconNames.FOOD} size={100} color={colors.gray} />
                         </View>}
-                        <TouchableOpacity style={[styles.backArrowContainer, { borderWidth: (!menuDetails.image) ? 1 : 0 }]} onPress={() => navigation.goBack()}>
+                        <TouchableOpacity style={[styles.backArrowContainer, { borderWidth: (!menuDetails.image) ? 1 : 0 }]} onPress={() => {
+                            try {
+                                navigation.goBack() 
+                            } catch (e) {  // @ts-ignore
+                                navigation.navigate("Home") 
+                            }}}>
                             <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                         </TouchableOpacity>
                     </View>
@@ -101,7 +106,7 @@ const MenuDetailsScreen = ({
 
                     <Separator size={10} color={colors.lightGray} />
                     
-                    {locationState.lastKnownLocation &&
+                    {locationState.lastKnownLocation && menuDetails.menu.location.address && 
                         <>
                             <InfoTextBox
                                 iconName={IconNames.MARKER}

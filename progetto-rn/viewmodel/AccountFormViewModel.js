@@ -34,6 +34,20 @@ export default class AccountFormViewModel {
 
     /**
      * @param {number} cardExpireMonth
+     * @param {number} cardExpireYear
+     * @returns {boolean} 
+     */ 
+    static validateCardExpireDate(cardExpireMonth, cardExpireYear) {
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // Months are 0-based
+        const currentYear = today.getFullYear();
+        const isExpired = cardExpireYear > currentYear || (cardExpireYear === currentYear && cardExpireMonth >= currentMonth);
+
+        return isExpired && this.validateCardExpireMonth(cardExpireMonth) && this.validateCardExpireYear(cardExpireYear);
+    }
+
+    /**
+     * @param {number} cardExpireMonth
      * @returns {boolean} 
      */
     static validateCardExpireMonth(cardExpireMonth) {
@@ -45,7 +59,7 @@ export default class AccountFormViewModel {
      * @returns {boolean} 
      */
     static validateCardExpireYear(cardExpireYear) {
-        return (cardExpireYear >= new Date().getFullYear());
+        return true;
     }
 
     /**
