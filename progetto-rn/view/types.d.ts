@@ -22,6 +22,7 @@ declare global {
         isLoading : boolean = true
         isFirstLaunch : boolean = true
         error : MyError? = null
+        reloadFavourites : boolean = false
     }
 
 }

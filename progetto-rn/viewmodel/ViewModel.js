@@ -200,5 +200,45 @@ export default class ViewModel {
         return menuImageFromServer;
     }
 
+    /**
+     * @param {number} menuId 
+     */
+    static async addFavouriteMenu(menuId) {
+        await AsyncStorageController.addFavouriteMenu(menuId)
+    }
+
+    static async removeFavouriteMenu(menuId) {
+        await AsyncStorageController.removeFavouriteMenu(menuId)
+    }
+
+    /**
+     * @returns {Promise<Array<number>>}
+     */
+    static async getFavouriteMenus() {
+        return await AsyncStorageController.get(KEYS.FAVOURITES)
+    }
+
+    static async getFavouriteMenusDetails() {
+        const favouriteIds = await this.getFavouriteMenus()
+        const favourites = []
+        for (const id of favouriteIds) {
+            const menuDetails = await ViewModel.fetchMenuDetails(
+                ViewModel.DEFAULT_LOCATION.lat, 
+                ViewModel.DEFAULT_LOCATION.lng,
+                id
+            )
+            favourites.push(menuDetails)
+        }
+        return favourites
+    }
+
+    /**
+     * @param {number} menuId 
+     * @returns {Promise<boolean>}
+     */
+    static async isFavouriteMenu(menuId) {
+        const favourites = await this.getFavouriteMenus()
+        return favourites.includes(menuId)
+    }
 
 }

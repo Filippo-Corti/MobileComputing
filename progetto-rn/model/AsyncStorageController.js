@@ -5,7 +5,8 @@ export const KEYS = {
     UID: "UID",
     HAS_ALREADY_RUN: "hasAlreadyRun",
     IS_REGISTERED: "isRegistered",
-    NAV_STACK: "navStack"
+    NAV_STACK: "navStack",
+    FAVOURITES: "savedMenus"
 }
 
 export default class AsyncStorageController {
@@ -52,6 +53,24 @@ export default class AsyncStorageController {
             return true;
         }
         return false;
+    }
+
+    static async addFavouriteMenu(menuId) {
+        let currentFavourites = await this.get(KEYS.FAVOURITES)
+        if (!currentFavourites) 
+            currentFavourites = []
+
+        currentFavourites.push(menuId)
+        await this.set(KEYS.FAVOURITES, currentFavourites)
+    }
+
+    static async removeFavouriteMenu(menuId) {
+        let currentFavourites = await this.get(KEYS.FAVOURITES)
+        if (!currentFavourites) 
+            currentFavourites = []
+
+        currentFavourites = currentFavourites.filter((id) => id != menuId)
+        await this.set(KEYS.FAVOURITES, currentFavourites)
     }
 
 

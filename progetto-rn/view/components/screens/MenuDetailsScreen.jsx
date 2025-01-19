@@ -30,12 +30,46 @@ const MenuDetailsScreen = ({
     /** @type {[MenuDetailsWithImage, React.Dispatch<React.SetStateAction<MenuDetailsWithImage>>]} */
     const [menuDetails, setMenuDetails] = useState(null);
 
-    const { appState, locationState } = useContext(AppStateContext);
+    const [savedText, setSavedText] = useState(null);
+    const [isMenuSaved, setIsMenuSaved] = useState(false);
+
+    const { appState, setAppState, locationState } = useContext(AppStateContext);
 
     const navigateToConfirmOrder = () => {
         // @ts-ignore
         navigation.navigate("ConfirmOrder", { menu: menuDetails });
     }
+
+    const onSaveInFavourites = () => {
+        ViewModel.addFavouriteMenu(menuId).then(() => {
+            setSavedText("Menu Saved!");
+            setAppState(prevState => ({
+                ...prevState,
+                reloadFavourites: true,
+            }))
+            setIsMenuSaved(true)
+        })
+    }
+
+    const onRemoveFromFavourites = () => {
+        ViewModel.removeFavouriteMenu(menuId).then(() => {
+            setSavedText("Menu Removed!");
+            setAppState(prevState => ({
+                ...prevState,
+                reloadFavourites: true,
+            }))
+            setIsMenuSaved(false)
+        })
+    }
+
+    useEffect(() => {
+        const checkMenuSaved = async () => {
+            const saved = await ViewModel.isFavouriteMenu(menuId)
+            setIsMenuSaved(saved)
+        }
+
+        checkMenuSaved();
+    }, [appState.reloadFavourites])
 
     useEffect(() => {
         const fetchMenuDetails = async () => {
@@ -79,15 +113,21 @@ const MenuDetailsScreen = ({
                         </View>}
                         <TouchableOpacity style={[styles.backArrowContainer, { borderWidth: (!menuDetails.image) ? 1 : 0 }]} onPress={() => {
                             try {
-                                navigation.goBack() 
+                                navigation.goBack()
                             } catch (e) {  // @ts-ignore
-                                navigation.navigate("Home") 
-                            }}}>
+                                navigation.navigate("Home")
+                            }
+                        }}>
                             <MyIcon name={IconNames.ARROW_LEFT} size={32} color={colors.black} />
                         </TouchableOpacity>
                     </View>
 
                     <View style={[globalStyles.insetContainer, { marginVertical: 20 }]}>
+
+                        {savedText && <Text style={[globalStyles.textBlack, globalStyles.textTitleRegular, styles.savedText]}>
+                            {savedText}
+                        </Text>}
+
                         <Text style={[globalStyles.textBlack, globalStyles.textTitleBold, { marginTop: 5, marginBottom: 10, }]}>
                             {menuDetails.menu.name}
                         </Text>
@@ -105,8 +145,8 @@ const MenuDetailsScreen = ({
                     </View>
 
                     <Separator size={10} color={colors.lightGray} />
-                    
-                    {locationState.lastKnownLocation && menuDetails.menu.location.address && 
+
+                    {locationState.lastKnownLocation && menuDetails.menu.location.address &&
                         <>
                             <InfoTextBox
                                 iconName={IconNames.MARKER}
@@ -123,8 +163,22 @@ const MenuDetailsScreen = ({
                     }
                 </View>
 
-                <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5 }]}>
-                    <LargeButton
+                <View style={[globalStyles.insetContainer, { marginTop: 25, marginBottom: 5, gap: 6 }]}>
+                    {(isMenuSaved)
+                        ? (
+                            <LargeButton
+                                text={"Remove from Favourites"}
+                                onPress={onRemoveFromFavourites}
+                                gray={true}
+                            />)
+                        : (
+                            <LargeButton
+                                text={"Save in Favourites"}
+                                onPress={onSaveInFavourites}
+                                gray={true}
+                            />)
+                    }
+                    < LargeButton
                         text={"Order • €" + price}
                         onPress={navigateToConfirmOrder}
                     />
@@ -165,6 +219,16 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: '100%',
+    },
+
+    savedText: {
+        textAlign: 'center',
+        marginBottom: 10,
+        padding: 10,
+        backgroundColor: colors.lightGray,
+        borderRadius: 5,
+        borderColor: colors.black,
+        borderWidth: 2,
     }
 
 });

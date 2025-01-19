@@ -42,7 +42,8 @@ export default function App() {
 		isLoading: true,
 		isFirstLaunch: true,
 		reloadMenus: false,
-		error: null
+		error: null,
+		reloadFavourites: false,
 	});
 
 	const initalizeUserContext = async () => {
