@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
@@ -67,7 +68,8 @@ fun RootNavHost(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = Colors.WHITE,
+        containerColor = Color.Transparent,
+        contentColor = Color.Black,
         bottomBar = {
             if (showTabBar) {
                 MyTabBar(navController)

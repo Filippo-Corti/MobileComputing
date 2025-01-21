@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -75,128 +77,124 @@ fun MenuDetailsScreen(
     val price = "%.2f".format(menuDetails.price)
     val deliveryTime = if (menuDetails.deliveryTime > 0) "${menuDetails.deliveryTime}" else "<1"
 
-    Box(
+    Column(
         modifier = Global.Container
-            .fillMaxHeight()
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
-        Column(
+
+        Box(
             modifier = Modifier
-                .fillMaxHeight()
+                .fillMaxWidth()
+                .height(250.dp),
+            contentAlignment = Alignment.Center
         ) {
+            if (menu.image.raw.isNotEmpty()) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Menu Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                MyIcon(
+                    name = IconNames.FOOD,
+                    size = 100,
+                    color = Colors.GRAY
+                )
+            }
 
-            Box(
+
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.25F),
-                contentAlignment = Alignment.Center
+                    .size(60.dp)
+                    .align(Alignment.TopStart)
+                    .clickable { onBackClick() },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (menu.image.raw.isNotEmpty()) {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "Menu Image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    MyIcon(
-                        name = IconNames.FOOD,
-                        size = 100,
-                        color = Colors.GRAY
-                    )
-                }
-
-
-                Row(
+                Box(
                     modifier = Modifier
-                        .size(60.dp)
-                        .align(Alignment.TopStart)
-                        .clickable { onBackClick() },
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(Colors.WHITE, shape = CircleShape)
+                        .padding(5.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .background(Colors.WHITE, shape = CircleShape)
-                            .padding(5.dp)
-                    ) {
-                        MyIcon(
-                            name = IconNames.ARROW_LEFT,
-                            size = 32,
-                            color = Colors.BLACK
-                        )
-                    }
+                    MyIcon(
+                        name = IconNames.ARROW_LEFT,
+                        size = 32,
+                        color = Colors.BLACK
+                    )
                 }
             }
+        }
 
-            Column(
-                modifier = Global.InsetContainer
-                    .padding(vertical = 20.dp)
+        Column(
+            modifier = Global.InsetContainer
+                .padding(vertical = 20.dp)
+        ) {
+            Text(
+                text = menuDetails.name,
+                color = Colors.BLACK,
+                fontSize = Global.FontSizes.Title,
+                fontFamily = Global.Fonts.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
+                MyIcon(name = IconNames.PRICE_TAG, size = 22, color = Colors.PRIMARY)
                 Text(
-                    text = menuDetails.name,
-                    color = Colors.BLACK,
-                    fontSize = Global.FontSizes.Title,
-                    fontFamily = Global.Fonts.Bold,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(vertical = 4.dp)
-                ) {
-                    MyIcon(name = IconNames.PRICE_TAG, size = 22, color = Colors.PRIMARY)
-                    Text(
-                        text = "€$price",
-                        color = Colors.DARK_GRAY,
-                        fontSize = Global.FontSizes.Subtitle,
-                        fontFamily = Global.Fonts.Medium,
-                    )
-                }
-
-                Text(
-                    text = menuDetails.longDescription,
-                    color = Colors.BLACK,
-                    fontSize = Global.FontSizes.Normal,
-                    fontFamily = Global.Fonts.Regular,
-                    modifier = Modifier.padding(vertical = 10.dp)
+                    text = "€$price",
+                    color = Colors.DARK_GRAY,
+                    fontSize = Global.FontSizes.Subtitle,
+                    fontFamily = Global.Fonts.Medium,
                 )
             }
 
-            Separator(color = Colors.LIGHT_GRAY, size = 10)
+            Text(
+                text = menuDetails.longDescription,
+                color = Colors.BLACK,
+                fontSize = Global.FontSizes.Normal,
+                fontFamily = Global.Fonts.Regular,
+                modifier = Modifier.padding(vertical = 10.dp)
+            )
+        }
+
+        Separator(color = Colors.LIGHT_GRAY, size = 10)
 
 
-            if (locationState.lastKnownLocation != null) {
+        if (locationState.lastKnownLocation != null) {
 
-                if (menuDetails.location.address != null) {
-                    InfoTextBox(
-                        iconName = IconNames.MARKER,
-                        label = "Menu Location",
-                        text = menuDetails.location.address!!
-                    )
-
-                    Separator(color = Colors.LIGHT_GRAY, size = 10)
-                }
-
+            if (menuDetails.location.address != null) {
                 InfoTextBox(
-                    iconName = IconNames.CLOCK,
-                    text = "Approximately $deliveryTime min(s)"
+                    iconName = IconNames.MARKER,
+                    label = "Menu Location",
+                    text = menuDetails.location.address!!
                 )
 
-                Separator(color = Colors.LIGHT_GRAY, size = 1)
+                Separator(color = Colors.LIGHT_GRAY, size = 10)
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            InfoTextBox(
+                iconName = IconNames.CLOCK,
+                text = "Approximately $deliveryTime min(s)"
+            )
 
-            // Order Button
-            Box(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                LargeButton(
-                    text = "Order • €$price",
-                    onPress = { onForwardClick(menuId) }
-                )
-            }
+            Separator(color = Colors.LIGHT_GRAY, size = 1)
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Order Button
+        Box(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            LargeButton(
+                text = "Order • €$price",
+                onPress = { onForwardClick(menuId) }
+            )
         }
     }
 

@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +44,7 @@ import com.example.progetto_kt.view.components.common.other.Separator
 import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.view.styles.Global
 import com.example.progetto_kt.viewmodel.MainViewModel
+import com.mapbox.maps.extension.style.expressions.dsl.generated.min
 
 @Composable
 fun AccountScreen(
@@ -76,35 +79,32 @@ fun AccountScreen(
         }
     }
 
-    LazyColumn(
+    Column(
         modifier = Global.Container
-            .fillMaxHeight()
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(top = 25.dp)
     ) {
 
-        item {
-            LoggedHeader(user) { onEditAccountClick(false) }
-            Separator(size = 1, color = Colors.LIGHT_GRAY)
+        LoggedHeader(user) { onEditAccountClick(false) }
+        Separator(size = 1, color = Colors.LIGHT_GRAY)
 
-            if (lastOrder != null && lastOrderMenu != null) {
-                LastOrder(
-                    viewModel = viewModel,
-                    menu = lastOrderMenu,
-                    order = lastOrder,
-                ) {
-                    if (lastOrder.status == OrderStatus.ON_DELIVERY) {
-                        onCheckLastOrderClick()
-                    } else {
-                        onOrderAgainClick(lastOrderMenu.menuDetails.id)
-                    }
+        if (lastOrder != null && lastOrderMenu != null) {
+            LastOrder(
+                viewModel = viewModel,
+                menu = lastOrderMenu,
+                order = lastOrder,
+            ) {
+                if (lastOrder.status == OrderStatus.ON_DELIVERY) {
+                    onCheckLastOrderClick()
+                } else {
+                    onOrderAgainClick(lastOrderMenu.menuDetails.id)
                 }
-
             }
-
-            CreditCardBox(user = user)
 
         }
 
+        CreditCardBox(user = user)
 
     }
 

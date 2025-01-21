@@ -1,7 +1,5 @@
 package com.example.progetto_kt.view.components.screens
 
-import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +33,6 @@ import com.example.progetto_kt.model.dataclasses.Timestamps.formatTimestamp
 import com.example.progetto_kt.model.dataclasses.Timestamps.toMillis
 import com.example.progetto_kt.model.dataclasses.toPoint
 import com.example.progetto_kt.view.components.common.buttons.ButtonWithArrow
-import com.example.progetto_kt.view.components.common.icons.IconNames
 import com.example.progetto_kt.view.components.common.other.InfoTextBox
 import com.example.progetto_kt.view.components.common.other.MenuSmallPreview
 import com.example.progetto_kt.view.components.common.other.ProgressBar
@@ -42,7 +41,6 @@ import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.view.styles.Global
 import com.example.progetto_kt.viewmodel.LocationState
 import com.example.progetto_kt.viewmodel.MainViewModel
-import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.EdgeInsets
 import com.mapbox.maps.extension.compose.MapEffect
@@ -54,9 +52,6 @@ import com.mapbox.maps.plugin.PuckBearing
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun LastOrderScreen(
@@ -104,6 +99,7 @@ fun LastOrderScreen(
 
     Box(
         modifier = Global.Container
+            .verticalScroll(rememberScrollState())
             .fillMaxHeight()
     ) {
         ShowOrderState(

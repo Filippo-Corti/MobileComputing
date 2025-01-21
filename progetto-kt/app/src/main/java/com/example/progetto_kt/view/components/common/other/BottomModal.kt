@@ -113,7 +113,7 @@ fun BottomModal(
 
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
 
                 if (error.actionText != null) {
