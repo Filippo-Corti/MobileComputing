@@ -104,12 +104,11 @@ class MainViewModel(
     /*** Initialization & State Management ***/
 
     init {
+        setLoading(true)
         viewModelScope.launch {
-            _appState.value = _appState.value.copy(isLoading = true)
             fetchUserSession()
             fetchUserDetails()
-            Log.d(TAG, "Fetched launch information")
-            _appState.value = _appState.value.copy(isLoading = false)
+            setLoading(false)
         }
     }
 
@@ -179,7 +178,7 @@ class MainViewModel(
                 longitude = location.longitude
             )
         }
-        return APILocation(45.46, 9.18) // Default Location
+        return DEFAULT_LOCATION
     }
 
     suspend fun getAddressFromLocation(location: APILocation): String {
@@ -227,7 +226,6 @@ class MainViewModel(
             viewModelScope.launch {
                 val location = locationTask.await()
                 allowLocation(location)
-                setLoading(false)
             }
         } catch (e: Exception) {
             Log.w(TAG, "Error getting location: $e")

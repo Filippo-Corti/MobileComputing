@@ -182,6 +182,8 @@ fun MenuPreviewBody(
 
     HorizontalDivider(
         thickness = 1.dp,
+        modifier = Modifier
+            .padding(horizontal = 15.dp),
         color = Colors.LIGHT_GRAY
     )
 }

@@ -30,7 +30,7 @@ class MenuRepository(
     suspend fun getMenuImage(sid : String, menuId : Int, imageVersion : Int) : MenuImage {
         val menuImageInStorage = dbController.dao.getMenuImageByVersion(menuId, imageVersion)
         if (menuImageInStorage != null) {
-            Log.d(TAG, "Menu Image retrieved from the Storage")
+            //Log.d(TAG, "Menu Image retrieved from the Storage")
             return MenuImage(menuImageInStorage.image)
         }
 
@@ -43,7 +43,7 @@ class MenuRepository(
             MenuImageWithVersion(menuId, imageVersion, menuImageFromServer.raw)
         )
 
-        Log.d(TAG, "Menu Image Fetched from Server. Now in Storage")
+        //Log.d(TAG, "Menu Image Fetched from Server. Now in Storage")
         return menuImageFromServer
     }
 

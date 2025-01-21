@@ -55,23 +55,19 @@ fun HomeScreen(
     val refreshState = rememberPullToRefreshState()
     val onRefresh: () -> Unit = {
         isRefreshing = true
-        Log.d("HomeScreen", "Fetching menus onRefresh")
         viewModel.fetchNearbyMenusAsync {
             isRefreshing = false
         }
     }
 
     LaunchedEffect(menusState.reloadMenus, appState.isLoading) {
-        Log.d("HomeScreen", "Triggered: ${menusState.reloadMenus} ${appState.isLoading}")
-        if (menusState.nearbyMenus.isEmpty() && !appState.isLoading || menusState.reloadMenus) {
-            isRefreshing = true
-            viewModel.fetchNearbyMenusAsync {
-                isRefreshing = false
-            }
+        if (appState.isLoading) return@LaunchedEffect
+        if (menusState.nearbyMenus.isEmpty() || menusState.reloadMenus) {
+            viewModel.fetchNearbyMenusAsync {}
         }
     }
 
-    if (appState.isLoading) {
+    if (appState.isLoading || menusState.nearbyMenus.isEmpty()) {
         return Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = Colors.PRIMARY)
         }
@@ -106,8 +102,11 @@ fun HomeScreen(
                     }
                 )
 
-                Separator(size = 1, color = Colors.LIGHT_GRAY)
-
+                Box(
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                ) {
+                    Separator(size = 1, color = Colors.LIGHT_GRAY)
+                }
             }
 
             items(menusState.nearbyMenus) { menu ->

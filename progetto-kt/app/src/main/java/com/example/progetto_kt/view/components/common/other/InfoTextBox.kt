@@ -27,13 +27,13 @@ fun InfoTextBox(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 18.dp, horizontal = 30.dp),
+            .padding(vertical = 22.dp, horizontal = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         if (iconName != null) {
-            MyIcon(name = iconName, size = 35, color = Colors.BLACK)
-            Spacer(modifier = Modifier.width(20.dp))
+            MyIcon(name = iconName, size = 38, color = Colors.BLACK)
+            Spacer(modifier = Modifier.width(18.dp))
         }
 
         Column(modifier = Modifier.weight(1f)) {

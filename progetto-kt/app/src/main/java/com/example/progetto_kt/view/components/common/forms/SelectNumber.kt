@@ -58,7 +58,7 @@ fun SelectNumber(
 
     Box(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(vertical = 16.dp)
     ) {
         BasicTextField(
             value = value,

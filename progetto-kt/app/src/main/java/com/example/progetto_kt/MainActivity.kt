@@ -4,10 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.location.Geocoder
-import android.media.audiofx.BassBoost
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -17,23 +15,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.preferencesDataStore
@@ -48,12 +35,12 @@ import com.example.progetto_kt.model.repositories.MenuRepository
 import com.example.progetto_kt.model.repositories.UserRepository
 import com.example.progetto_kt.view.components.common.other.SplashScreen
 import com.example.progetto_kt.view.components.navigation.RootNavHost
-import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.viewmodel.MainViewModel
 import com.example.rprogetto_kt.model.repositories.OrderRepository
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import java.util.Locale
+
 
 class MainActivity : ComponentActivity() {
 
@@ -162,7 +149,6 @@ fun MangiaEBasta(
     LaunchedEffect(locationState.hasCheckedPermissions) {
         if (locationState.hasCheckedPermissions) return@LaunchedEffect
 
-        viewModel.setLoading(true)
         if (viewModel.checkLocationPermission(context)) {
             viewModel.getCurrentLocation() // Get first location immediately
             viewModel.subscribeToLocationUpdates(locationCallback)
@@ -175,7 +161,6 @@ fun MangiaEBasta(
                     actionText = "I'll do it"
                 )
             )
-            viewModel.setLoading(false)
             viewModel.disallowLocation()
         }
 

@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,200 +75,197 @@ fun AddEditAccountScreen(
         }
     }
 
-    LazyColumn(
+
+    Column(
         modifier = Global.Container
             .fillMaxHeight()
     ) {
 
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
 
+            Text(
+                text = "Your Account",
+                color = Colors.BLACK,
+                fontSize = Global.FontSizes.Title,
+                fontFamily = Global.Fonts.Regular,
+                modifier = Modifier.padding(vertical = 3.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .size(60.dp)
+                    .align(Alignment.CenterStart)
+                    .clickable { onBackClick() },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                        .background(Colors.WHITE, shape = CircleShape)
+                        .padding(5.dp)
                 ) {
-
-                    Text(
-                        text = "Your Account",
-                        color = Colors.BLACK,
-                        fontSize = Global.FontSizes.Title,
-                        fontFamily = Global.Fonts.Regular,
-                        modifier = Modifier.padding(vertical = 3.dp)
+                    MyIcon(
+                        name = IconNames.ARROW_LEFT,
+                        size = 32,
+                        color = Colors.BLACK
                     )
-
-                    Row(
-                        modifier = Modifier
-                            .size(60.dp)
-                            .align(Alignment.CenterStart)
-                            .clickable { onBackClick() },
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .background(Colors.WHITE, shape = CircleShape)
-                                .padding(5.dp)
-                        ) {
-                            MyIcon(
-                                name = IconNames.ARROW_LEFT,
-                                size = 32,
-                                color = Colors.BLACK
-                            )
-                        }
-                    }
                 }
-
             }
+        }
 
-            Column(
-                modifier = Global.InsetContainer
-                    .padding(top = 15.dp, bottom = 15.dp)
+
+        Column(
+            modifier = Global.InsetContainer
+                .padding(top = 15.dp, bottom = 15.dp, start = 5.dp)
+        ) {
+
+            Text(
+                text = "General Information",
+                color = Colors.BLACK,
+                fontSize = Global.FontSizes.Subtitle,
+                fontFamily = Global.Fonts.Medium,
+                modifier = Modifier.padding(top = 3.dp, bottom = 20.dp)
+            )
+
+            FormField(
+                label = "First Name",
+                value = formParams.firstName,
+                onValueChange = { formViewModel.onFirstNameChange(it) },
+                errorMessage = "First Name should be at most 15 characters and not empty",
+                showError = submitFailed,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Sentences
+                )
+            )
+
+            FormField(
+                label = "Last Name",
+                value = formParams.lastName,
+                onValueChange = { formViewModel.onLastNameChange(it) },
+                errorMessage = "Last Name should be at most 15 characters and not empty",
+                showError = submitFailed,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Sentences
+                )
+            )
+
+        }
+
+        Separator(size = 10, color = Colors.LIGHT_GRAY)
+
+        Column(
+            modifier = Global.InsetContainer
+                .padding(top = 20.dp, bottom = 15.dp, start = 5.dp)
+        ) {
+
+            Text(
+                text = "Payment Method • Credit Card",
+                color = Colors.BLACK,
+                fontSize = Global.FontSizes.Subtitle,
+                fontFamily = Global.Fonts.Medium,
+                modifier = Modifier.padding(top = 3.dp, bottom = 20.dp)
+            )
+
+            FormField(
+                label = "Holder Name",
+                value = formParams.cardFullName,
+                onValueChange = { formViewModel.onCardFullNameChange(it) },
+                errorMessage = "Credit Card Name should be at most 31 characters and not empty",
+                showError = submitFailed,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    capitalization = KeyboardCapitalization.Words
+                )
+            )
+
+            FormField(
+                label = "Number",
+                value = formParams.cardNumber,
+                onValueChange = { formViewModel.onCardNumberChange(it) },
+                errorMessage = "Card Number should be 16 digits",
+                showError = submitFailed,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                )
+            )
+
+            Text(
+                text = "Expiry Date",
+                color = Colors.DARK_GRAY,
+                fontFamily = Global.Fonts.Regular,
+                fontSize = Global.FontSizes.Small,
+                modifier = Modifier.padding(top = 20.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
+                SelectNumber(
+                    min = 1,
+                    max = 12,
+                    value = formParams.cardExpireMonth.toString(),
+                    onValueChange = { formViewModel.onCardExpireMonthChange(it.toInt()) },
+                )
+
                 Text(
-                    text = "General Information",
+                    text = "/",
                     color = Colors.BLACK,
                     fontSize = Global.FontSizes.Subtitle,
-                    fontFamily = Global.Fonts.Medium,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    fontFamily = Global.Fonts.Medium
                 )
 
-                FormField(
-                    label = "First Name",
-                    value = formParams.firstName,
-                    onValueChange = { formViewModel.onFirstNameChange(it) },
-                    errorMessage = "First Name should be at most 15 characters and not empty",
-                    showError = submitFailed,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
-                )
-
-                FormField(
-                    label = "Last Name",
-                    value = formParams.lastName,
-                    onValueChange = { formViewModel.onLastNameChange(it) },
-                    errorMessage = "Last Name should be at most 15 characters and not empty",
-                    showError = submitFailed,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
+                SelectNumber(
+                    min = 2025,
+                    max = 2034,
+                    value = formParams.cardExpireYear.toString(),
+                    onValueChange = { formViewModel.onCardExpireYearChange(it.toInt()) },
                 )
 
             }
 
-            Separator(size = 10, color = Colors.LIGHT_GRAY)
-
-            Column(
-                modifier = Global.InsetContainer
-                    .padding(top = 20.dp, bottom = 15.dp)
-            ) {
-
-                Text(
-                    text = "Payment Method • Credit Card",
-                    color = Colors.BLACK,
-                    fontSize = Global.FontSizes.Subtitle,
-                    fontFamily = Global.Fonts.Medium,
-                    modifier = Modifier.padding(bottom = 12.dp)
+            FormField(
+                label = "CVV",
+                value = formParams.cardCVV,
+                onValueChange = { formViewModel.onCardCVVChange(it) },
+                errorMessage = "Card CVV should be 3 digits",
+                showError = submitFailed,
+                keyBoardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
                 )
+            )
 
-                FormField(
-                    label = "Holder Name",
-                    value = formParams.cardFullName,
-                    onValueChange = { formViewModel.onCardFullNameChange(it) },
-                    errorMessage = "Credit Card Name should be at most 31 characters and not empty",
-                    showError = submitFailed,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text
-                    )
-                )
+        }
 
-                FormField(
-                    label = "Number",
-                    value = formParams.cardNumber,
-                    onValueChange = { formViewModel.onCardNumberChange(it) },
-                    errorMessage = "Card Number should be 16 digits",
-                    showError = submitFailed,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    )
-                )
+        Spacer(modifier = Modifier.weight(1f))
 
-                Text(
-                    text = "Expiry Date",
-                    color = Colors.DARK_GRAY,
-                    fontFamily = Global.Fonts.Regular,
-                    fontSize = Global.FontSizes.Small,
-                    modifier = Modifier.padding(top = 20.dp, start = 15.dp)
-                )
+        // Order Button
+        Box(
+            modifier = Modifier.padding(16.dp)
+        ) {
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    SelectNumber(
-                        min = 1,
-                        max = 12,
-                        value = formParams.cardExpireMonth.toString(),
-                        onValueChange = { formViewModel.onCardExpireMonthChange(it.toInt()) },
-                    )
-
-                    Text(
-                        text = "/",
-                        color = Colors.BLACK,
-                        fontSize = Global.FontSizes.Subtitle,
-                        fontFamily = Global.Fonts.Medium
-                    )
-
-                    SelectNumber(
-                        min = 2025,
-                        max = 2034,
-                        value = formParams.cardExpireYear.toString(),
-                        onValueChange = { formViewModel.onCardExpireYearChange(it.toInt()) },
-                    )
-
-                }
-
-                FormField(
-                    label = "CVV",
-                    value = formParams.cardCVV,
-                    onValueChange = { formViewModel.onCardCVVChange(it) },
-                    errorMessage = "Card CVV should be 3 digits",
-                    showError = submitFailed,
-                    keyBoardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
-                    )
-                )
-
-            }
-
-
-            // Order Button
-            Box(
-                modifier = Modifier.padding(16.dp)
-            ) {
-
-                LargeButton(
-                    text = if (newAccount) "Create Account" else "Save",
-                    onPress = {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            val ok = formViewModel.submit(viewModel::updateUserData)
-                            Log.d("AddEditAccountScreen", "Submit result is $ok")
-                            if (ok)
-                                onBackClick()
-                            else {
-                                submitFailed = true
-                            }
-                        }
+            LargeButton(
+                text = if (newAccount) "Create Account" else "Save",
+                onPress = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val ok = formViewModel.submit(viewModel::updateUserData)
+                        Log.d("AddEditAccountScreen", "Submit result is $ok")
+                        if (ok)
+                            onBackClick()
+                        else
+                            submitFailed = true
                     }
-                )
-            }
+                }
+            )
         }
     }
 }
