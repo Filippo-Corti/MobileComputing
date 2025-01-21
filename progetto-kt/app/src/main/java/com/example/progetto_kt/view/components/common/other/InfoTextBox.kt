@@ -21,13 +21,14 @@ import com.example.progetto_kt.view.styles.Global
 fun InfoTextBox(
     text : String,
     label : String? = null,
-    iconName : IconNames? = null
+    iconName : IconNames? = null,
+    verticalPadding : Int = 22
 ) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 22.dp, horizontal = 30.dp),
+            .padding(vertical = verticalPadding.dp, horizontal = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 

@@ -193,15 +193,7 @@ class MainViewModel(
                 if (addresses.isNullOrEmpty()) return@withContext "";
 
                 val address = addresses[0]
-                val thoroughfare =
-                    if (address.thoroughfare != null) "${address.thoroughfare}," else ""
-                val subThoroughfare =
-                    if (address.subThoroughfare != null) "${address.subThoroughfare}," else ""
-                val postalCode = if (address.postalCode != null) "(${address.postalCode})" else ""
-                val locality = address.locality ?: ""
-
-                "$subThoroughfare $thoroughfare $postalCode $locality"
-
+                address.getAddressLine(0)
             } catch (e: Exception) {
                 Log.e(TAG, "Error: $e")
                 ""

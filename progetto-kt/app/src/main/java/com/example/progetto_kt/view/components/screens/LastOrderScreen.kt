@@ -342,16 +342,20 @@ fun ShowOrderState(
             if (order.deliveryLocation.address != null) {
                 InfoTextBox(
                     label = "Pick it up at",
-                    text = order.deliveryLocation.address!!
+                    text = order.deliveryLocation.address!!,
+                    verticalPadding = 12
                 )
             }
 
             if (order.currentLocation.address != null) {
                 InfoTextBox(
                     label = "Drone is currently at",
-                    text = order.currentLocation.address!!
+                    text = order.currentLocation.address!!,
+                    verticalPadding = 12
                 )
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
 
         }
 
