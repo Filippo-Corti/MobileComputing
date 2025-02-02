@@ -18,6 +18,7 @@ import com.example.progetto_kt.model.dataclasses.Order
 import com.example.progetto_kt.model.dataclasses.User
 import com.example.progetto_kt.model.dataclasses.Error
 import com.example.progetto_kt.model.dataclasses.ErrorType
+import com.example.progetto_kt.model.dataclasses.Ingredient
 import com.example.progetto_kt.model.dataclasses.UserUpdateParams
 import com.example.progetto_kt.model.dataclasses.toAPILocation
 import com.example.progetto_kt.model.dataclasses.toPoint
@@ -58,6 +59,7 @@ data class MenusExplorationState(
     val nearbyMenus: List<MenuWithImage> = emptyList(),
     val selectedMenu: MenuDetailsWithImage? = null,
     val reloadMenus: Boolean = false,
+    val selectedMenuIngredients: List<Ingredient> = emptyList()
 )
 
 data class AppState(
@@ -507,6 +509,19 @@ class MainViewModel(
             )
             _menusExplorationState.value = _menusExplorationState.value.copy(
                 selectedMenu = MenuDetailsWithImage(menuDetails, image)
+            )
+        }
+    }
+
+    suspend fun fetchMenuIngredients(menuId : Int) {
+        runWithErrorHandling {
+            val ingredients = menuRepository.getMenuIngredients(
+                sid = _sid.value!!,
+                menuId = menuId
+            )
+            Log.d("EsameGennaio", "Menu Ingredients for ${_menusExplorationState.value.selectedMenu?.menuDetails?.name} are: ${ingredients.size}")
+            _menusExplorationState.value = _menusExplorationState.value.copy(
+                selectedMenuIngredients = ingredients
             )
         }
     }

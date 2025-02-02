@@ -55,6 +55,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 fun MenuDetailsScreen(
     viewModel: MainViewModel,
     menuId: Int,
+    onCheckIngredientsClick: (Int) -> Unit,
     onForwardClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -191,6 +192,17 @@ fun MenuDetailsScreen(
         }
 
         Spacer(modifier = Modifier.weight(1f))
+
+        // Ingredients Button
+        Box(
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+        ) {
+            LargeButton(
+                text = "Check ingredients",
+                gray = true,
+                onPress = { onCheckIngredientsClick(menuId) }
+            )
+        }
 
         // Order Button
         Box(

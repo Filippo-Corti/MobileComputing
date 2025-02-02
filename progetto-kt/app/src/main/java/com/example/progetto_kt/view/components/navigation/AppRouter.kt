@@ -55,6 +55,15 @@ sealed class AppScreen(
         )
     )
 
+    data object MenuIngredients : AppScreen(
+        ScreenParams(
+            route = "confirm_order/{menuId}",
+            title = "Menu Ingredients",
+            showTabBar = false,
+            stackName = "home_stack"
+        )
+    )
+
     data object AccountStack : AppScreen(
         ScreenParams(
             route = "account_stack",
@@ -110,6 +119,7 @@ sealed class AppScreen(
             Account,
             MenuDetails,
             ConfirmOrder,
+            MenuIngredients,
             AddEditAccount,
         )
 

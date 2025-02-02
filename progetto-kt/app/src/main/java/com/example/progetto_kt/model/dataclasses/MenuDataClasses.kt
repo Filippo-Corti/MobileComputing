@@ -33,6 +33,14 @@ data class MenuImage (
     @SerialName("base64") var raw : String
 )
 
+@Serializable
+data class Ingredient (
+    @SerialName("name") val name : String,
+    @SerialName("description") val description : String,
+    @SerialName("bio") val bio : Boolean,
+    @SerialName("origin") val origin : String
+)
+
 data class MenuWithImage (
     val menu : Menu,
     val image : MenuImage? = null

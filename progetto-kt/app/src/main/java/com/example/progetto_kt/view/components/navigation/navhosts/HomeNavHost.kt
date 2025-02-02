@@ -13,6 +13,7 @@ import com.example.progetto_kt.view.components.screens.ConfirmOrderScreen
 import com.example.progetto_kt.view.components.screens.HomeScreen
 import com.example.progetto_kt.view.components.screens.MenuDetailsScreen
 import com.example.progetto_kt.view.components.navigation.AppScreen
+import com.example.progetto_kt.view.components.screens.MenuIngredientsScreen
 import com.example.progetto_kt.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,14 @@ fun NavGraphBuilder.homeNavHost(
             MenuDetailsScreen(
                 viewModel = viewModel,
                 menuId = menuId!!.toInt(),
+                onCheckIngredientsClick = {
+                    navController.navigate(
+                        AppScreen.MenuIngredients.params.route.replace(
+                            "{menuId}",
+                            menuId.toString()
+                        )
+                    )
+                },
                 onForwardClick = {
                     navController.navigate(
                         AppScreen.ConfirmOrder.params.route.replace(
@@ -106,5 +115,28 @@ fun NavGraphBuilder.homeNavHost(
                 }
             )
         }
+
+        composable(
+            route = AppScreen.MenuIngredients.params.route,
+            enterTransition = {
+                slideIn(tween(400)) { IntOffset(it.width, 0) }
+            },
+            exitTransition = { null },
+            popEnterTransition = { null },
+            popExitTransition = {
+                slideOut(tween(400)) { IntOffset(it.width, 0) }
+            }
+        ) { backStackEntry ->
+            val menuId = backStackEntry.arguments?.getString("menuId")
+
+            MenuIngredientsScreen(
+                viewModel = viewModel,
+                menuId = menuId!!.toInt(),
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
+        }
+
     }
 }

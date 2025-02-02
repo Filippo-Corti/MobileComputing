@@ -26,7 +26,7 @@ import com.example.progetto_kt.view.styles.Global
 fun MyDialog(
     title: String,
     content: String,
-    onDismissRequest: () -> Unit = {}
+    onDismissRequest: () -> Unit
 ) {
     Dialog(
         onDismissRequest = { onDismissRequest() }

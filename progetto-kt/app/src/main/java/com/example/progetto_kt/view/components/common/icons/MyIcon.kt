@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Grass
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
@@ -38,7 +39,8 @@ enum class IconNames {
     NAVIGATOR,
     CC_CHIP,
     VISA,
-    CROSS
+    CROSS,
+    BIO
 }
 
 @Composable
@@ -151,6 +153,13 @@ fun MyIcon(
                 .size(size.dp),
             imageVector = Icons.Filled.Close,
             contentDescription = "Close",
+            tint = color
+        )
+        IconNames.BIO -> Icon(
+            modifier = Modifier
+                .size(size.dp),
+            imageVector = Icons.Filled.Grass,
+            contentDescription = "Biological",
             tint = color
         )
         else -> {}

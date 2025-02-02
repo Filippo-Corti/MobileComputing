@@ -7,6 +7,7 @@ import com.example.progetto_kt.model.dataclasses.BuyOrderRequest
 import com.example.progetto_kt.model.dataclasses.Error
 import com.example.progetto_kt.model.dataclasses.ErrorType
 import com.example.progetto_kt.model.dataclasses.APILocation
+import com.example.progetto_kt.model.dataclasses.Ingredient
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
 import com.example.progetto_kt.model.dataclasses.MenuImage
@@ -312,6 +313,37 @@ class APIController(
                 message = "We couldn't authenticate you, please try un-installing and re-installing the app."
             )
             404 -> return MenuImage("") // Graceful Degradation
+            else -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Unexpected Error",
+                message = "Something wrong happened contacting the server: \n${(httpResponse.body() as APIError).message} \nPlease try closing and re-opening the app."
+            )
+        }
+    }
+
+    suspend fun getMenuIngredients(sid : String, menuId : Int) : List<Ingredient> {
+        Log.d(TAG, "Getting Ingredients for menu $menuId")
+
+        val httpResponse = genericRequest(
+            endpoint = "menu/$menuId/ingredients",
+            method = HttpMethod.GET,
+            queryParams = mapOf(
+                "sid" to sid,
+            )
+        )
+
+        when (httpResponse.status.value) {
+            200 -> return httpResponse.body() as List<Ingredient>
+            401 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "Authentication Error",
+                message = "We couldn't authenticate you, please try un-installing and re-installing the app."
+            )
+            404 -> throw Error(
+                type = ErrorType.NETWORK,
+                title = "This Menu doesn't Exist",
+                message = "We couldn't find the menu you're looking for. Please consider closing and re-opening the app or picking another menu."
+            )
             else -> throw Error(
                 type = ErrorType.NETWORK,
                 title = "Unexpected Error",

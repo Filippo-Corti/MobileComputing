@@ -1,6 +1,7 @@
 package com.example.progetto_kt.model.repositories
 
 import android.util.Log
+import com.example.progetto_kt.model.dataclasses.Ingredient
 import com.example.progetto_kt.model.datasources.PreferencesController
 import com.example.progetto_kt.model.dataclasses.Menu
 import com.example.progetto_kt.model.dataclasses.MenuDetails
@@ -45,6 +46,10 @@ class MenuRepository(
 
         //Log.d(TAG, "Menu Image Fetched from Server. Now in Storage")
         return menuImageFromServer
+    }
+
+    suspend fun getMenuIngredients(sid : String, menuId : Int) : List<Ingredient> {
+        return apiController.getMenuIngredients(sid, menuId)
     }
 
 }
