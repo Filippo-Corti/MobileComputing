@@ -54,60 +54,93 @@ class AccountFormViewModel(
         }
     }
 
+    fun isFirstNameValid(value : String) : Boolean {
+        return !(value.length > 15 || value.isEmpty())
+    }
+
+    fun isLastNameValid(value : String) : Boolean {
+        return !(value.length > 15 || value.isEmpty())
+    }
+
+    fun isCardFullNameValid(value : String) : Boolean {
+        return !(value.length > 31 || value.isEmpty())
+    }
+
+    fun isCardNumberValid(value : String) : Boolean {
+        return (value.length == 16 && value.toLongOrNull() != null)
+    }
+
+    fun isCardExpireMonthValid(value : Int) : Boolean {
+        return (value in 1..12)
+    }
+
+    fun isCardExpireYearValid(value : Int) : Boolean {
+        return (value >= Calendar.getInstance().get(Calendar.YEAR))
+    }
+
+    fun isCardCVVValid(value : String) : Boolean {
+        return (value.length == 3 && value.toIntOrNull() != null)
+    }
+
     fun onFirstNameChange(value : String) : Boolean {
         Log.d(TAG, "First Name Changed: $value")
         _formParams.value = _formParams.value.copy(firstName = value)
 
-        return !(value.length > 15 || value.isEmpty())
+        return isFirstNameValid(value)
     }
 
     fun onLastNameChange(value : String) : Boolean {
         Log.d(TAG, "Last Name Changed: $value")
         _formParams.value = _formParams.value.copy(lastName = value)
 
-        return !(value.length > 15 || value.isEmpty())
+        return isLastNameValid(value)
     }
 
     fun onCardFullNameChange(value : String) : Boolean {
         Log.d(TAG, "Card Full Name Changed: $value")
         _formParams.value = _formParams.value.copy(cardFullName = value)
 
-        return !(value.length > 31 || value.isEmpty())
+        return isCardFullNameValid(value)
     }
 
     fun onCardNumberChange(value : String) : Boolean {
         Log.d(TAG, "Card Number Changed: $value")
         _formParams.value = _formParams.value.copy(cardNumber = value)
 
-        return (value.length == 16 && value.toLongOrNull() != null)
+        return isCardNumberValid(value)
     }
 
     fun onCardExpireMonthChange(value : Int) : Boolean {
         Log.d(TAG, "Card Expire Month Changed: $value")
         _formParams.value = _formParams.value.copy(cardExpireMonth = value)
 
-        return (value in 1..12)
+        return isCardExpireMonthValid(value)
     }
 
     fun onCardExpireYearChange(value : Int) : Boolean {
         Log.d(TAG, "Card Expire Year Changed: $value")
         _formParams.value = _formParams.value.copy(cardExpireYear = value)
 
-        return (value >= Calendar.getInstance().get(Calendar.YEAR))
+        return isCardExpireYearValid(value)
     }
 
     fun onCardCVVChange(value : String) : Boolean {
         Log.d(TAG, "Card CVV Changed: $value")
         _formParams.value = _formParams.value.copy(cardCVV = value)
 
-        return (value.length == 3 && value.toIntOrNull() != null)
+        return isCardCVVValid(value)
     }
 
     suspend fun submit(submitCb : suspend (UserUpdateParams) -> Boolean) : Boolean {
         Log.d(TAG, "Submitting with values: ${_formParams.value}")
-        if (_formParams.value.firstName.isEmpty() || _formParams.value.lastName.isEmpty() ||
-            _formParams.value.cardFullName.isEmpty() || _formParams.value.cardNumber.isEmpty() ||
-            _formParams.value.cardCVV.isEmpty()) {
+        if (!isFirstNameValid(_formParams.value.firstName) ||
+            !isLastNameValid(_formParams.value.lastName) ||
+            !isCardFullNameValid(_formParams.value.cardFullName) ||
+            !isCardNumberValid(_formParams.value.cardNumber) ||
+            !isCardExpireMonthValid(_formParams.value.cardExpireMonth) ||
+            !isCardExpireYearValid(_formParams.value.cardExpireYear) ||
+            !isCardCVVValid(_formParams.value.cardCVV)
+            ) {
             Log.d(TAG, "Invalid Form Data")
             return false
         }
