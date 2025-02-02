@@ -28,6 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -39,6 +42,7 @@ import com.example.progetto_kt.view.components.common.buttons.LargeButton
 import com.example.progetto_kt.view.components.common.icons.IconNames
 import com.example.progetto_kt.view.components.common.icons.MyIcon
 import com.example.progetto_kt.view.components.common.other.InfoTextBox
+import com.example.progetto_kt.view.components.common.other.MyDialog
 import com.example.progetto_kt.view.components.common.other.Separator
 import com.example.progetto_kt.view.styles.Colors
 import com.example.progetto_kt.view.styles.Global
@@ -58,6 +62,7 @@ fun MenuDetailsScreen(
     val appState by viewModel.appState.collectAsState()
     val menusState by viewModel.menusExplorationState.collectAsState()
     val locationState by viewModel.locationState.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(menuId) {
         viewModel.fetchMenuDetails(menuId)

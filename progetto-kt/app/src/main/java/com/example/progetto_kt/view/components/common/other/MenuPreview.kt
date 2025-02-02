@@ -85,7 +85,7 @@ fun MenuPreviewBody(
 ) {
     val priceStr = "%.2f".format(price)
     val deliveryTimeStr = if (deliveryTime > 0) deliveryTime.toString() else "<1"
-    val distanceStr = "$%.1f".format(distance)
+    val distanceStr = "%.1f".format(distance)
 
     Row(
         modifier =  Modifier
